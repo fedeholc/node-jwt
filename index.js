@@ -1,7 +1,20 @@
 // Servidor (Node.js con Express)
-import express, { json } from "express";
+import express from "express";
 import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
+import { createDbConnection } from "./utils-db.js";
+
+const db = createDbConnection("mydb.sqlite");
+console.log(db);
+
+db.all("SELECT * FROM user", [], (err, rows) => {
+  if (err) {
+    throw err;
+  }
+  rows.forEach((row) => {
+    console.log(row);
+  });
+});
 
 const app = express();
 
