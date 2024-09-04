@@ -2,8 +2,9 @@ POST http://localhost:3000/login HTTP/1.1
 content-type: application/json
 
 {
- "username": "usuario", 
- "password": "contraseña" 
+ "username": "a", 
+ "password": "b",
+  "email": "c@fede.com"
 }
 
 ###
@@ -12,7 +13,13 @@ POST http://localhost:3000/registro HTTP/1.1
 content-type: application/json
 
 {
- "username": "usuario", 
- "password": "contraseña",
- "email": "fed2e@fede.com"
+ "username": "a", 
+ "password": "b",
+ "email": "c@fede.com"
 }
+
+###
+
+GET http://localhost:3000/perfil HTTP/1.1
+content-type: application/json
+Authorization: eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ0NzUyNywiZXhwIjoxNzI1NDUxMTI3fQ.bexWyhe83D27n-SNv_37_u4mBMw3iuY_1Z6fnOdSoxA

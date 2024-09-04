@@ -1,3 +1,13 @@
+//TODO: crear unit test y ver si también se puede hacer E2E
+
+//TODO: hay que poner bearer delante del token en el header de la request???
+
+//TODO: cómo sería la lógica del lado del cliente con cookies?
+// tengo que ver si hay un token en la cookie y si no lo hay, redirigir a la página de login? Si lo hay, lo considero ya como logueado y no muestro la página de login? o tengo que hacer una request al servidor para verificar que el token es válido? se hace a la página de loguin? o a una página de verificación de token? o directamente a la página que se quiere entrar(que sería la página de perfil)? o a una página de inicio que redirige a la página de perfil si el token es válido?
+
+//todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
+//ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
+
 // Servidor (Node.js con Express)
 import express from "express";
 import { SignJWT, jwtVerify } from "jose";
@@ -6,7 +16,7 @@ import { createDbConnection } from "./utils-db.js";
 
 const db = createDbConnection("mydb.sqlite");
 console.log(db);
-
+/* 
 db.all("SELECT * FROM user", [], (err, rows) => {
   if (err) {
     throw err;
@@ -14,12 +24,13 @@ db.all("SELECT * FROM user", [], (err, rows) => {
   rows.forEach((row) => {
     console.log(row);
   });
-});
+}); */
 
 const app = express();
 
 app.use(express.json());
 
+//todo: debería guardar la key en un .env ? o está bien que se renueve cada vez que se reinicia el servidor?
 const secretKey = new Uint8Array(crypto.randomBytes(32));
 
 async function generarToken(payload) {
@@ -30,23 +41,6 @@ async function generarToken(payload) {
     .sign(secretKey);
 }
 
-//* cuando tenga usuario se puede generar el token con un payload con mas info que va a ir y volver
-/*
-// Generar token
-async function generarToken(usuario) {
-  const token = await new SignJWT({
-    sub: usuario.id,
-    username: usuario.username,
-    role: usuario.role
-  })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(secretKey);
-  
-  return token;
-}*/
-
 // Función para hashear contraseñas
 function hashPassword(password) {
   return crypto.createHash("sha256").update(password).digest("hex");
@@ -54,24 +48,20 @@ function hashPassword(password) {
 
 // Endpoint de login (sin token)
 app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
 
-  //* al usuario habría que buscarlo en una base de datos
-  /*    const usuario = usuarios.find(
-      (u) => u.username === username && u.password === hashPassword(password)
-    ); */
+  let userResponse = await getUserByEmail(email);
+  console.log(userResponse, req.body);
+  if (
+    username === userResponse.user &&
+    hashPassword(password) === userResponse.pass
+  ) {
+    const token = await generarToken({
+      id: userResponse.id,
+      email: userResponse.email,
+    });
 
-  // Aquí iría la lógica de verificación de credenciales
-  if (username === "usuario" && password === "contraseña") {
-    const token = await generarToken({ id: 1, username });
-
-    //* token con data del usuario
-    /*       const token = await generarToken({
-          id: usuario.id,
-          username: usuario.username,
-        }); */
-
-    res.json({ token });
+    res.status(201).json({ token: token });
   } else {
     res.status(401).json({ error: "Credenciales inválidas" });
   }
@@ -113,29 +103,25 @@ app.post("/registro", async (req, res) => {
     return res.status(400).json({ error: "Todos los campos son requeridos" });
   }
 
-  let r = await getUserByEmail(email);
+  let userResponse = await getUserByEmail(email);
 
-  if (r) {
+  if (userResponse) {
     return res.status(409).json({ error: "Usuario o email ya existe" });
   }
 
-  console.log("fuera", r);
-
-  //* Crear nuevo usuario
+  // Crear nuevo usuario
   try {
     const id = await insertUser(username, email, hashPassword(password));
-    console.log("id", id);
 
     const token = await generarToken({
       id: id,
       email: email,
     });
 
-    //TODO Por aca está tirando un error a pesar de que registra el user
-    // revisar
-    return res
-      .status(201)
-      .json({ mensaje: "Usuario registrado con éxito. Id: " + id }, token);
+    return res.status(201).json({
+      mensaje: "Usuario registrado con éxito. Id: " + id,
+      token: token,
+    });
   } catch (error) {
     return res
       .status(500)
@@ -146,6 +132,7 @@ app.post("/registro", async (req, res) => {
 // Middleware para verificar token
 async function verificarToken(req, res, next) {
   const token = req.headers["authorization"];
+  console.log(req.headers);
   if (!token) return res.status(403).json({ error: "Token no proporcionado" });
 
   try {
@@ -153,26 +140,25 @@ async function verificarToken(req, res, next) {
     req.usuario = payload;
     next();
   } catch (error) {
-    res.status(401).json({ error: "Token inválido" });
+    res.status(401).json({ error: "Token inválido" + error });
   }
 }
 
 // Ruta protegida (requiere token)
 app.get("/perfil", verificarToken, (req, res) => {
-  res.json({ mensaje: "Acceso permitido", usuario: req.usuario });
-});
+  let user = getUserByEmail(req.usuario.email);
 
-//* también podría ser algo así:
-/* 
-app.get('/perfil', verificarToken, (req, res) => {
-  const usuario = usuarios.find(u => u.id === req.usuario.id);
-  if (usuario) {
-    const { password, ...usuarioSinPassword } = usuario;
-    res.json({ mensaje: 'Acceso permitido', usuario: usuarioSinPassword });
+  // dada la info que viene en el token esta validación
+  // podría no ser necesaria.
+  if (!user) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
   } else {
-    res.status(404).json({ error: 'Usuario no encontrado' });
+    return res.status(201).json({
+      mensaje: "Acceso permitido",
+      usuario: user,
+      usuarioToken: req.usuario,
+    });
   }
 });
-*/
 
 app.listen(3000, () => console.log("Servidor corriendo en puerto 3000"));
