@@ -131,6 +131,8 @@ app.post("/registro", async (req, res) => {
       email: email,
     });
 
+    //TODO Por aca está tirando un error a pesar de que registra el user
+    // revisar
     return res
       .status(201)
       .json({ mensaje: "Usuario registrado con éxito. Id: " + id }, token);
