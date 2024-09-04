@@ -34,12 +34,10 @@ function hashPassword(password) {
 function verifyToken(secretKey) {
   return async function (req, res, next) {
     const token = req.token;
-    console.log("token: ", token);
     if (!token) {
       return res.status(403).json({ error: "Token not found." });
     }
     try {
-      //const { payload } = await jwtVerify(token, secretKey);
       req.payload = await jwtVerify(token, secretKey);
       next();
     } catch (error) {
@@ -53,6 +51,9 @@ function extractToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   if (authHeader && authHeader.startsWith("Bearer ")) {
     req.token = authHeader.split(" ")[1].trim();
+    if (!req.token || req.token.trim() === "") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
   } else {
     return res.status(401).json({ error: "Unauthorized" });
   }
