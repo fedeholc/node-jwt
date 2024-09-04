@@ -10,57 +10,41 @@
 
 // Servidor (Node.js con Express)
 import express from "express";
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify } from "jose";
 import crypto from "crypto";
 import { createDbConnection } from "./utils-db.js";
+import { generateToken, hashPassword } from "./util-auth.js";
 
-const db = createDbConnection("mydb.sqlite");
-console.log(db);
-/* 
-db.all("SELECT * FROM user", [], (err, rows) => {
-  if (err) {
-    throw err;
-  }
-  rows.forEach((row) => {
-    console.log(row);
-  });
-}); */
-
+const db = createDbConnection("./mydb.sqlite");
 const app = express();
-
 app.use(express.json());
 
-//todo: debería guardar la key en un .env ? o está bien que se renueve cada vez que se reinicia el servidor?
-const secretKey = new Uint8Array(crypto.randomBytes(32));
 
-async function generarToken(payload) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("1h")
-    .sign(secretKey);
-}
-
-// Función para hashear contraseñas
-function hashPassword(password) {
-  return crypto.createHash("sha256").update(password).digest("hex");
+// eslint-disable-next-line no-undef
+const secretKeyArray = process.env.MY_SECRET_KEY.split(",").map(Number);
+const secretKey = new Uint8Array(secretKeyArray);
+if (secretKey instanceof Uint8Array === false || secretKey.length !== 32) {
+  console.error("Invalid secret key. Please check your .env file.");
+  // eslint-disable-next-line no-undef
+  process.exit(1);
 }
 
 // Endpoint de login (sin token)
 app.post("/login", async (req, res) => {
   const { username, password, email } = req.body;
-
   let userResponse = await getUserByEmail(email);
   console.log(userResponse, req.body);
   if (
     username === userResponse.user &&
     hashPassword(password) === userResponse.pass
   ) {
-    const token = await generarToken({
-      id: userResponse.id,
-      email: userResponse.email,
-    });
-
+    const token = await generateToken(
+      {
+        id: userResponse.id,
+        email: userResponse.email,
+      },
+      secretKey
+    );
     res.status(201).json({ token: token });
   } else {
     res.status(401).json({ error: "Credenciales inválidas" });
@@ -113,10 +97,13 @@ app.post("/registro", async (req, res) => {
   try {
     const id = await insertUser(username, email, hashPassword(password));
 
-    const token = await generarToken({
-      id: id,
-      email: email,
-    });
+    const token = await generateToken(
+      {
+        id: id,
+        email: email,
+      },
+      secretKey
+    );
 
     return res.status(201).json({
       mensaje: "Usuario registrado con éxito. Id: " + id,
@@ -130,14 +117,14 @@ app.post("/registro", async (req, res) => {
 });
 
 // Middleware para verificar token
-async function verificarToken(req, res, next) {
+async function verifyToken(req, res, next) {
   const token = req.headers["authorization"];
   console.log(req.headers);
   if (!token) return res.status(403).json({ error: "Token no proporcionado" });
 
   try {
-    const { payload } = await jwtVerify(token, secretKey);
-    req.usuario = payload;
+    //const { payload } = await jwtVerify(token, secretKey);
+    req.payload = await jwtVerify(token, secretKey);
     next();
   } catch (error) {
     res.status(401).json({ error: "Token inválido" + error });
@@ -145,8 +132,8 @@ async function verificarToken(req, res, next) {
 }
 
 // Ruta protegida (requiere token)
-app.get("/perfil", verificarToken, (req, res) => {
-  let user = getUserByEmail(req.usuario.email);
+app.get("/perfil", verifyToken, (req, res) => {
+  let user = getUserByEmail(req.payload.email);
 
   // dada la info que viene en el token esta validación
   // podría no ser necesaria.
@@ -156,7 +143,7 @@ app.get("/perfil", verificarToken, (req, res) => {
     return res.status(201).json({
       mensaje: "Acceso permitido",
       usuario: user,
-      usuarioToken: req.usuario,
+      usuarioToken: req.payload,
     });
   }
 });

@@ -22,4 +22,4 @@ content-type: application/json
 
 GET http://localhost:3000/perfil HTTP/1.1
 content-type: application/json
-Authorization: eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ0NzUyNywiZXhwIjoxNzI1NDUxMTI3fQ.bexWyhe83D27n-SNv_37_u4mBMw3iuY_1Z6fnOdSoxA
+Authorization: eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ3MDQwNCwiZXhwIjoxNzI1NDc0MDA0fQ.Dwm-Ncv234dQmM_PU-VKZJYycgZAZ-3uvArMuaSncGA
