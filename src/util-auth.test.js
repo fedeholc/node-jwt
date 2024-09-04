@@ -1,8 +1,8 @@
 // extractToken.test.js
 import { describe, expect, test, vi, beforeEach } from "vitest";
-import {extractToken} from "./util-auth";
+import { extractToken } from "./util-auth";
 import httpMocks from "node-mocks-http";
- 
+
 describe("extractToken middleware", () => {
   let req, res, next;
 
@@ -12,7 +12,18 @@ describe("extractToken middleware", () => {
     next = vi.fn(); // Simula la función `next()`
   });
 
-  test("debería extraer el token correctamente cuando el encabezado de autorización es válido", () => {
+  test("should extract token from valid Authorization header", () => {
+    /* 
+    En lugar de usar el httpMocks de arriba, podría crear yo el req que necesito:
+     const req = {
+      headers: {
+        authorization: 'Bearer validtoken123'
+      }
+    };
+    const res = {};
+    next = vi.fn(); 
+    */
+
     req.headers.authorization = "Bearer abc123token";
 
     extractToken(req, res, next);
@@ -21,7 +32,8 @@ describe("extractToken middleware", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  test("debería retornar 401 si no hay encabezado de autorización", () => {
+  test("should return 401 for missing Authorization header", () => {
+    // req está vacío
     extractToken(req, res, next);
 
     expect(res.statusCode).toBe(401);
@@ -29,8 +41,8 @@ describe("extractToken middleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test('debería retornar 401 si el encabezado de autorización no empieza con "Bearer "', () => {
-    req.headers.authorization = "Basic abc123token";
+  test("should return 401 for Authorization header without Bearer", () => {
+    req.headers.authorization = "NotBearer abc123token";
 
     extractToken(req, res, next);
 
@@ -39,7 +51,7 @@ describe("extractToken middleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test('debería retornar 401 si el token está vacío después de "Bearer"', () => {
+  test("should return 401 for empty token after Bearer", () => {
     req.headers.authorization = "Bearer ";
 
     extractToken(req, res, next);
@@ -49,7 +61,17 @@ describe("extractToken middleware", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test("debería llamar a next() si el token se extrae correctamente", () => {
+  test("should trim token correctly", () => {
+    req.headers.authorization = "Bearer   token123    ";
+
+    extractToken(req, res, next);
+
+    expect(res.statusCode).toBe(401);
+    expect(res._getJSONData()).toEqual({ error: "Unauthorized" });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("should call next() if token is ok", () => {
     req.headers.authorization = "Bearer validToken";
 
     extractToken(req, res, next);
