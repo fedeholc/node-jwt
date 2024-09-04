@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
 
-export { generateToken, hashPassword };
+export { generateToken, hashPassword, verifyToken };
 /**
  *
  * @param {{}} payload - Information to be included in the token
@@ -23,4 +23,25 @@ async function generateToken(payload, secretKey) {
  */
 function hashPassword(password) {
   return crypto.createHash("sha256").update(password).digest("hex");
+}
+
+/**
+ * 
+ * @param {string} secretKey 
+ * @returns 
+ */
+function verifyToken(secretKey) {
+  return async function (req, res, next) {
+    const token = req.headers["authorization"];
+    if (!token) {
+      return res.status(403).json({ error: "Token not found." });
+    }
+    try {
+      //const { payload } = await jwtVerify(token, secretKey);
+      req.payload = await jwtVerify(token, secretKey);
+      next();
+    } catch (error) {
+      return res.status(401).json({ error: "Invalid Token: " + error });
+    }
+  };
 }

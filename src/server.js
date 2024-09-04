@@ -10,15 +10,12 @@
 
 // Servidor (Node.js con Express)
 import express from "express";
-import { jwtVerify } from "jose";
-import crypto from "crypto";
-import { createDbConnection } from "./utils-db.js";
-import { generateToken, hashPassword } from "./util-auth.js";
+import { createDbConnection, getUserByEmail, insertUser } from "./utils-db.js";
+import { generateToken, hashPassword, verifyToken } from "./util-auth.js";
 
 const db = createDbConnection("./mydb.sqlite");
 const app = express();
 app.use(express.json());
-
 
 // eslint-disable-next-line no-undef
 const secretKeyArray = process.env.MY_SECRET_KEY.split(",").map(Number);
@@ -47,55 +44,27 @@ app.post("/login", async (req, res) => {
     );
     res.status(201).json({ token: token });
   } else {
-    res.status(401).json({ error: "Credenciales inválidas" });
+    res.status(401).json({ error: "Ivalid credentials" });
   }
 });
 
-async function getUserByEmail(email) {
-  return new Promise((resolve, reject) => {
-    db.get("SELECT * FROM user WHERE email = ?", email, (err, row) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(row);
-    });
-  });
-}
-
-async function insertUser(username, email, password) {
-  return new Promise(function (resolve, reject) {
-    db.run(
-      "INSERT INTO user (user, email, pass) VALUES (?, ?, ?)",
-      [username, email, password],
-      function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(this.lastID);
-        }
-      }
-    );
-  });
-}
-
 // Endpoint de registro
-app.post("/registro", async (req, res) => {
+app.post("/register", async (req, res) => {
   const { username, password, email } = req.body;
 
-  // Validación básica
   if (!username || !password || !email) {
-    return res.status(400).json({ error: "Todos los campos son requeridos" });
+    return res.status(400).json({ error: "All fields are required." });
   }
 
   let userResponse = await getUserByEmail(email);
 
   if (userResponse) {
-    return res.status(409).json({ error: "Usuario o email ya existe" });
+    return res.status(409).json({ error: "User or email already exist." });
   }
 
   // Crear nuevo usuario
   try {
-    const id = await insertUser(username, email, hashPassword(password));
+    const id = await insertUser(db, username, email, hashPassword(password));
 
     const token = await generateToken(
       {
@@ -106,46 +75,31 @@ app.post("/registro", async (req, res) => {
     );
 
     return res.status(201).json({
-      mensaje: "Usuario registrado con éxito. Id: " + id,
+      mensaje: "User succesfully registered. Id: " + id,
       token: token,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ error: "Error al registrar usuario" + error });
+    return res.status(500).json({ error: "Error registering user: " + error });
   }
 });
 
 // Middleware para verificar token
-async function verifyToken(req, res, next) {
-  const token = req.headers["authorization"];
-  console.log(req.headers);
-  if (!token) return res.status(403).json({ error: "Token no proporcionado" });
-
-  try {
-    //const { payload } = await jwtVerify(token, secretKey);
-    req.payload = await jwtVerify(token, secretKey);
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Token inválido" + error });
-  }
-}
 
 // Ruta protegida (requiere token)
-app.get("/perfil", verifyToken, (req, res) => {
-  let user = getUserByEmail(req.payload.email);
+app.get("/perfil", verifyToken(secretKey), (req, res) => {
+  let user = getUserByEmail(db, req.payload.email);
 
   // dada la info que viene en el token esta validación
   // podría no ser necesaria.
   if (!user) {
-    return res.status(404).json({ error: "Usuario no encontrado" });
+    return res.status(404).json({ error: "User not found" });
   } else {
     return res.status(201).json({
-      mensaje: "Acceso permitido",
+      mensaje: "Access granted",
       usuario: user,
       usuarioToken: req.payload,
     });
   }
 });
 
-app.listen(3000, () => console.log("Servidor corriendo en puerto 3000"));
+app.listen(3000, () => console.log("Server running on port 3000"));
