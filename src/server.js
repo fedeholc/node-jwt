@@ -11,7 +11,7 @@
 // Servidor (Node.js con Express)
 import express from "express";
 import { createDbConnection, getUserByEmail, insertUser } from "./utils-db.js";
-import { generateToken, hashPassword, verifyToken } from "./util-auth.js";
+import { extractToken, generateToken, hashPassword, verifyToken } from "./util-auth.js";
 
 const db = createDbConnection("./mydb.sqlite");
 const app = express();
@@ -28,13 +28,10 @@ if (secretKey instanceof Uint8Array === false || secretKey.length !== 32) {
 
 // Endpoint de login (sin token)
 app.post("/login", async (req, res) => {
-  const { username, password, email } = req.body;
-  let userResponse = await getUserByEmail(email);
+  const { user, pass, email } = req.body;
+  let userResponse = await getUserByEmail(db, email);
   console.log(userResponse, req.body);
-  if (
-    username === userResponse.user &&
-    hashPassword(password) === userResponse.pass
-  ) {
+  if (user === userResponse.user && hashPassword(pass) === userResponse.pass) {
     const token = await generateToken(
       {
         id: userResponse.id,
@@ -50,13 +47,13 @@ app.post("/login", async (req, res) => {
 
 // Endpoint de registro
 app.post("/register", async (req, res) => {
-  const { username, password, email } = req.body;
+  const { user, pass, email } = req.body;
 
-  if (!username || !password || !email) {
+  if (!user || !pass || !email) {
     return res.status(400).json({ error: "All fields are required." });
   }
 
-  let userResponse = await getUserByEmail(email);
+  let userResponse = await getUserByEmail(db, email);
 
   if (userResponse) {
     return res.status(409).json({ error: "User or email already exist." });
@@ -64,7 +61,7 @@ app.post("/register", async (req, res) => {
 
   // Crear nuevo usuario
   try {
-    const id = await insertUser(db, username, email, hashPassword(password));
+    const id = await insertUser(db, user, email, hashPassword(pass));
 
     const token = await generateToken(
       {
@@ -86,7 +83,7 @@ app.post("/register", async (req, res) => {
 // Middleware para verificar token
 
 // Ruta protegida (requiere token)
-app.get("/perfil", verifyToken(secretKey), (req, res) => {
+app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
   let user = getUserByEmail(db, req.payload.email);
 
   // dada la info que viene en el token esta validación

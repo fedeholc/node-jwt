@@ -2,8 +2,8 @@ POST http://localhost:3000/login HTTP/1.1
 content-type: application/json
 
 {
- "username": "a", 
- "password": "b",
+ "user": "a", 
+ "pass": "b",
   "email": "c@fede.com"
 }
 
@@ -14,12 +14,12 @@ content-type: application/json
 
 {
  "username": "a", 
- "password": "b",
+ "pass": "b",
  "email": "cx@fede.com"
 }
 
 ###
 
-GET http://localhost:3000/perfil HTTP/1.1
+GET http://localhost:3000/profile HTTP/1.1
 content-type: application/json
-Authorization: eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ3MzQxNywiZXhwIjoxNzI1NDc3MDE3fQ.2PDbsMcbTruzPHqfD1V6PW41oRxxIyyLpYXKiSBhZC4
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ3NjczNSwiZXhwIjoxNzI1NDgwMzM1fQ.pZ2iGsHp2Ur_byyMs7KwnXk9Z0MObvINblMRz4_SiaI

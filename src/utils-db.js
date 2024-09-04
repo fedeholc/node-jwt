@@ -24,16 +24,16 @@ async function getUserByEmail(db, email) {
 /**
  *
  * @param {Database} db - SQLite database object
- * @param {string} username
+ * @param {string} user
  * @param {string} email
- * @param {string} password
+ * @param {string} pass
  * @returns Promise<number> | Promise<Error>
  */
-async function insertUser(db, username, email, password) {
+async function insertUser(db, user, email, pass) {
   return new Promise(function (resolve, reject) {
     db.run(
       "INSERT INTO user (user, email, pass) VALUES (?, ?, ?)",
-      [username, email, password],
+      [user, email, pass],
       function (err) {
         if (err) {
           reject(err);
