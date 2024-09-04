@@ -22,8 +22,6 @@ app.use(express.json());
 
 const secretKey = new Uint8Array(crypto.randomBytes(32));
 
-/* const secretKey = "clave_secreta_muy_segura";
- */
 async function generarToken(payload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -79,6 +77,33 @@ app.post("/login", async (req, res) => {
   }
 });
 
+async function getUserByEmail(email) {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT * FROM user WHERE email = ?", email, (err, row) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(row);
+    });
+  });
+}
+
+async function insertUser(username, email, password) {
+  return new Promise(function (resolve, reject) {
+    db.run(
+      "INSERT INTO user (user, email, pass) VALUES (?, ?, ?)",
+      [username, email, password],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.lastID);
+        }
+      }
+    );
+  });
+}
+
 // Endpoint de registro
 app.post("/registro", async (req, res) => {
   const { username, password, email } = req.body;
@@ -88,28 +113,32 @@ app.post("/registro", async (req, res) => {
     return res.status(400).json({ error: "Todos los campos son requeridos" });
   }
 
-  //* Verificar si el usuario ya existe
-  /*   if (usuarios.some(u => u.username === username || u.email === email)) {
-    return res.status(409).json({ error: 'Usuario o email ya existe' });
-  } */
+  let r = await getUserByEmail(email);
+
+  if (r) {
+    return res.status(409).json({ error: "Usuario o email ya existe" });
+  }
+
+  console.log("fuera", r);
 
   //* Crear nuevo usuario
-  /*   const nuevoUsuario = {
-    id: usuarios.length + 1,
-    username,
-    email,
-    password: hashPassword(password)
-  };
+  try {
+    const id = await insertUser(username, email, hashPassword(password));
+    console.log("id", id);
 
-  usuarios.push(nuevoUsuario); */
+    const token = await generarToken({
+      id: id,
+      email: email,
+    });
 
-  //* Generar token para el nuevo usuario
-  const token = await generarToken({
-    id: nuevoUsuario.id,
-    username: nuevoUsuario.username,
-  });
-
-  res.status(201).json({ mensaje: "Usuario registrado con éxito", token });
+    return res
+      .status(201)
+      .json({ mensaje: "Usuario registrado con éxito. Id: " + id }, token);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error al registrar usuario" + error });
+  }
 });
 
 // Middleware para verificar token

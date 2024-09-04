@@ -1,8 +1,18 @@
-
 POST http://localhost:3000/login HTTP/1.1
 content-type: application/json
 
 {
  "username": "usuario", 
  "password": "contraseña" 
+}
+
+###
+
+POST http://localhost:3000/registro HTTP/1.1
+content-type: application/json
+
+{
+ "username": "usuario", 
+ "password": "contraseña",
+ "email": "fed2e@fede.com"
 }
