@@ -1,7 +1,5 @@
 //TODO: crear unit test y ver si también se puede hacer E2E
 
-//TODO: hay que poner bearer delante del token en el header de la request???
-
 //TODO: cómo sería la lógica del lado del cliente con cookies?
 // tengo que ver si hay un token en la cookie y si no lo hay, redirigir a la página de login? Si lo hay, lo considero ya como logueado y no muestro la página de login? o tengo que hacer una request al servidor para verificar que el token es válido? se hace a la página de loguin? o a una página de verificación de token? o directamente a la página que se quiere entrar(que sería la página de perfil)? o a una página de inicio que redirige a la página de perfil si el token es válido?
 
@@ -11,7 +9,12 @@
 // Servidor (Node.js con Express)
 import express from "express";
 import { createDbConnection, getUserByEmail, insertUser } from "./utils-db.js";
-import { extractToken, generateToken, hashPassword, verifyToken } from "./util-auth.js";
+import {
+  extractToken,
+  generateToken,
+  hashPassword,
+  verifyToken,
+} from "./util-auth.js";
 
 const db = createDbConnection("./mydb.sqlite");
 const app = express();
@@ -35,6 +38,7 @@ app.post("/login", async (req, res) => {
     const token = await generateToken(
       {
         id: userResponse.id,
+        user: userResponse.user,
         email: userResponse.email,
       },
       secretKey
@@ -66,6 +70,7 @@ app.post("/register", async (req, res) => {
     const token = await generateToken(
       {
         id: id,
+        user: user,
         email: email,
       },
       secretKey

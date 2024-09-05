@@ -4,7 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
 
 /**
- *
+ * Function to generate a token
  * @param {{}} payload - Information to be included in the token
  * @param {Uint8Array} secretKey - Secret key to sign the token
  * @returns string - token
@@ -18,7 +18,7 @@ async function generateToken(payload, secretKey) {
 }
 
 /**
- *
+ * Function to hash the password
  * @param {string} password
  * @returns string - hashed password
  */
@@ -27,7 +27,7 @@ function hashPassword(password) {
 }
 
 /**
- *
+ * Middleware to verify the token
  * @param {string} secretKey
  * @returns
  */
@@ -46,7 +46,13 @@ function verifyToken(secretKey) {
   };
 }
 
-// Middleware para extraer el token
+
+/**
+ * Middleware to extract the token from the Authorization header
+ * @param {{}} req
+ * @param {{}} res
+ * @param {Function} next
+ */
 function extractToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   if (authHeader && authHeader.startsWith("Bearer ")) {

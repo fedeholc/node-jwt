@@ -58,11 +58,12 @@ function closeDbConnection(db) {
     });
   });
 }
+
 function createDbConnection(filepath) {
   if (fs.existsSync(filepath)) {
     console.log("Database exists");
   } else {
-    console.log("Creating database2");
+    console.log("Creating database");
   }
   try {
     let db = new sqlite3.Database(filepath, (error) => {
@@ -79,6 +80,7 @@ function createDbConnection(filepath) {
     throw error;
   }
 }
+
 async function deleteDbFile(filepath) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(filepath)) {
@@ -94,6 +96,7 @@ async function deleteDbFile(filepath) {
     }
   });
 }
+
 function deleteTable(tableName, db) {
   db.exec(`DROP TABLE IF EXISTS ${tableName}`, (error) => {
     if (error) {
