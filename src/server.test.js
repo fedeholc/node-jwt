@@ -4,10 +4,8 @@ import request from "supertest";
 import { hashPassword, generateToken } from "./util-auth";
 import { routeLogin } from "./routes/login-route";
 import { getDbInstance } from "./db";
-import { createDbConnection, getUserByEmail } from "./utils-db";
-// Import your actual helper functions
+import { getUserByEmail } from "./utils-db";
 
-// Mock the helper functions
 vi.mock("./util-auth", () => ({
   hashPassword: vi.fn(),
   generateToken: vi.fn(),
@@ -23,7 +21,6 @@ app.use(express.json());
 const secretKey = "your-secret-key";
 const db = getDbInstance();
 
-// Import and apply your login route
 app.post("/login", routeLogin(db, secretKey));
 
 describe("Login Endpoint", () => {
