@@ -8,46 +8,27 @@
 
 // Servidor (Node.js con Express)
 import express from "express";
-import { createDbConnection, getUserByEmail, insertUser } from "./utils-db.js";
+import { getUserByEmail, insertUser } from "./utils-db.js";
 import {
   extractToken,
   generateToken,
   hashPassword,
   verifyToken,
 } from "./util-auth.js";
+import { getDbInstance } from "./db.js";
+import { getSecretKey } from "./secret-key.js";
+import { loginRouter } from "./routes/login-router.js";
+import { routeLogin } from "./routes/login-route.js";
 
-const db = createDbConnection("./mydb.sqlite");
+const db = getDbInstance();
 const app = express();
 app.use(express.json());
 
-// eslint-disable-next-line no-undef
-const secretKeyArray = process.env.MY_SECRET_KEY.split(",").map(Number);
-const secretKey = new Uint8Array(secretKeyArray);
-if (secretKey instanceof Uint8Array === false || secretKey.length !== 32) {
-  console.error("Invalid secret key. Please check your .env file.");
-  // eslint-disable-next-line no-undef
-  process.exit(1);
-}
+const secretKey = getSecretKey();
 
-// Endpoint de login (sin token)
-app.post("/login", async (req, res) => {
-  const { user, pass, email } = req.body;
-  let userResponse = await getUserByEmail(db, email);
-  console.log(userResponse, req.body);
-  if (user === userResponse.user && hashPassword(pass) === userResponse.pass) {
-    const token = await generateToken(
-      {
-        id: userResponse.id,
-        user: userResponse.user,
-        email: userResponse.email,
-      },
-      secretKey
-    );
-    res.status(201).json({ token: token });
-  } else {
-    res.status(401).json({ error: "Ivalid credentials" });
-  }
-});
+//VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
+app.use("/login2", loginRouter);
+app.post("/login", routeLogin(db, secretKey));
 
 // Endpoint de registro
 app.post("/register", async (req, res) => {
