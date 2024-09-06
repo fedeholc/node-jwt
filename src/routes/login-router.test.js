@@ -7,12 +7,15 @@ import { getDbInstance } from "../db";
 import { getUserByEmail } from "../utils-db";
 //import { getSecretKey } from "../secret-key";
 
+//VER ojo, hay que hacer un mock de getSecretKey porque se la llama automaticamente al importar el archivo login-router.js. Si no se hace el mock, el test falla porque se la llama y no devuelve la key, supongo que porque llama a process env sin el flag --env-file, de todos modos está bien no depender de que este el archivo. La cuestion es que para que no pase eso handleLogin que es lo que se quiere testear podría estar en otro archivo (otra cosa sería querer testear el router y no el handler, pero en este caso no tiene sentido porque el router no tiene lógica, solo llama al handler).
 vi.mock("../secret-key.js", () => ({
   getSecretKey: vi.fn(),
 }));
+//VER con getDbInstance pasa lo mismo pero si no se hace el mock no falla, simplemente vuelve undefined, pero no sé por qué, si por el path a la base de datos o qué.
 vi.mock("../db", () => ({
   getDbInstance: vi.fn(),
 }));
+//TODO: ver el tema del path a la base
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
   generateToken: vi.fn(),
@@ -30,7 +33,6 @@ app.use(express.json());
 const secretKey = "your-secret-key";
 //getDbInstance.mockReturnValue({});
 const db = getDbInstance();
-console.log("db", db);
 app.post("/login", handleLogin(db, secretKey));
 
 describe("Login Endpoint", () => {
