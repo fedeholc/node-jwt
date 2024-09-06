@@ -12,15 +12,21 @@ vi.mock("../util-auth", () => ({
 }));
 vi.mock("../utils-db", () => ({
   getUserByEmail: vi.fn(),
-  createDbConnection: vi.fn(),
 }));
+vi.mock("../db", () => ({
+  getDbInstance: vi.fn(),
+}));
+
+
+
+
 
 const app = express();
 app.use(express.json());
 
 const secretKey = "your-secret-key";
-const db = getDbInstance();
-
+const db = await getDbInstance();
+console.log(db);
 app.post("/login", handleLogin(db, secretKey));
 
 describe("Login Endpoint", () => {

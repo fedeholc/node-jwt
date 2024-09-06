@@ -12,6 +12,10 @@ vi.mock("../secret-key.js", () => ({
   getSecretKey: vi.fn(),
 }));
 //VER con getDbInstance pasa lo mismo pero si no se hace el mock no falla, simplemente vuelve undefined, pero no sé por qué, si por el path a la base de datos o qué.
+//eso era por el path, corrigiendolo a un path absoluto devolvía correcto.
+//Pero si se hace el mock vuelve undefined.
+//Otra cuestion importante es que si no se hace mock de getDbInstance, hay que hacerlo del createDbConnection, porque si no, al llamar a getDbInstance, se llama a createDbConnection y eso no está mockeado, entonces falla.
+//Pero si se hace el mock de getDbInstance, no hace falta hacer el mock de createDbConnection.
 vi.mock("../db", () => ({
   getDbInstance: vi.fn(),
 }));
@@ -22,8 +26,16 @@ vi.mock("../util-auth", () => ({
 }));
 vi.mock("../utils-db", () => ({
   getUserByEmail: vi.fn(),
-  createDbConnection: vi.fn(),
 }));
+
+//VER también se puede hacer el mock de algunas cosas y de otras no, por ejemplo con el siguiente código se puede hacer el mock de generateToken pero usar la funcion original de hashPassword.
+/* vi.mock("../util-auth", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    generateToken: vi.fn(),
+  };
+}); */
 
 const app = express();
 app.use(express.json());
@@ -32,7 +44,8 @@ app.use(express.json());
 //const secretKey = getSecretKey();
 const secretKey = "your-secret-key";
 //getDbInstance.mockReturnValue({});
-const db = getDbInstance();
+const db = await getDbInstance();
+console.log(db);
 app.post("/login", handleLogin(db, secretKey));
 
 describe("Login Endpoint", () => {

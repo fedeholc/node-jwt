@@ -59,26 +59,32 @@ function closeDbConnection(db) {
   });
 }
 
-function createDbConnection(filepath) {
-  if (fs.existsSync(filepath)) {
-    console.log("Database exists");
-  } else {
-    console.log("Creating database");
-  }
-  try {
-    let db = new sqlite3.Database(filepath, (error) => {
-      if (error) {
-        console.error("Error creating database:", error.message);
-      } else {
-        console.log("Connection with SQLite has been established");
-      }
-    });
-    console.log("Database object created:", db);
-    return db;
-  } catch (error) {
-    console.error("Unexpected error:", error);
-    throw error;
-  }
+async function createDbConnection(filepath) {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(filepath)) {
+      console.log("Database exists");
+      let db = new sqlite3.Database(filepath, (error) => {
+        if (error) {
+          console.error("Error creating database:", error.message);
+          reject(error);
+        } else {
+          console.log("Connection with SQLite has been established");
+          resolve(db);
+        }
+      });
+    } else {
+      console.log("Creating database");
+      let db = new sqlite3.Database(filepath, (error) => {
+        if (error) {
+          console.error("Error creating database:", error.message);
+          reject(error);
+        } else {
+          console.log("Connection with SQLite has been established");
+          resolve(db);
+        }
+      });
+    }
+  });
 }
 
 async function deleteDbFile(filepath) {

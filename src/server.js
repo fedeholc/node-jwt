@@ -20,7 +20,8 @@ import { getSecretKey } from "./secret-key.js";
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
 
-const db = getDbInstance();
+const db = await getDbInstance();
+console.log("DB connected", db);
 const app = express();
 app.use(express.json());
 
