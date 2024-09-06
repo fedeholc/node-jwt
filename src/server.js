@@ -18,7 +18,7 @@ import {
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
 import { loginRouter } from "./routes/login-router.js";
-import { routeLogin } from "./routes/login-route.js";
+import { handleLogin } from "./routes/handle-login.js";
 
 const db = getDbInstance();
 const app = express();
@@ -28,7 +28,7 @@ const secretKey = getSecretKey();
 
 //VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
 app.use("/login2", loginRouter);
-app.post("/login", routeLogin(db, secretKey));
+app.post("/login", handleLogin(db, secretKey));
 
 // Endpoint de registro
 app.post("/register", async (req, res) => {

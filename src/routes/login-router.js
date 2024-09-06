@@ -6,9 +6,9 @@ import { getDbInstance } from "../db.js";
 
 export const loginRouter = express.Router();
 
-loginRouter.post("/", routeLogin(getDbInstance(), getSecretKey()));
+loginRouter.post("/", handleLogin(getDbInstance(), getSecretKey()));
 
-function routeLogin(db, secretKey) {
+export function handleLogin(db, secretKey) {
   return async (req, res) => {
     const { user, pass, email } = req.body;
     let userResponse = await getUserByEmail(db, email);

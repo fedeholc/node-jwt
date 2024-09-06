@@ -5,6 +5,7 @@ let dbInstance = null;
 export function getDbInstance() {
   if (!dbInstance) {
     dbInstance = createDbConnection("./mydb.sqlite");
+    console.log("holi", dbInstance);
   }
   return dbInstance;
 }

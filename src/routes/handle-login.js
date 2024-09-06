@@ -1,7 +1,7 @@
 import { hashPassword, generateToken } from "../util-auth.js";
 import { getUserByEmail } from "../utils-db.js";
 
-export function routeLogin(db, secretKey) {
+export function handleLogin(db, secretKey) {
   return async (req, res) => {
     const { user, pass, email } = req.body;
     let userResponse = await getUserByEmail(db, email);
