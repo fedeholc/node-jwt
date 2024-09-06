@@ -8,6 +8,11 @@
 
 // Servidor (Node.js con Express)
 import express from "express";
+ import session from "express-session";
+import passport from "./passport-config.js";
+import { loginRouter } from "./routes/login-router.js";
+import { handleLogin } from "./routes/handle-login.js";
+
 import { getUserByEmail, insertUser } from "./utils-db.js";
 import {
   extractToken,
@@ -17,13 +22,33 @@ import {
 } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
-import { loginRouter } from "./routes/login-router.js";
-import { handleLogin } from "./routes/handle-login.js";
-
+ 
 const db = await getDbInstance();
 console.log("DB connected", db);
 const app = express();
-app.use(express.json());
+//app.use(express.json());
+
+app.use(session({
+  secret: await getSecretKey(),
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  "/auth/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
+
+app.use(
+  "/auth/github/callback",
+  passport.authenticate("github", { failureRedirect: "/" }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
 
 const secretKey = getSecretKey();
 
