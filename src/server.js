@@ -9,10 +9,9 @@
 // Servidor (Node.js con Express)
 import express from "express";
 import session from "express-session";
-import passport from "./passport-config.js";
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
-
+import cors from "cors";
 import { getUserByEmail, insertUser } from "./utils-db.js";
 import {
   extractToken,
@@ -23,11 +22,42 @@ import {
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
 import axios from "axios";
+import cookieParser from "cookie-parser";
 
 const db = await getDbInstance();
 console.log("DB connected", db);
 const app = express();
-//app.use(express.json());
+app.use(express.json());
+app.use(cookieParser());
+// Configura CORS para permitir solicitudes desde cualquier origen
+
+const allowedOrigins = [
+  "http://127.0.0.1:5500",
+  "http://localhost:5500",
+  "http://127.0.0.1:8080",
+  "http://localhost:8080",
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Permitir solicitudes sin origen (como las de herramientas de prueba)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Permite enviar cookies y credenciales
+  })
+);
+
+/* app.use(
+  cors({
+    origin: "http://127.0.0.1:5500", // Reemplaza con la URL de tu frontend
+    credentials: true, // Permite enviar cookies y credenciales
+  })
+); */
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -35,16 +65,12 @@ const redirectURI = "http://127.0.0.1:3000/auth/github/callback";
 
 app.use(
   session({
-    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambia esto por una clave secreta
+    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambiar esto por una clave secreta
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Asegúrate de configurar secure: true en producción si usas HTTPS
+    cookie: { secure: false }, //configurar secure: true en producción si se usa HTTPS
   })
 );
-
-//app.use(passport.initialize());
-/* app.use(passport.session());
- */
 
 app.use((req, res, next) => {
   console.log("Session ID:", req.sessionID);
@@ -52,24 +78,33 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/auth/github", (req, res) => {
+/* app.get("/auth/github", (req, res) => {
   const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email`;
   console.log("githubAuthURL", githubAuthURL);
   res.redirect(githubAuthURL);
+}); */
+
+app.get("/auth/github2", (req, res) => {
+  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&state=${req.query.returnTo}&scope=user:email&r`;
+  console.log("githubAuthURL", githubAuthURL);
+  req.session.returnTo = req.query.returnTo || "/";
+  console.log("req.query", req.query);
+  console.log(
+    "req.session.returnTo enviada como parametro",
+    req.session.returnTo
+  );
+  //res.redirect(githubAuthURL);
+
+  res.status(201).json({ ghauth: githubAuthURL });
 });
 
-/* app.use("/auth/github", passport.authenticate("github"));
- */
-/* app.use(
-  "/auth/github/callback",
-  passport.authenticate("github", { failureRedirect: "/", session: false }),
-  (req, res) => {
-    console.log("req.user", req.user);
-    res.redirect("/");
-  }
-); */
-
 app.get("/auth/github/callback", async (req, res) => {
+  console.log(
+    "callback sesion id",
+    req.session.id,
+    req.session.returnTo,
+    req.query.state
+  );
   const code = req.query.code;
   console.log("code", code);
 
@@ -107,17 +142,47 @@ app.get("/auth/github/callback", async (req, res) => {
     });
 
     const user = userResponse.data;
-    console.log("User info:", user.Authorization);
+    console.log("User info:", user.id, user.Authorization);
 
     // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
     // Por ejemplo, puedes guardar el usuario en una sesión de Express.
     req.session.user = user;
 
-    res.redirect("/profileX"); // Redirige al perfil o a cualquier ruta que desees
+    res.cookie("authToken", accessToken, {
+      httpOnly: false, // Evita que el frontend acceda a esta cookie
+      secure: false, // Cambiar a true en producción con HTTPS
+    });
+    res.cookie("userCookie", user, {
+      httpOnly: false, // Evita que el frontend acceda a esta cookie
+      secure: false, // Cambiar a true en producción con HTTPS
+    });
+    // Redirige al usuario a la URL almacenada en la sesión
+    let returnTo =
+      req.query.state || "http://127.0.0.1:5500/src/front/a.html";
+    delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
+    returnTo = returnTo + "?user=" + user.email;
+    res.redirect(returnTo);
+
+    //res.redirect("/profileX"); // Redirige al perfil o a cualquier ruta que desees
   } catch (error) {
     console.error("Error during authentication", error);
     res.status(500).send("Authentication failed");
   }
+});
+
+app.get("/user-info", (req, res) => {
+  // Verifica si la cookie con el token está presente
+  //console.log("cookies:", req.cookies);
+  if (!req.cookies) {
+    return res.status(401).json({ error: "nocookies" });
+  }
+  const token = req.cookies.authToken;
+
+  if (!token) {
+    return res.status(401).json({ error: "User not authenticated" });
+  }
+
+  res.status(201).json({ token: token });
 });
 
 function ensureAuthenticated(req, res, next) {

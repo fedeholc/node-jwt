@@ -26,4 +26,5 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvb
 
 ###
 
-GET http://127.0.0.1:3000/auth/github HTTP/1.1
+GET http://127.0.0.1:3000/auth/github2 HTTP/1.1
+

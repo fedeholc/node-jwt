@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <h1>hola</h1>
+</body>
+<script>
+  fetch("http://127.0.0.1:3000/user-info", {
+    method: "GET",
+    credentials: "include" // Asegura que las cookies se envíen en la solicitud
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Datos del usuario:", data);
+    });
+</script>
+
+</html>
