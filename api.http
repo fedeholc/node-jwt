@@ -23,3 +23,7 @@ content-type: application/json
 GET http://localhost:3000/profile HTTP/1.1
 content-type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTgsImVtYWlsIjoiY0BmZWRlLmNvbSIsImlhdCI6MTcyNTQ3NjczNSwiZXhwIjoxNzI1NDgwMzM1fQ.pZ2iGsHp2Ur_byyMs7KwnXk9Z0MObvINblMRz4_SiaI
+
+###
+
+GET http://127.0.0.1:3000/auth/github HTTP/1.1

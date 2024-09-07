@@ -6,13 +6,16 @@ import { getDbInstance } from "./db.js";
 
 const db = await getDbInstance();
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
+passport.serializeUser((profile, done) => {
+  console.log("serializeUser", profile);
+  done(null, profile);
 });
 
-passport.deserializeUser(async (id, done) => {
-  const user = await getUserByEmail(id);
-  done(null, user);
+passport.deserializeUser(async (obj, done) => {
+  console.log("deserializeUser", obj);
+
+  /*   const user = await getUserByEmail(email);
+   */ done(null, obj);
 });
 
 passport.use(
@@ -20,24 +23,40 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "http://127.0.0.1:3000/auth/github/callback",
+      callbackURL: "/auth/github/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await getUserByEmail(db, profile.emails[0].value);
-        if (!user) {
-          user = await insertUser(
-            db,
-            profile.username,
-            profile.emails[0].value,
-            profile.id
-          );
-        }
-        user.id = "1234"
-        return done(null, user);
+       process.nextTick(function () {
+         // To keep the example simple, the user's GitHub profile is returned to
+         // represent the logged-in user.  In a typical application, you would want
+         // to associate the GitHub account with a user record in your database,
+         // and return that user instead.
+         //authCallback("github", profile, { accessToken, refreshToken }, done);
+        });
+        return done(null, profile);
+     /*  try {
+ 
+        //  profile.accessToken = accessToken;
+        //  console.log("accessToken", accessToken);
+        //      let user = await getUserByEmail(db, profile.emails[0].value);
+        // if (!user) {
+        //   user = await insertUser(
+        //     db,
+        //     profile.username,
+        //     profile.emails[0].value,
+        //     profile.id
+        //   );
+        // }  
+        //        user.id = "1234";
+        // user.email = "federicoholc@gmail.com";  
+        console.log("profile", profile);
+        return done(null, profile);
+
+
       } catch (err) {
         return done(err);
-      }
+      } */
+ 
     }
   )
 );

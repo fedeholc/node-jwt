@@ -8,7 +8,7 @@
 
 // Servidor (Node.js con Express)
 import express from "express";
- import session from "express-session";
+import session from "express-session";
 import passport from "./passport-config.js";
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
@@ -22,39 +22,128 @@ import {
 } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
- 
+import axios from "axios";
+
 const db = await getDbInstance();
 console.log("DB connected", db);
 const app = express();
 //app.use(express.json());
 
-app.use(session({
-  secret: await getSecretKey(),
-  resave: false,
-  saveUninitialized: false
-}));
+const clientID = process.env.GITHUB_CLIENT_ID;
+const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+const redirectURI = "http://127.0.0.1:3000/auth/github/callback";
+
+
+
+app.use(
+  session({
+    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambia esto por una clave secreta
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Asegúrate de configurar secure: true en producción si usas HTTPS
+  })
+);
 
 app.use(passport.initialize());
-app.use(passport.session());
+/* app.use(passport.session());
+ */
 
-app.use(
-  "/auth/github",
-  passport.authenticate("github", { scope: ["user:email"] })
-);
+app.get("/auth/github", (req, res) => {
+  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email`;
+  console.log("githubAuthURL", githubAuthURL);
+  res.redirect(githubAuthURL);
+});
 
-app.use(
+/* app.use("/auth/github", passport.authenticate("github"));
+ */
+/* app.use(
   "/auth/github/callback",
-  passport.authenticate("github", { failureRedirect: "/" }),
+  passport.authenticate("github", { failureRedirect: "/", session: false }),
   (req, res) => {
+    console.log("req.user", req.user);
     res.redirect("/");
   }
-);
+); */
+
+app.get("/auth/github/callback", async (req, res) => {
+  const code = req.query.code;
+  console.log("code", code);
+
+  if (!code) {
+    return res.status(400).send("No authorization code received");
+  }
+
+  try {
+    // Intercambiar el código de autorización por un access token
+    const tokenResponse = await axios.post(
+      "https://github.com/login/oauth/access_token",
+      {
+        client_id: clientID,
+        client_secret: clientSecret,
+        code: code,
+        redirect_uri: redirectURI,
+      },
+      {
+        headers: {
+          Accept: "application/json", // Recibe la respuesta en formato JSON
+        },
+      }
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+    if (!accessToken) {
+      return res.status(400).send("Error obtaining access token");
+    }
+
+    // Usa el token para obtener la información del usuario
+    const userResponse = await axios.get("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const user = userResponse.data;
+    console.log("User info:", user);
+
+    // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
+    // Por ejemplo, puedes guardar el usuario en una sesión de Express.
+    req.session.user = user;
+    
+    res.redirect("/profileX"); // Redirige al perfil o a cualquier ruta que desees
+  } catch (error) {
+    console.error("Error during authentication", error);
+    res.status(500).send("Authentication failed");
+  }
+});
+
+function ensureAuthenticated(req, res, next) {
+  if (req.session.user) {
+    return next();
+  } else {
+    res.redirect("/auth/github");
+  }
+}
+app.get("/profileX", ensureAuthenticated, (req, res) => {
+  // La ruta está protegida, el usuario debe estar autenticado
+  const user = req.session.user; // Obtén el usuario de la sesión
+  res.send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
+});
 
 const secretKey = getSecretKey();
 
 //VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
 app.use("/login2", loginRouter);
 app.post("/login", handleLogin(db, secretKey));
+
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).send("Error during logout");
+    }
+    res.redirect("/"); // Redirige a la página de inicio o a cualquier otra página
+  });
+});
 
 // Endpoint de registro
 app.post("/register", async (req, res) => {
