@@ -207,13 +207,40 @@ function ensureAuthenticated(req, res, next) {
 }
 app.get("/", (req, res) => {
   console.log(req.session.id);
-  res.status(200).send("Hello World! user:" + req.session.user);
+  if (req.session.views) {
+    req.session.views++;
+  } else {
+    req.session.views = 1;
+  }
+  res
+    .status(200)
+    .send(
+      "Hello World! user:" + req.session.user + " views:" + req.session.views
+    );
+});
+
+app.get("/nolog", (req, res) => {
+  console.log(req.session.id);
+  if (req.session.views) {
+    req.session.views++;
+  } else {
+    req.session.views = 1;
+  }
+  res
+    .status(200)
+    .send(
+      "Hello World! user:" + req.session.user + " views:" + req.session.views
+    );
 });
 
 app.get("/profileX", ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
   const user = req.session.user; // Obtén el usuario de la sesión
-  res.status(200).send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
+  res
+    .status(200)
+    .send(
+      `Hello ${req.session.views}, ${user.login}! Your email is ${user.email}.`
+    ); // Muestra el perfil del usuario
 });
 
 const secretKey = getSecretKey();
