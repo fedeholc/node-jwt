@@ -95,7 +95,7 @@ app.get("/auth/github2", (req, res) => {
   );
   //res.redirect(githubAuthURL);
 
-  res.status(201).json({ ghauth: githubAuthURL });
+  res.status(200).json({ ghauth: githubAuthURL });
 });
 
 app.get("/auth/github/callback", async (req, res) => {
@@ -157,8 +157,7 @@ app.get("/auth/github/callback", async (req, res) => {
       secure: false, // Cambiar a true en producción con HTTPS
     });
     // Redirige al usuario a la URL almacenada en la sesión
-    let returnTo =
-      req.query.state || "http://127.0.0.1:5500/src/front/a.html";
+    let returnTo = req.query.state || "http://127.0.0.1:5500/src/front/a.html";
     delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
     returnTo = returnTo + "?user=" + user.email;
     res.redirect(returnTo);
@@ -182,7 +181,7 @@ app.get("/user-info", (req, res) => {
     return res.status(401).json({ error: "User not authenticated" });
   }
 
-  res.status(201).json({ token: token });
+  res.status(200).json({ token: token });
 });
 
 function ensureAuthenticated(req, res, next) {
@@ -208,13 +207,13 @@ function ensureAuthenticated(req, res, next) {
 }
 app.get("/", (req, res) => {
   console.log(req.session.id);
-  res.status(201).send("Hello World! user:" + req.session.user);
+  res.status(200).send("Hello World! user:" + req.session.user);
 });
 
 app.get("/profileX", ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
   const user = req.session.user; // Obtén el usuario de la sesión
-  res.status(201).send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
+  res.status(200).send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
 });
 
 const secretKey = getSecretKey();
@@ -281,7 +280,7 @@ app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   } else {
-    return res.status(201).json({
+    return res.status(200).json({
       mensaje: "Access granted",
       usuario: user,
       usuarioToken: req.payload,

@@ -5,48 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script src="script.js" type="module" defer></script>
 </head>
 
 <body>
-  <button>login github</button>
+  <h1>hola</h1>
+  <div id="info"></div>
+  <button id="btn-login-gh">Login con GitHub</button>
+  <button id="btn-logout">Logout</button>
+
 </body>
-<script>
-  let data = "";
-  fetch("http://127.0.0.1:3000/user-info", {
-    method: "GET",
-    credentials: "include" // Asegura que las cookies se envíen en la solicitud
-  })
-    .then(response => response.json())
-    .then(d => {
-      console.log("Datos del usuario desde index:", d);
-      data = d;
 
-      if (!data.error) {
-        console.log("user:", data)
-        document.querySelector('button').innerText = 'logout' + data.token;
-
-      }
-      else {
-        document.querySelector('button').addEventListener('click', async () => {
-          // window.location.href = 'http://localhost:3000/auth/github'
-
-          let returnTo = window.location.href;
-          let response = await fetch(`http://localhost:3000/auth/github2?returnTo=${returnTo}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-
-            }
-          });
-          let data = await response.json();
-          window.location.href = data.ghauth;
-          /*    window.location.href = "http://127.0.0.1:3000/auth/github2?returnTo=http://127.0.0.1:5500" */
-          console.log(data);
-        });
-      }
-    });
-
-
-</script>
 
 </html>
