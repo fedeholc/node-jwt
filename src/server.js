@@ -33,8 +33,6 @@ const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectURI = "http://127.0.0.1:3000/auth/github/callback";
 
-
-
 app.use(
   session({
     secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambia esto por una clave secreta
@@ -44,9 +42,15 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
+//app.use(passport.initialize());
 /* app.use(passport.session());
  */
+
+app.use((req, res, next) => {
+  console.log("Session ID:", req.sessionID);
+  //console.log("Session:", req.session);
+  next();
+});
 
 app.get("/auth/github", (req, res) => {
   const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email`;
@@ -103,12 +107,12 @@ app.get("/auth/github/callback", async (req, res) => {
     });
 
     const user = userResponse.data;
-    console.log("User info:", user);
+    console.log("User info:", user.Authorization);
 
     // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
     // Por ejemplo, puedes guardar el usuario en una sesión de Express.
     req.session.user = user;
-    
+
     res.redirect("/profileX"); // Redirige al perfil o a cualquier ruta que desees
   } catch (error) {
     console.error("Error during authentication", error);
@@ -117,16 +121,35 @@ app.get("/auth/github/callback", async (req, res) => {
 });
 
 function ensureAuthenticated(req, res, next) {
+  console.log(
+    "ensureAuthenticated session id y req auth",
+    req.session.id,
+    req.Authorization
+  );
   if (req.session.user) {
-    return next();
+    console.log("ensure session user", req.session.user.id);
   } else {
-    res.redirect("/auth/github");
+    console.log("ensure session no user", req.session.user);
+  }
+  console.log("ensure user:", req.user);
+  if (req.session.user) {
+    return next(); // Usuario autenticado, continúa con la solicitud
+  } else {
+    console.log("User not authenticated");
+    //TODO: ojo, si se redirecciona a /auth/github se reloguea
+    res.redirect("/nolog"); // Redirige a la página de inicio de sesión si no está autenticado
+    //
   }
 }
+app.get("/", (req, res) => {
+  console.log(req.session.id);
+  res.status(201).send("Hello World! user:" + req.session.user);
+});
+
 app.get("/profileX", ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
   const user = req.session.user; // Obtén el usuario de la sesión
-  res.send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
+  res.status(201).send(`Hello, ${user.login}! Your email is ${user.email}.`); // Muestra el perfil del usuario
 });
 
 const secretKey = getSecretKey();
@@ -141,7 +164,8 @@ app.get("/logout", (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error during logout");
     }
-    res.redirect("/"); // Redirige a la página de inicio o a cualquier otra página
+    res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
+    res.redirect("/"); // Redirige a la página de inicio
   });
 });
 
