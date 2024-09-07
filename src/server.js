@@ -1,7 +1,6 @@
 //TODO: crear unit test y ver si también se puede hacer E2E
 
-//TODO: cómo sería la lógica del lado del cliente con cookies?
-// tengo que ver si hay un token en la cookie y si no lo hay, redirigir a la página de login? Si lo hay, lo considero ya como logueado y no muestro la página de login? o tengo que hacer una request al servidor para verificar que el token es válido? se hace a la página de loguin? o a una página de verificación de token? o directamente a la página que se quiere entrar(que sería la página de perfil)? o a una página de inicio que redirige a la página de perfil si el token es válido?
+//TODO: Probar si con session se reemplaza lo de mandar las cookies a mano.
 
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
