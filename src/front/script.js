@@ -27,9 +27,18 @@ if (response.ok) {
   document.querySelector("#btn-login-gh").style.display = "none";
 }
 
-document.querySelector("button").addEventListener("click", async () => {
-  // window.location.href = 'http://localhost:3000/auth/github'
+document.querySelector("#btn-logout").addEventListener("click", async () => {
+  let response = await fetch("http://127.0.0.1:3000/logout", {
+    method: "GET",
+    credentials: "include",
+  });
+  console.log("Logout Response: ", response);
+  if (response.ok) {
+    window.location.reload();
+  }
+});
 
+document.querySelector("#btn-login-gh").addEventListener("click", async () => {
   let returnTo = window.location.href;
   let response = await fetch(
     `http://localhost:3000/auth/github2?returnTo=${returnTo}`,
@@ -41,7 +50,6 @@ document.querySelector("button").addEventListener("click", async () => {
     }
   );
   let data = await response.json();
+  console.log("Login github:", data);
   window.location.href = data.ghauth;
-  /*    window.location.href = "http://127.0.0.1:3000/auth/github2?returnTo=http://127.0.0.1:5500" */
-  console.log(data);
 });

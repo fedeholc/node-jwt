@@ -228,8 +228,12 @@ app.get("/logout", (req, res) => {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error during logout");
     }
-    res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
-    res.redirect("/"); // Redirige a la página de inicio
+    //res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
+
+    Object.keys(req.cookies).forEach((cookie) => {
+      res.clearCookie(cookie);
+    });
+    res.status(201).send("ok"); // Redirige a la página de inicio
   });
 });
 
