@@ -25,7 +25,7 @@ import {
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
 import cookieParser from "cookie-parser";
-import { sessionCounter } from "./middleware.js";
+import { sessionCounter, ensureAuthenticated } from "./middleware.js";
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
@@ -74,24 +74,6 @@ app.get("/auth/github", handleAuthGitHub);
 app.get("/auth/github/callback", handleAuthGitHubCallback);
 
 app.get("/user-info", handleUserInfo);
-
-function ensureAuthenticated(req, res, next) {
-  //TODO: tendría que poner un isAuth en la session para no tener que hacer esto? ambas?
-  if (req.session.user) {
-    console.log("ensure session user", req.session.user.id);
-  } else {
-    console.log("ensure session no user", req.session.user);
-  }
-  console.log("ensure user:", req.user);
-  if (req.session.user) {
-    return next(); // Usuario autenticado, continúa con la solicitud
-  } else {
-    console.log("User not authenticated");
-    //TODO: ojo, si se redirecciona a /auth/github se reloguea
-    res.redirect("/nolog"); // Redirige a la página de inicio de sesión si no está autenticado
-    //
-  }
-}
 
 app.get("/", (req, res) => {
   console.log(req.session.id);
