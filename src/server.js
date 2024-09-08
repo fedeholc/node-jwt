@@ -78,23 +78,15 @@ app.use((req, res, next) => {
 });
 
 app.get("/auth/github", (req, res) => {
-  req.session.returnTo = req.get("referer") || req.query.returnTo || "/";
+  req.session.returnTo = req.query.returnTo || req.get("referer") || "/";
 
-  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&state=${req.session.returnTo}&scope=user:email&r`;
-
-  res.cookie("returnURL", req.session.returnTo, {
-    httpOnly: false, // Evita que el frontend acceda a esta cookie
-    secure: false, // Cambiar a true en producción con HTTPS
-  });
+  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email&r`;
 
   res.status(200).json({ ghauth: githubAuthURL });
 });
 
 app.get("/auth/github/callback", async (req, res) => {
-  console.log("en callback returnto: ", req.session.returnTo);
-
   const code = req.query.code;
-
   if (!code) {
     return res.status(400).send("No authorization code received");
   }
@@ -134,24 +126,20 @@ app.get("/auth/github/callback", async (req, res) => {
     // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
     // Por ejemplo, puedes guardar el usuario en una sesión de Express.
     req.session.user = user;
+    req.session.accessToken = accessToken;
 
     res.cookie("authToken", accessToken, {
-      httpOnly: false, // Evita que el frontend acceda a esta cookie
+      httpOnly: true, // Evita que el frontend acceda a esta cookie
       secure: false, // Cambiar a true en producción con HTTPS
     });
-    res.cookie("userCookie", user, {
-      httpOnly: false, // Evita que el frontend acceda a esta cookie
-      secure: false, // Cambiar a true en producción con HTTPS
-    });
-
+ 
     // Redirige al usuario a la URL almacenada en la sesión
-    let returnTo = req.query.state || "http://127.0.0.1:5500/src/front/a.html";
+    let returnTo = req.session.returnTo || "/";
 
     delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
-    returnTo = returnTo + "?user=" + user.email;
-    res.redirect(returnTo);
 
-    //res.redirect("/profileX"); // Redirige al perfil o a cualquier ruta que desees
+    res.redirect(returnTo);
+ 
   } catch (error) {
     console.error("Error during authentication", error);
     res.status(500).send("Authentication failed");
@@ -168,7 +156,7 @@ app.get("/user-info", (req, res) => {
     return res.status(401).json({ error: "User not authenticated" });
   }
 
-  res.status(200).json({ token: token });
+  res.status(200).json({ token: token, user: req.session.user });
 });
 
 function ensureAuthenticated(req, res, next) {

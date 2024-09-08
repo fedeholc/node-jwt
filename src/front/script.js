@@ -21,6 +21,7 @@ if (response.ok) {
   document.querySelector("#info").innerHTML = `
   <h2>Usuario autorizado.</h2>
   <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+  <p>User: ${data.user.email}</p>
   <p>Token: ${data.token}</p>`;
 
   document.querySelector("#btn-logout").style.display = "block";
