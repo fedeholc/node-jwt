@@ -15,13 +15,8 @@ import session from "express-session";
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
 import cors from "cors";
-import { getUserByEmail, insertUser } from "./utils-db.js";
-import {
-  extractToken,
-  generateToken,
-  hashPassword,
-  verifyToken,
-} from "./util-auth.js";
+import { getUserByEmail } from "./utils-db.js";
+import { extractToken, verifyToken } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
 import cookieParser from "cookie-parser";
@@ -31,7 +26,11 @@ import {
   handleAuthGitHubCallback,
 } from "./route-handlers/auth-github.js";
 import { handleUserInfo } from "./route-handlers/user-info.js";
+import { handleLogOut } from "./route-handlers/logout.js";
+import { handleRegister } from "./route-handlers/register.js";
 
+
+const secretKey = getSecretKey();
 const db = await getDbInstance();
 console.log("DB connected", db);
 const app = express();
@@ -89,6 +88,18 @@ app.get("/", (req, res) => {
     );
 });
 
+
+//VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
+app.use("/login2", loginRouter);
+app.post("/login", handleLogin(db, secretKey));
+
+app.get("/logout", handleLogOut);
+
+// Endpoint de registro
+// TODO: distintos endpoints según el tipo de registro?
+// TODO: y cómo se haría la parte de verificación de mail?
+app.post("/register", handleRegister(db, secretKey));
+
 app.get("/profileX", ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
   const user = req.session.user; // Obtén el usuario de la sesión
@@ -98,67 +109,6 @@ app.get("/profileX", ensureAuthenticated, (req, res) => {
       `Hello ${req.session.views}, ${user.login}! Your email is ${user.email}.`
     ); // Muestra el perfil del usuario
 });
-
-const secretKey = getSecretKey();
-
-//VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
-app.use("/login2", loginRouter);
-app.post("/login", handleLogin(db, secretKey));
-
-app.get("/logout", (req, res) => {
-  Object.keys(req.cookies).forEach((cookie) => {
-    res.clearCookie(cookie);
-  });
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Error destroying session:", err);
-      return res.status(500).send("Error during logout");
-    }
-    //res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
-
-    res.status(201).send("ok"); // Redirige a la página de inicio
-  });
-});
-
-// Endpoint de registro
-// TODO: distintos endpoints según el tipo de registro?
-// TODO: y cómo se haría la parte de verificación de mail?
-app.post("/register", async (req, res) => {
-  const { user, pass, email } = req.body;
-
-  if (!user || !pass || !email) {
-    return res.status(400).json({ error: "All fields are required." });
-  }
-
-  let userResponse = await getUserByEmail(db, email);
-
-  if (userResponse) {
-    return res.status(409).json({ error: "User or email already exist." });
-  }
-
-  // Crear nuevo usuario
-  try {
-    const id = await insertUser(db, user, email, hashPassword(pass));
-
-    const token = await generateToken(
-      {
-        id: id,
-        user: user,
-        email: email,
-      },
-      secretKey
-    );
-
-    return res.status(201).json({
-      mensaje: "User succesfully registered. Id: " + id,
-      token: token,
-    });
-  } catch (error) {
-    return res.status(500).json({ error: "Error registering user: " + error });
-  }
-});
-
-// Middleware para verificar token
 
 // Ruta protegida (requiere token)
 app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
