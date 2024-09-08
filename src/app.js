@@ -25,6 +25,11 @@ import {
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
 import cookieParser from "cookie-parser";
+import { sessionCounter } from "./middleware.js";
+import {
+  handleAuthGitHub,
+  handleAuthGitHubCallback,
+} from "./route-handlers/auth-github.js";
 
 const db = await getDbInstance();
 console.log("DB connected", db);
@@ -62,109 +67,51 @@ app.use(
   })
 );
 
-const clientID = process.env.GITHUB_CLIENT_ID;
-const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-const redirectURI = "http://127.0.0.1:3000/auth/github/callback";
+app.use(sessionCounter);
 
-app.use((req, res, next) => {
-  if (req.session.count) {
-    req.session.count++;
-  } else {
-    req.session.count = 1;
-  }
-  console.log(
-    `Sesion id: ${req.session.id} - cantidad de requests: ${req.session.count}`
-  );
-  next();
-});
+app.get("/auth/github", handleAuthGitHub);
+app.get("/auth/github/callback", handleAuthGitHubCallback);
 
-app.get("/auth/github", (req, res) => {
-  req.session.returnTo = req.query.returnTo || req.get("referer") || "/";
 
-  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email&r`;
 
-  res.status(200).json({ ghauth: githubAuthURL });
-});
 
-app.get("/auth/github/callback", async (req, res) => {
-  const code = req.query.code;
-  if (!code) {
-    return res.status(400).send("No authorization code received");
-  }
-
-  try {
-    const tokenResponse = await fetch(
-      "https://github.com/login/oauth/access_token",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json", // Recibe la respuesta en formato JSON
-        },
-        body: JSON.stringify({
-          client_id: clientID,
-          client_secret: clientSecret,
-          code: code,
-          redirect_uri: redirectURI,
-        }),
-      }
-    );
-    const tokenData = await tokenResponse.json();
-    console.log("tokenData", tokenData);
-    const accessToken = tokenData.access_token;
-    if (!accessToken) {
-      return res.status(400).send("Error obtaining access token");
-    }
-
-    const userResponse = await fetch("https://api.github.com/user", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (!userResponse.ok) {
-      return res.status(400).send("Error obtaining user data");
-    }
-
-    const user = await userResponse.json();
-    console.log("user", user);
-
-    //const user = userResponse.data;
-    console.log("User info:", user.id);
-
-    // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
-    // Por ejemplo, puedes guardar el usuario en una sesión de Express.
-    req.session.user = user;
-    req.session.accessToken = accessToken;
-
-    res.cookie("authToken", accessToken, {
-      httpOnly: true, // Evita que el frontend acceda a esta cookie
-      secure: false, // Cambiar a true en producción con HTTPS
-    });
-
-    // Redirige al usuario a la URL almacenada en la sesión
-    let returnTo = req.session.returnTo || "/";
-
-    delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
-
-    res.redirect(returnTo);
-  } catch (error) {
-    console.error("Error during authentication", error);
-    res.status(500).send("Authentication failed");
-  }
-});
-
-app.get("/user-info", (req, res) => {
+app.get("/user-info", async (req, res) => {
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
   }
-  const token = req.cookies.authToken;
+  const accessToken = req.cookies.authToken;
 
-  if (!token) {
+  //TODO: qué pasa si hay otros providers? tengo que checkiar de quién es el token?
+
+  if (!accessToken) {
     return res.status(401).json({ error: "User not authenticated" });
   }
 
-  res.status(200).json({ token: token, user: req.session.user });
+  //TODO: está parte está repetida en github callback, hacer función
+  const userResponse = await fetch("https://api.github.com/user", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  console.log("userResponse", userResponse);
+  if (!userResponse.ok) {
+    return res.status(400).send("Error obtaining user data");
+  }
+
+  //TODO: está bien traer la info de github? no debería traerla de mi bd?
+  //VER o sea, el loguin sirve para evitar el pass, pero después de eso no debería depender del servidor de github, pero que info guardar en una cookie para dar acceso? uso JWT???
+
+  const user = await userResponse.json();
+
+  req.session.user = user;
+
+  if (!req.session.user) {
+    //VER debería hacer un logout y redirigir al login?
+    return res.status(401).json({ error: "User not authenticated" });
+  }
+
+  res.status(200).json({ token: accessToken, user: req.session.user });
 });
 
 function ensureAuthenticated(req, res, next) {
