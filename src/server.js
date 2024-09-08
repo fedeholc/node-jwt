@@ -71,34 +71,29 @@ app.use((req, res, next) => {
   } else {
     req.session.count = 1;
   }
-  console.log("count", req.session.count, req.cookies.abc);
+  console.log(
+    `Sesion id: ${req.session.id} - cantidad de accesos: ${req.session.count}`
+  );
   next();
 });
 
 app.get("/auth/github", (req, res) => {
-  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&state=${req.query.returnTo}&scope=user:email&r`;
+  req.session.returnTo = req.get("referer") || req.query.returnTo || "/";
 
-  req.session.returnTo = req.query.returnTo || "/";
-  res.cookie("abc", "bbb", {
+  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&state=${req.session.returnTo}&scope=user:email&r`;
+
+  res.cookie("returnURL", req.session.returnTo, {
     httpOnly: false, // Evita que el frontend acceda a esta cookie
     secure: false, // Cambiar a true en producción con HTTPS
   });
 
-  console.log("1return to: ", req.session.returnTo);
-  console.log("1original url", req.get("host"), req.originalUrl);
   res.status(200).json({ ghauth: githubAuthURL });
 });
 
 app.get("/auth/github/callback", async (req, res) => {
-  console.log(
-    "callback sesion id",
-    req.session.id,
-    req.session.returnTo,
-    req.query.state
-  );
+  console.log("en callback returnto: ", req.session.returnTo);
+
   const code = req.query.code;
-  console.log("cookies: ", req.cookies);
-  console.log("code", code, req.session.returnTo, req.session.count);
 
   if (!code) {
     return res.status(400).send("No authorization code received");
@@ -148,8 +143,10 @@ app.get("/auth/github/callback", async (req, res) => {
       httpOnly: false, // Evita que el frontend acceda a esta cookie
       secure: false, // Cambiar a true en producción con HTTPS
     });
+
     // Redirige al usuario a la URL almacenada en la sesión
     let returnTo = req.query.state || "http://127.0.0.1:5500/src/front/a.html";
+
     delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
     returnTo = returnTo + "?user=" + user.email;
     res.redirect(returnTo);
@@ -162,14 +159,6 @@ app.get("/auth/github/callback", async (req, res) => {
 });
 
 app.get("/user-info", (req, res) => {
-  // Verifica si la cookie con el token está presente
-  //console.log("cookies:", req.cookies);
-  console.log("cookie return to en sesion ", req.session.id);
-  console.log("uinfo original url", req.get("host"), req.originalUrl);
-  res.cookie("returnTo", "XXX", {
-    httpOnly: false, // Evita que el frontend acceda a esta cookie
-    secure: false, // Cambiar a true en producción con HTTPS
-  });
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
   }
