@@ -28,7 +28,6 @@ console.log("DB connected", db);
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-// Configura CORS para permitir solicitudes desde cualquier origen
 
 const allowedOrigins = [
   "http://127.0.0.1:5500",
@@ -51,49 +50,40 @@ app.use(
   })
 );
 
-/* app.use(
-  cors({
-    origin: "http://127.0.0.1:5500", // Reemplaza con la URL de tu frontend
-    credentials: true, // Permite enviar cookies y credenciales
+app.use(
+  session({
+    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambiar esto por una clave secreta
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }, //configurar secure: true en producción si se usa HTTPS
   })
-); */
+);
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectURI = "http://127.0.0.1:3000/auth/github/callback";
 
-app.use(
-  session({
-    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambiar esto por una clave secreta
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, //configurar secure: true en producción si se usa HTTPS
-  })
-);
-
 app.use((req, res, next) => {
-  console.log("Session ID:", req.sessionID);
-  //console.log("Session:", req.session);
+  if (req.session.count) {
+    req.session.count++;
+  } else {
+    req.session.count = 1;
+  }
+  console.log("count", req.session.count, req.cookies.abc);
   next();
 });
 
-/* app.get("/auth/github", (req, res) => {
-  const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email`;
-  console.log("githubAuthURL", githubAuthURL);
-  res.redirect(githubAuthURL);
-}); */
-
-app.get("/auth/github2", (req, res) => {
+app.get("/auth/github", (req, res) => {
   const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientID}&redirect_uri=${redirectURI}&state=${req.query.returnTo}&scope=user:email&r`;
-  console.log("githubAuthURL", githubAuthURL);
-  req.session.returnTo = req.query.returnTo || "/";
-  console.log("req.query", req.query);
-  console.log(
-    "req.session.returnTo enviada como parametro",
-    req.session.returnTo
-  );
-  //res.redirect(githubAuthURL);
 
+  req.session.returnTo = req.query.returnTo || "/";
+  res.cookie("abc", "bbb", {
+    httpOnly: false, // Evita que el frontend acceda a esta cookie
+    secure: false, // Cambiar a true en producción con HTTPS
+  });
+
+  console.log("1return to: ", req.session.returnTo);
+  console.log("1original url", req.get("host"), req.originalUrl);
   res.status(200).json({ ghauth: githubAuthURL });
 });
 
@@ -105,7 +95,8 @@ app.get("/auth/github/callback", async (req, res) => {
     req.query.state
   );
   const code = req.query.code;
-  console.log("code", code);
+  console.log("cookies: ", req.cookies);
+  console.log("code", code, req.session.returnTo, req.session.count);
 
   if (!code) {
     return res.status(400).send("No authorization code received");
@@ -171,6 +162,12 @@ app.get("/auth/github/callback", async (req, res) => {
 app.get("/user-info", (req, res) => {
   // Verifica si la cookie con el token está presente
   //console.log("cookies:", req.cookies);
+  console.log("cookie return to en sesion ", req.session.id);
+  console.log("uinfo original url", req.get("host"), req.originalUrl);
+  res.cookie("returnTo", "XXX", {
+    httpOnly: false, // Evita que el frontend acceda a esta cookie
+    secure: false, // Cambiar a true en producción con HTTPS
+  });
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
   }
@@ -204,6 +201,7 @@ function ensureAuthenticated(req, res, next) {
     //
   }
 }
+
 app.get("/", (req, res) => {
   console.log(req.session.id);
   if (req.session.views) {
@@ -249,6 +247,9 @@ app.use("/login2", loginRouter);
 app.post("/login", handleLogin(db, secretKey));
 
 app.get("/logout", (req, res) => {
+  Object.keys(req.cookies).forEach((cookie) => {
+    res.clearCookie(cookie);
+  });
   req.session.destroy((err) => {
     if (err) {
       console.error("Error destroying session:", err);
@@ -256,9 +257,6 @@ app.get("/logout", (req, res) => {
     }
     //res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
 
-    Object.keys(req.cookies).forEach((cookie) => {
-      res.clearCookie(cookie);
-    });
     res.status(201).send("ok"); // Redirige a la página de inicio
   });
 });

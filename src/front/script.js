@@ -41,9 +41,10 @@ document.querySelector("#btn-logout").addEventListener("click", async () => {
 document.querySelector("#btn-login-gh").addEventListener("click", async () => {
   let returnTo = window.location.href;
   let response = await fetch(
-    `http://localhost:3000/auth/github2?returnTo=${returnTo}`,
+    `http://127.0.0.1:3000/auth/github?returnTo=${returnTo}`,
     {
       method: "GET",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
