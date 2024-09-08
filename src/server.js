@@ -4,6 +4,8 @@
 
 //TODO: leer web.dev cookies
 
+//TODO: ver donde poner los try catch si dentro y/o fuera de los métodos, y como menejar las respuestas del server, si throw error o no.
+
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
 
@@ -22,7 +24,6 @@ import {
 } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
-import axios from "axios";
 import cookieParser from "cookie-parser";
 
 const db = await getDbInstance();
@@ -72,7 +73,7 @@ app.use((req, res, next) => {
     req.session.count = 1;
   }
   console.log(
-    `Sesion id: ${req.session.id} - cantidad de accesos: ${req.session.count}`
+    `Sesion id: ${req.session.id} - cantidad de requests: ${req.session.count}`
   );
   next();
 });
@@ -92,35 +93,43 @@ app.get("/auth/github/callback", async (req, res) => {
   }
 
   try {
-    // Intercambiar el código de autorización por un access token
-    const tokenResponse = await axios.post(
+    const tokenResponse = await fetch(
       "https://github.com/login/oauth/access_token",
       {
-        client_id: clientID,
-        client_secret: clientSecret,
-        code: code,
-        redirect_uri: redirectURI,
-      },
-      {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Accept: "application/json", // Recibe la respuesta en formato JSON
         },
+        body: JSON.stringify({
+          client_id: clientID,
+          client_secret: clientSecret,
+          code: code,
+          redirect_uri: redirectURI,
+        }),
       }
     );
-
-    const accessToken = tokenResponse.data.access_token;
+    const tokenData = await tokenResponse.json();
+    console.log("tokenData", tokenData);
+    const accessToken = tokenData.access_token;
     if (!accessToken) {
       return res.status(400).send("Error obtaining access token");
     }
 
-    // Usa el token para obtener la información del usuario
-    const userResponse = await axios.get("https://api.github.com/user", {
+    const userResponse = await fetch("https://api.github.com/user", {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    if (!userResponse.ok) {
+      return res.status(400).send("Error obtaining user data");
+    }
 
-    const user = userResponse.data;
+    const user = await userResponse.json();
+    console.log("user", user);
+
+    //const user = userResponse.data;
     console.log("User info:", user.id);
 
     // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
@@ -132,14 +141,13 @@ app.get("/auth/github/callback", async (req, res) => {
       httpOnly: true, // Evita que el frontend acceda a esta cookie
       secure: false, // Cambiar a true en producción con HTTPS
     });
- 
+
     // Redirige al usuario a la URL almacenada en la sesión
     let returnTo = req.session.returnTo || "/";
 
     delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
 
     res.redirect(returnTo);
- 
   } catch (error) {
     console.error("Error during authentication", error);
     res.status(500).send("Authentication failed");

@@ -18,6 +18,8 @@ if (response.ok) {
   let data = await response.json();
   console.log("Data:", data);
 
+  //TODO: validar que estén los datos esperados
+
   document.querySelector("#info").innerHTML = `
   <h2>Usuario autorizado.</h2>
   <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
