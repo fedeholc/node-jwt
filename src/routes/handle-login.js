@@ -3,18 +3,19 @@ import { getUserByEmail } from "../utils-db.js";
 
 export function handleLogin(db, secretKey) {
   return async function (req, res) {
-    const { user, pass, email } = req.body;
+    const { pass, email } = req.body;
     let userResponse = await getUserByEmail(db, email);
     if (
       userResponse &&
-      user === userResponse.user &&
+      email === userResponse.email &&
       hashPassword(pass) === userResponse.pass
     ) {
       const token = await generateToken(
         {
-          id: userResponse.id,
-          user: userResponse.user,
-          email: userResponse.email,
+          user: {
+            id: userResponse.id,
+            email: userResponse.email,
+          },
         },
         secretKey
       );

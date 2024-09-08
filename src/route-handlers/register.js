@@ -3,9 +3,9 @@ import { hashPassword, generateToken } from "../util-auth.js";
 
 export function handleRegister(db, secretKey) {
   return async function (req, res) {
-    const { user, pass, email } = req.body;
+    const { pass, email } = req.body;
 
-    if (!user || !pass || !email) {
+    if (!pass || !email) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
@@ -17,19 +17,27 @@ export function handleRegister(db, secretKey) {
 
     // Crear nuevo usuario
     try {
-      const id = await insertUser(db, user, email, hashPassword(pass));
-
+      const id = await insertUser(db, email, hashPassword(pass));
       const token = await generateToken(
         {
-          id: id,
-          user: user,
-          email: email,
+          user: {
+            id: id,
+            email: email,
+          },
         },
         secretKey
       );
 
+      res.cookie("jwtToken", token, {
+        httpOnly: true, // Evita que el frontend acceda a esta cookie
+        secure: false, // Cambiar a true en producción con HTTPS
+      });
+
       return res.status(201).json({
-        mensaje: "User succesfully registered. Id: " + id,
+        user: {
+          email: email,
+          id: id,
+        },
         token: token,
       });
     } catch (error) {

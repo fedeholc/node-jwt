@@ -10,6 +10,7 @@ import crypto from "crypto";
  * @returns string - token
  */
 async function generateToken(payload, secretKey) {
+  console.log("payload", payload);
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

@@ -9,19 +9,20 @@ export const loginRouter = express.Router();
 loginRouter.post("/", handleLogin(getDbInstance(), getSecretKey()));
 
 export function handleLogin(db, secretKey) {
-  return async (req, res) => {
-    const { user, pass, email } = req.body;
+  return async function (req, res) {
+    const { pass, email } = req.body;
     let userResponse = await getUserByEmail(db, email);
     if (
       userResponse &&
-      user === userResponse.user &&
+      email === userResponse.email &&
       hashPassword(pass) === userResponse.pass
     ) {
       const token = await generateToken(
         {
-          id: userResponse.id,
-          user: userResponse.user,
-          email: userResponse.email,
+          user: {
+            id: userResponse.id,
+            email: userResponse.email,
+          },
         },
         secretKey
       );

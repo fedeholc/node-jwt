@@ -1,4 +1,9 @@
+import { getSecretKey } from "../secret-key.js";
+import { jwtVerify } from "jose";
 export { handleUserInfo };
+
+const secretKey = getSecretKey();
+
 async function handleUserInfo(req, res) {
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
@@ -6,6 +11,15 @@ async function handleUserInfo(req, res) {
   const accessToken = req.cookies.authToken;
 
   //TODO: qué pasa si hay otros providers? tengo que checkiar de quién es el token?
+  const jwtToken = req.cookies.jwtToken;
+  if (jwtToken) {
+    let userJWT = await jwtVerify(jwtToken, secretKey);
+    console.log("userJWT", userJWT);
+    if (userJWT) {
+      req.session.user = userJWT.payload.user;
+      return res.status(200).json({ user: req.session.user });
+    }
+  }
 
   if (!accessToken) {
     return res.status(401).json({ error: "User not authenticated" });

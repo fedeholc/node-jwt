@@ -62,3 +62,39 @@ document.querySelector("#btn-login-gh").addEventListener("click", async () => {
   console.log("Login github:", data);
   window.location.href = data.ghauth;
 });
+
+document
+  .querySelector("#btn-signup")
+  .addEventListener("click", async (event) => {
+    event.preventDefault();
+    let email = document.querySelector("#email").value;
+    let password = document.querySelector("#password").value;
+
+    let response = await fetch("http://127.0.0.1:3000/register", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email, pass: password }),
+    });
+    console.log("Signup Response: ", response);
+
+    if (!response.ok) {
+      let data = await response.json();
+      document.querySelector("#info").innerHTML = `
+      <h2>Error al registrar usuario.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Error: ${data.error}</p>`;
+    }
+
+    if (response.ok) {
+      let data = await response.json();
+      document.querySelector("#info").innerHTML = `
+      <h2>Usuario registrado.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>User: ${data.user.id} - ${data.user.email}</p>
+      <p>Token: ${data.token}</p>`;
+      //window.location.reload();
+    }
+  });

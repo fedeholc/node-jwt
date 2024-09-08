@@ -29,11 +29,11 @@ async function getUserByEmail(db, email) {
  * @param {string} pass
  * @returns Promise<number> | Promise<Error>
  */
-async function insertUser(db, user, email, pass) {
+async function insertUser(db, email, pass) {
   return new Promise(function (resolve, reject) {
     db.run(
-      "INSERT INTO user (user, email, pass) VALUES (?, ?, ?)",
-      [user, email, pass],
+      "INSERT INTO user (email, pass) VALUES (?, ?)",
+      [email, pass],
       function (err) {
         if (err) {
           reject(err);

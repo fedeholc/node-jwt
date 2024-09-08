@@ -112,7 +112,7 @@ app.get("/profileX", ensureAuthenticated, (req, res) => {
 
 // Ruta protegida (requiere token)
 app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
-  let user = getUserByEmail(db, req.payload.email);
+  let user = getUserByEmail(db, req.payload.user.email);
 
   // dada la info que viene en el token esta validación
   // podría no ser necesaria.
