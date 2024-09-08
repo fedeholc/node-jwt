@@ -2,6 +2,8 @@
 
 //TODO: Probar si con session se reemplaza lo de mandar las cookies a mano.
 
+//TODO: leer web.dev cookies
+
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
 
@@ -132,7 +134,7 @@ app.get("/auth/github/callback", async (req, res) => {
     });
 
     const user = userResponse.data;
-    console.log("User info:", user.id, user.Authorization);
+    console.log("User info:", user.id);
 
     // Aquí deberías manejar la lógica para iniciar sesión y crear una sesión para el usuario.
     // Por ejemplo, puedes guardar el usuario en una sesión de Express.
