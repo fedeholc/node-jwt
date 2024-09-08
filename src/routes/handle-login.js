@@ -19,7 +19,18 @@ export function handleLogin(db, secretKey) {
         },
         secretKey
       );
-      res.status(201).json({ token: token });
+      res.cookie("jwtToken", token, {
+        httpOnly: true, // Evita que el frontend acceda a esta cookie
+        secure: false, // Cambiar a true en producción con HTTPS
+      });
+
+      return res.status(201).json({
+        user: {
+          email: userResponse.email,
+          id: userResponse.id,
+        },
+        token: token,
+      });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
     }
