@@ -37,7 +37,6 @@ async function handleAuthGitHubCallback(req, res) {
       }
     );
     const tokenData = await tokenResponse.json();
-    console.log("tokenData", tokenData);
     const accessToken = tokenData.access_token;
     if (!accessToken) {
       return res.status(400).send("Error obtaining access token");
@@ -49,7 +48,6 @@ async function handleAuthGitHubCallback(req, res) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("userResponse", userResponse);
     if (!userResponse.ok) {
       return res.status(400).send("Error obtaining user data");
     }

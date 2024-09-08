@@ -12,7 +12,6 @@ export function handleLogin(db, secretKey) {
   return async (req, res) => {
     const { user, pass, email } = req.body;
     let userResponse = await getUserByEmail(db, email);
-    console.log(userResponse, req.body);
     if (
       userResponse &&
       user === userResponse.user &&

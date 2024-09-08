@@ -8,9 +8,32 @@
   <script src="script.js" type="module" defer></script>
 </head>
 
+<style>
+  body,
+  form {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    gap: 1rem;
+  }
+
+  input,
+  button {
+    width: fit-content;
+  }
+</style>
+
 <body>
   <h1>hola</h1>
   <div id="info"></div>
+  <form id="login-form">
+    <label for="email">Email</label>
+    <input type="text" id="email" placeholder="email">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="password">
+    <button id="btn-login">Login</button>
+    <button id="btn-signup">Signup</button>
+  </form>
   <button id="btn-login-gh">Login con GitHub</button>
   <button id="btn-logout">Logout</button>
 
