@@ -30,6 +30,7 @@ import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
 } from "./route-handlers/auth-github.js";
+import { handleUserInfo } from "./route-handlers/user-info.js";
 
 const db = await getDbInstance();
 console.log("DB connected", db);
@@ -72,54 +73,10 @@ app.use(sessionCounter);
 app.get("/auth/github", handleAuthGitHub);
 app.get("/auth/github/callback", handleAuthGitHubCallback);
 
-
-
-
-app.get("/user-info", async (req, res) => {
-  if (!req.cookies) {
-    return res.status(401).json({ error: "nocookies" });
-  }
-  const accessToken = req.cookies.authToken;
-
-  //TODO: qué pasa si hay otros providers? tengo que checkiar de quién es el token?
-
-  if (!accessToken) {
-    return res.status(401).json({ error: "User not authenticated" });
-  }
-
-  //TODO: está parte está repetida en github callback, hacer función
-  const userResponse = await fetch("https://api.github.com/user", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  console.log("userResponse", userResponse);
-  if (!userResponse.ok) {
-    return res.status(400).send("Error obtaining user data");
-  }
-
-  //TODO: está bien traer la info de github? no debería traerla de mi bd?
-  //VER o sea, el loguin sirve para evitar el pass, pero después de eso no debería depender del servidor de github, pero que info guardar en una cookie para dar acceso? uso JWT???
-
-  const user = await userResponse.json();
-
-  req.session.user = user;
-
-  if (!req.session.user) {
-    //VER debería hacer un logout y redirigir al login?
-    return res.status(401).json({ error: "User not authenticated" });
-  }
-
-  res.status(200).json({ token: accessToken, user: req.session.user });
-});
+app.get("/user-info", handleUserInfo);
 
 function ensureAuthenticated(req, res, next) {
-  console.log(
-    "ensureAuthenticated session id y req auth",
-    req.session.id,
-    req.Authorization
-  );
+  //TODO: tendría que poner un isAuth en la session para no tener que hacer esto? ambas?
   if (req.session.user) {
     console.log("ensure session user", req.session.user.id);
   } else {
@@ -137,20 +94,6 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get("/", (req, res) => {
-  console.log(req.session.id);
-  if (req.session.views) {
-    req.session.views++;
-  } else {
-    req.session.views = 1;
-  }
-  res
-    .status(200)
-    .send(
-      "Hello World! user:" + req.session.user + " views:" + req.session.views
-    );
-});
-
-app.get("/nolog", (req, res) => {
   console.log(req.session.id);
   if (req.session.views) {
     req.session.views++;
@@ -196,6 +139,8 @@ app.get("/logout", (req, res) => {
 });
 
 // Endpoint de registro
+// TODO: distintos endpoints según el tipo de registro?
+// TODO: y cómo se haría la parte de verificación de mail?
 app.post("/register", async (req, res) => {
   const { user, pass, email } = req.body;
 
@@ -248,6 +193,10 @@ app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
       usuarioToken: req.payload,
     });
   }
+});
+
+app.get("*", (req, res) => {
+  res.status(404).send("¡Hola! Página no encontrada");
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
