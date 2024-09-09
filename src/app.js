@@ -127,5 +127,7 @@ app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
 app.get("*", (req, res) => {
   res.status(404).send("¡Hola! Página no encontrada");
 });
-
-app.listen(3000, () => console.log("Server running on port 3000"));
+console.log("env", process.env.PORT);
+app.listen(process.env.PORT || 3000, () =>
+  console.log(`Server running on port ${process.env.PORT || 3000}`)
+);

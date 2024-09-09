@@ -2,7 +2,7 @@ export { apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP };
 import process from "process";
 
 const apiBase = {
-  DEV: "http://127.0.0.1:3000",
+  DEV: `http://127.0.0.1:${process.env.PORT || 3000}`,
   PROD: "https://api.example.com",
 };
 

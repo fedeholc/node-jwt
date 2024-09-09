@@ -1,6 +1,7 @@
 export { apiURL, apiEP, env, apiBase };
+const PORT = 1234;
 const apiBase = {
-  DEV: "http://127.0.0.1:3000",
+  DEV: `http://127.0.0.1:${PORT}`,
   PROD: "https://api.example.com",
 };
 
