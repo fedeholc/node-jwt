@@ -37,6 +37,25 @@ const apiURL = {
   USER_INFO: apiBase[env] + apiEP.USER_INFO,
 };
 
+const dialog = document.querySelector("dialog");
+
+const openDialogBtn = document.getElementById("btn-signup-open");
+const closeDialogBtn = document.getElementById("close-dialog");
+
+openDialogBtn.addEventListener("click", () => {
+  dialog.showModal();
+});
+
+closeDialogBtn.addEventListener("click", () => {
+  dialog.close();
+});
+
+window.addEventListener("click", (event) => {
+  if (event.target === dialog) {
+    dialog.close();
+  }
+});
+
 try {
   let response = await fetch(apiURL.USER_INFO, {
     method: "GET",
@@ -63,14 +82,16 @@ try {
     document.querySelector("#info").innerHTML = `
   <h2>Usuario autorizado.</h2>
   <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-  <p>User: ${data.user.email}</p>
-  <p>Token: ${data.token}</p>`;
+  <p>User: ${data.user.email}</p>`;
 
-    /*   document.querySelector("#btn-logout").style.display = "block";
-  document.querySelector("#btn-login-gh").style.display = "none"; */
+    document.querySelector("#btn-logout").style.display = "block";
+    hideLogin();
   }
 } catch (error) {
-  console.error("Error de red o en la solicitud:", error);
+  console.error(error);
+  document.querySelector("#info").innerHTML = `
+    <h2> Error connecting with server </h2>`;
+
   throw error; // Propagamos el error para que pueda ser manejado más arriba si es necesario
 }
 
@@ -131,8 +152,8 @@ document
       document.querySelector("#info").innerHTML = `
     <h2>Sesión iniciada.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-    <p>User: ${data.user.id} - ${data.user.email}</p>
-    <p>Token: ${data.token}</p>`;
+    <p>User: ${data.user.id} - ${data.user.email}</p>`;
+      hideLogin();
       //window.location.reload();
     }
   });
@@ -141,8 +162,14 @@ document
   .querySelector("#btn-signup")
   .addEventListener("click", async (event) => {
     event.preventDefault();
-    let email = document.querySelector("#email").value;
-    let password = document.querySelector("#password").value;
+    let email = document.querySelector("#su-email").value;
+    let password = document.querySelector("#su-password").value;
+    let confirmPassword = document.querySelector("#su-confirm-password").value;
+
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
 
     let response = await fetch(apiURL.REGISTER, {
       method: "POST",
@@ -170,5 +197,15 @@ document
       <p>User: ${data.user.id} - ${data.user.email}</p>
       <p>Token: ${data.token}</p>`;
       //window.location.reload();
+
+      hideLogin();
     }
+    dialog.close();
   });
+
+function hideLogin() {
+  document.querySelector("#btn-logout").style.display = "block";
+  document.querySelector("#btn-login-gh").style.display = "none";
+  document.querySelector("#login-form").style.display = "none";
+  document.querySelector("#btn-signup-open").style.display = "none";
+}

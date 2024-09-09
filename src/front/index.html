@@ -5,118 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <link rel="stylesheet" href="style.css">
   <script src="script.js" type="module" defer></script>
 
 </head>
-
-<style>
-  body,
-  form {
-    display: flex;
-    flex-direction: column;
-    place-items: center;
-    gap: 1rem;
-
-  }
-
-  body,
-  form,
-  input,
-  button,
-  p {
-    font-family: monospace, sans-serif;
-  }
-
-  input,
-  button,
-  p {
-    width: fit-content;
-    max-width: 600px;
-    text-wrap: balance;
-    word-break: break-all;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    background-color: #00a7d1;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #0071b3;
-  }
-
-  .btn-login {
-    padding: 0.5rem;
-    background-color: #db009a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .btn-login:hover {
-    background-color: #a50073;
-  }
-
-
-
-  dialog {
-    background-color: white;
-    width: 100%;
-    max-width: 400px;
-    padding: 2rem;
-    margin: 2rem auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
-    animation: fadeIn 0.3s ease;
-  }
-
-  dialog::backdrop {
-    background-color: rgb(0 0 0 / 0%);
-    transition: all 0.3s allow-discrete;
-  }
-
-  dialog[open]::backdrop {
-    background-color: rgb(0 0 0 / 25%);
-  }
-
-  .close-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    font-size: 2rem;
-    color: #aaa;
-    cursor: pointer;
-  }
-
-  .close-btn:hover {
-    color: black;
-  }
-
-
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-
-  form label {
-    font-weight: bold;
-  }
-
-  form input {
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-</style>
-
-<!-- hacer el login y el signup con dialog -->
 
 <body>
   <h1>hola</h1>
@@ -128,55 +20,26 @@
     <input type="password" id="password" placeholder="password">
     <button class="btn-login" id="btn-login">Login</button>
   </form>
-  <button class="btn-login" id="btn-login-gh">Login con GitHub</button>
+  <button class="btn-login" id="btn-login-gh">Login with GitHub</button>
+
+  <button id="btn-signup-open">Sign Up</button>
+
   <button class="btn-login" id="btn-logout">Logout</button>
 
-  <button id="btn-signup">Signup</button>
-
-  <button id="btn-open">Sign Up</button>
-
-  <!--   <div id="signup-dialog" class="dialog-overlay">
- -->
   <dialog>
-    <!--     <div class="dialog">
- --> <span class="close-btn" id="close-dialog">&times;</span>
+    <span class="close-btn" id="close-dialog">&times;</span>
     <h2>Sign Up</h2>
     <form id="signup-form">
-      <label for="email">Email</label>
+      <label for="su-email">Email</label>
       <input type="email" id="su-email" name="su-email" required>
-      <label for="password">Password</label>
+      <label for="su-password">Password</label>
       <input type="password" id="su-password" name="su-password" required>
-      <label for="confirm-password">Confirm Password</label>
-      <input type="password" id="confirm-password" name="confirm-password" required>
-      <button type="submit">Sign Up</button>
+      <label for="su-confirm-password">Confirm Password</label>
+      <input type="password" id="su-confirm-password" name="confirm-password" required>
+      <button id="btn-signup" type="submit">Sign Up</button>
     </form>
-    <!--     </div>
- -->
   </dialog>
-  <!--   </div>
- -->
-  <script defer>
-    // Script to open and close the dialog
-    const dialog = document.querySelector("dialog");
 
-    const openDialogBtn = document.getElementById('btn-open');
-    const closeDialogBtn = document.getElementById('close-dialog');
-
-    openDialogBtn.addEventListener('click', () => {
-      dialog.showModal();
-    });
-
-    closeDialogBtn.addEventListener('click', () => {
-      dialog.close();
-    });
-
-    window.addEventListener('click', (event) => {
-      if (event.target === dialog) {
-        dialog.close();
-      }
-    });
-  </script>
 </body>
-
 
 </html>
