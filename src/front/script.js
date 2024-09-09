@@ -1,7 +1,44 @@
 //TODO: no hardocear la URL del servidor y demas
+const apiBase = {
+  DEV: "http://127.0.0.1:3000",
+  PROD: "https://api.example.com",
+};
+
+let env;
+if (window.location.hostname === "127.0.0.1") {
+  env = "DEV";
+} else {
+  env = "PROD";
+}
+
+const apiEP = {
+  AUTH_GITHUB: "/auth/github",
+  AUTH_GITHUB_CALLBACK: "/auth/github/callback",
+  LOGIN: "/login",
+  LOGIN_2: "/login2",
+  LOGOUT: "/logout",
+  PROFILE: "/profile",
+  PROFILE_X: "/profileX",
+  REGISTER: "/register",
+  ROOT: "/",
+  USER_INFO: "/user-info",
+};
+const apiURL = {
+  BASE: apiBase[env],
+  AUTH_GITHUB: apiBase[env] + apiEP.AUTH_GITHUB,
+  AUTH_GITHUB_CALLBACK: apiBase[env] + apiEP.AUTH_GITHUB_CALLBACK,
+  LOGIN: apiBase[env] + apiEP.LOGIN,
+  LOGIN_2: apiBase[env] + apiEP.LOGIN_2,
+  LOGOUT: apiBase[env] + apiEP.LOGOUT,
+  PROFILE: apiBase[env] + apiEP.PROFILE,
+  PROFILE_X: apiBase[env] + apiEP.PROFILE_X,
+  REGISTER: apiBase[env] + apiEP.REGISTER,
+  ROOT: apiBase[env] + apiEP.ROOT,
+  USER_INFO: apiBase[env] + apiEP.USER_INFO,
+};
 
 try {
-  let response = await fetch("http://127.0.0.1:3000/user-info", {
+  let response = await fetch(apiURL.USER_INFO, {
     method: "GET",
     credentials: "include", // Asegura que las cookies se envíen en la solicitud
   });
@@ -38,7 +75,7 @@ try {
 }
 
 document.querySelector("#btn-logout").addEventListener("click", async () => {
-  let response = await fetch("http://127.0.0.1:3000/logout", {
+  let response = await fetch(apiURL.LOGOUT, {
     method: "GET",
     credentials: "include",
   });
@@ -48,22 +85,21 @@ document.querySelector("#btn-logout").addEventListener("click", async () => {
   }
 });
 
-document.querySelector("#btn-login-gh").addEventListener("click", async () => {
-  let returnTo = window.location.href;
-  let response = await fetch(
-    `http://127.0.0.1:3000/auth/github?returnTo=${returnTo}`,
-    {
+document
+  .querySelector("#btn-login-gh")
+  .addEventListener("click", async (event) => {
+    event.preventDefault();
+    let response = await fetch(apiURL.AUTH_GITHUB, {
       method: "GET",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-    }
-  );
-  let data = await response.json();
-  console.log("Login github:", data);
-  window.location.href = data.ghauth;
-});
+    });
+    let data = await response.json();
+
+    window.location.href = data.ghauth;
+  });
 
 document
   .querySelector("#btn-login")
@@ -72,7 +108,7 @@ document
     let email = document.querySelector("#email").value;
     let password = document.querySelector("#password").value;
 
-    let response = await fetch("http://127.0.0.1:3000/login", {
+    let response = await fetch(apiURL.LOGIN, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -108,7 +144,7 @@ document
     let email = document.querySelector("#email").value;
     let password = document.querySelector("#password").value;
 
-    let response = await fetch("http://127.0.0.1:3000/register", {
+    let response = await fetch(apiURL.REGISTER, {
       method: "POST",
       credentials: "include",
       headers: {

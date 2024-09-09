@@ -26,7 +26,7 @@ export function handleLogin(db, secretKey) {
         },
         secretKey
       );
-      res.status(201).json({ token: token });
+      res.status(200).json({ token: token });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
     }

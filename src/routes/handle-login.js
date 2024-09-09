@@ -24,7 +24,7 @@ export function handleLogin(db, secretKey) {
         secure: false, // Cambiar a true en producción con HTTPS
       });
 
-      return res.status(201).json({
+      return res.status(200).json({
         user: {
           email: userResponse.email,
           id: userResponse.id,

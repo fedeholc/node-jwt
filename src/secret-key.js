@@ -1,7 +1,11 @@
-/* eslint-disable no-undef */
-let secretKey = null;
+export { getSecretKey, getSessionKey };
 
-export function getSecretKey() {
+import process from "process";
+
+let secretKey = null;
+let sessionKey = null;
+
+function getSecretKey() {
   if (!secretKey) {
     if (!process.env.MY_SECRET_KEY) {
       console.error("Secret key not found. Please check your .env file.");
@@ -16,4 +20,19 @@ export function getSecretKey() {
     }
   }
   return secretKey;
+}
+
+function getSessionKey() {
+  if (!sessionKey) {
+    if (!process.env.MY_SESSION_KEY) {
+      console.error("Session key not found. Please check your .env file.");
+      process.exit(1);
+    }
+    sessionKey = process.env.MY_SESSION_KEY;
+    if (typeof sessionKey !== "string" || sessionKey.length !== 64) {
+      console.error("Invalid session key. Please check your .env file.");
+      process.exit(1);
+    }
+  }
+  return sessionKey;
 }

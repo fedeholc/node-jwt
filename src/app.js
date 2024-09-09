@@ -18,7 +18,7 @@ import cors from "cors";
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
-import { getSecretKey } from "./secret-key.js";
+import { getSecretKey, getSessionKey } from "./secret-key.js";
 import cookieParser from "cookie-parser";
 import { sessionCounter, ensureAuthenticated } from "./middleware.js";
 import {
@@ -28,30 +28,28 @@ import {
 import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
-
+import { ALLOWED_ORIGINS, apiEP } from "./endpoints.js";
+import process from "process";
 
 const secretKey = getSecretKey();
-const db = await getDbInstance();
+const db = await getDbInstance(); //TODO: le paso archivo?
 console.log("DB connected", db);
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const allowedOrigins = [
-  "http://127.0.0.1:5500",
-  "http://localhost:5500",
-  "http://127.0.0.1:8080",
-  "http://localhost:8080",
-];
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Permitir solicitudes sin origen (como las de herramientas de prueba)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
+      console.log("origin", origin);
+      // Permitir solicitudes sin origen (por ejemplo, archivos locales)
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+        return callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true, // Permite enviar cookies y credenciales
@@ -60,21 +58,21 @@ app.use(
 
 app.use(
   session({
-    secret: "your-secret-keyour-secret-keyyour-secret-keyyour-secret-keyy", // Cambiar esto por una clave secreta
+    secret: getSessionKey(), // Cambiar esto por una clave secreta
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, //configurar secure: true en producción si se usa HTTPS
+    cookie: { secure: process.env.NODE_ENV === "production" }, //cookies seguras en producción (para usar HTTPS)
   })
 );
 
 app.use(sessionCounter);
 
-app.get("/auth/github", handleAuthGitHub);
-app.get("/auth/github/callback", handleAuthGitHubCallback);
+app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
+app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
-app.get("/user-info", handleUserInfo);
+app.get(apiEP.USER_INFO, handleUserInfo);
 
-app.get("/", (req, res) => {
+app.get(apiEP.ROOT, (req, res) => {
   console.log(req.session.id);
   if (req.session.views) {
     req.session.views++;
@@ -88,19 +86,18 @@ app.get("/", (req, res) => {
     );
 });
 
-
 //VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
-app.use("/login2", loginRouter);
-app.post("/login", handleLogin(db, secretKey));
+app.use(apiEP.LOGIN_2, loginRouter);
+app.post(apiEP.LOGIN, handleLogin(db, secretKey));
 
-app.get("/logout", handleLogOut);
+app.get(apiEP.LOGOUT, handleLogOut);
 
 // Endpoint de registro
 // TODO: distintos endpoints según el tipo de registro?
 // TODO: y cómo se haría la parte de verificación de mail?
-app.post("/register", handleRegister(db, secretKey));
+app.post(apiEP.REGISTER, handleRegister(db, secretKey));
 
-app.get("/profileX", ensureAuthenticated, (req, res) => {
+app.get(apiEP.PROFILE_X, ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
   const user = req.session.user; // Obtén el usuario de la sesión
   res
@@ -111,7 +108,7 @@ app.get("/profileX", ensureAuthenticated, (req, res) => {
 });
 
 // Ruta protegida (requiere token)
-app.get("/profile", extractToken, verifyToken(secretKey), (req, res) => {
+app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
   let user = getUserByEmail(db, req.payload.user.email);
 
   // dada la info que viene en el token esta validación

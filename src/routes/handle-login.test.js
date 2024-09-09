@@ -34,7 +34,7 @@ describe("Login Endpoint", () => {
     vi.clearAllMocks();
   });
 
-  test("should return 201 and token for valid credentials", async () => {
+  test("should return 200 and token for valid credentials", async () => {
     const mockUser = {
       id: 1,
       user: "testuser",
@@ -52,7 +52,7 @@ describe("Login Endpoint", () => {
       email: "test@example.com",
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
     expect(response.body).toEqual({ token: "mocked-token" });
     expect(getUserByEmail).toHaveBeenCalledWith(db, "test@example.com");
     expect(hashPassword).toHaveBeenCalledWith("password123");
