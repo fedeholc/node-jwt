@@ -30,7 +30,7 @@ export function handleRegister(db, secretKey) {
 
       res.cookie("jwtToken", token, {
         httpOnly: true, // Evita que el frontend acceda a esta cookie
-        secure: false, // Cambiar a true en producción con HTTPS
+        secure: false, //TODO: Cambiar a true en producción con HTTPS
       });
 
       return res.status(201).json({

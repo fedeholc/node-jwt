@@ -1,15 +1,22 @@
+//TODO: algo a resolver es, si tengo token, podría dar por logueado al usuario? como esta ahora no tengo mas info que el token, con lo cual estoy obligado a chekiar con mi base de datos cuales son los datos de ese usuario. Un modelo màs tipo local first implicaría tener los datos del usuario (còmo guardarlos sin comprometer la seguridad), y en ese caso si no hay conexion no importaria tanto, luego cuando se conecta se chekea si el usuario existe y se actualiza lo que haga falta.
+
 import { apiURL } from "./endpoints-front.js";
 
 const dialog = document.querySelector("dialog");
 
-const openDialogBtn = document.getElementById("btn-signup-open");
-const closeDialogBtn = document.getElementById("close-dialog");
+const btnOpenDialog = document.getElementById("btn-signup-open");
+const btnCloseDialog = document.getElementById("close-dialog");
+const btnLogout = document.getElementById("btn-logout");
+const btnLoginGH = document.getElementById("btn-login-gh");
+const btnLogin = document.getElementById("btn-login");
+const btnSignUp = document.getElementById("btn-signup");
+const divInfo = document.getElementById("info");
 
-openDialogBtn.addEventListener("click", () => {
+btnOpenDialog.addEventListener("click", () => {
   dialog.showModal();
 });
 
-closeDialogBtn.addEventListener("click", () => {
+btnCloseDialog.addEventListener("click", () => {
   dialog.close();
 });
 
@@ -25,15 +32,12 @@ try {
     credentials: "include", // Asegura que las cookies se envíen en la solicitud
   });
 
-  console.log("Response2: ", response);
+  console.log("Response: ", response);
 
   if (!response.ok) {
-    document.querySelector("#info").innerHTML = `
+    divInfo.innerHTML = `
     <h2>No hay usuario autenticado.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>`;
-
-    /* document.querySelector("#btn-logout").style.display = "none";
-  document.querySelector("#btn-login-gh").style.display = "block"; */
   }
 
   if (response.ok) {
@@ -42,23 +46,23 @@ try {
 
     //TODO: validar que estén los datos esperados
 
-    document.querySelector("#info").innerHTML = `
-  <h2>Usuario autorizado.</h2>
-  <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-  <p>User: ${data.user.email}</p>`;
+    divInfo.innerHTML = `
+    <h2>Usuario autorizado.</h2>
+    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+    <p>User: ${data.user.email}</p>`;
 
-    document.querySelector("#btn-logout").style.display = "block";
+    btnLogout.style.display = "block";
     hideLogin();
   }
 } catch (error) {
   console.error(error);
-  document.querySelector("#info").innerHTML = `
+  divInfo.innerHTML = `
     <h2> Error connecting with server </h2>`;
 
   throw error; // Propagamos el error para que pueda ser manejado más arriba si es necesario
 }
 
-document.querySelector("#btn-logout").addEventListener("click", async () => {
+btnLogout.addEventListener("click", async () => {
   let response = await fetch(apiURL.LOGOUT, {
     method: "GET",
     credentials: "include",
@@ -69,113 +73,111 @@ document.querySelector("#btn-logout").addEventListener("click", async () => {
   }
 });
 
-document
-  .querySelector("#btn-login-gh")
-  .addEventListener("click", async (event) => {
-    event.preventDefault();
-    let response = await fetch(apiURL.AUTH_GITHUB, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    let data = await response.json();
-
-    window.location.href = data.ghauth;
+btnLoginGH.addEventListener("click", async (event) => {
+  event.preventDefault();
+  let response = await fetch(apiURL.AUTH_GITHUB, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
+  let data = await response.json();
 
-document
-  .querySelector("#btn-login")
-  .addEventListener("click", async (event) => {
-    event.preventDefault();
-    let email = document.querySelector("#email").value;
-    let password = document.querySelector("#password").value;
+  window.location.href = data.ghauth;
+});
 
-    let response = await fetch(apiURL.LOGIN, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: email, pass: password }),
-    });
-    console.log("Login Response: ", response);
+btnLogin.addEventListener("click", async (event) => {
+  event.preventDefault();
+  let email = document.querySelector("#email").value;
+  let password = document.querySelector("#password").value;
 
-    if (!response.ok) {
-      let data = await response.json();
-      document.querySelector("#info").innerHTML = `
+  let response = await fetch(apiURL.LOGIN, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: email, pass: password }),
+  });
+  console.log("Login Response: ", response);
+
+  if (!response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
     <h2>Error al iniciar sesión.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
     <p>Error: ${data.error}</p>`;
-    }
+  }
 
-    if (response.ok) {
-      let data = await response.json();
-      document.querySelector("#info").innerHTML = `
+  if (response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
     <h2>Sesión iniciada.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
     <p>User: ${data.user.id} - ${data.user.email}</p>`;
-      hideLogin();
-      //window.location.reload();
-    }
-  });
+    hideLogin();
+    //window.location.reload();
+  }
+});
 
 //TODO agregar validación de email y password
 //TODO checkeo de mail con resend?
-document
-  .querySelector("#btn-signup")
-  .addEventListener("click", async (event) => {
-    event.preventDefault();
-    let email = document.querySelector("#su-email").value;
-    let password = document.querySelector("#su-password").value;
-    let confirmPassword = document.querySelector("#su-confirm-password").value;
+btnSignUp.addEventListener("click", async (event) => {
+  event.preventDefault();
+  let email = document.querySelector("#su-email").value;
+  let password = document.querySelector("#su-password").value;
+  let confirmPassword = document.querySelector("#su-confirm-password").value;
 
-    if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden.");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Las contraseñas no coinciden.");
+    return;
+  }
 
-    if (email === "" || password === "" || confirmPassword === "") {
-      alert("Please fill in all fields.");
-      return;
-    }
+  if (email === "" || password === "" || confirmPassword === "") {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-    let response = await fetch(apiURL.REGISTER, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: email, pass: password }),
-    });
-    console.log("Signup Response: ", response);
+  let response = await fetch(apiURL.REGISTER, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: email, pass: password }),
+  });
+  console.log("Signup Response: ", response);
 
-    if (!response.ok) {
-      let data = await response.json();
-      document.querySelector("#info").innerHTML = `
+  if (!response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
       <h2>Error al registrar usuario.</h2>
       <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
       <p>Error: ${data.error}</p>`;
-    }
+  }
 
-    if (response.ok) {
-      let data = await response.json();
-      document.querySelector("#info").innerHTML = `
+  if (response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
       <h2>Usuario registrado.</h2>
       <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
       <p>User: ${data.user.id} - ${data.user.email}</p>
-      <p>Token: ${data.token}</p>`;
-      //window.location.reload();
+      <p>Token: ${data.token}</p>`; //TODO: este token creo que debe venir
+    //window.location.reload();
 
-      hideLogin();
-    }
-    dialog.close();
-  });
+    hideLogin();
+
+    //TODO: que hacer una vez que un usuario se loguea o se registra?
+    //? como template debería poner un par de opciones, como ir a la página principal o a su perfil, pero si es una spa tal vez es simplemente como un refresh, pero no real sino tipo react re-rendereando la página pero mostrando otras cosas porque ahora es con el usuario logueado, para lo cual tendria que tener como un objeto global con la info del usuario logueado.
+
+  }
+  dialog.close();
+});
 
 function hideLogin() {
-  document.querySelector("#btn-logout").style.display = "block";
-  document.querySelector("#btn-login-gh").style.display = "none";
+  btnLogout.style.display = "block";
+  btnLoginGH.style.display = "none";
   document.querySelector("#login-form").style.display = "none";
-  document.querySelector("#btn-signup-open").style.display = "none";
+  btnOpenDialog.style.display = "none";
 }
