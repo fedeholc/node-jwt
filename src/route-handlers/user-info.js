@@ -8,7 +8,9 @@ async function handleUserInfo(req, res) {
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
   }
-  const accessToken = req.cookies.authToken; //TODO: tendría que llamarlo githubToken?
+  const accessToken = req.cookies.authToken;
+  //VER ARCHIVOS FLUJO OFFLINE.MD
+  //TODO: tendría que llamarlo githubToken?
   //TODO: pero ojo! está bien traer la info de github? no debería traerla de mi bd?
   //VER o sea, el loguin sirve para evitar el pass, pero después de eso no debería depender del servidor de github, pero que info guardar en una cookie para dar acceso? uso JWT???
   //TODO: de esa forma es un solo jwt (tendrìa que generarlo al registrar con github tambièn)
