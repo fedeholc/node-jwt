@@ -24,7 +24,6 @@ Lo que hay que decidir es segùn el tipo de aplicaciòn que funcionalidades est�
 import { apiURL } from "./endpoints-front.js";
 
 const dialog = document.querySelector("dialog");
-
 const btnOpenDialog = document.getElementById("btn-signup-open");
 const btnCloseDialog = document.getElementById("close-dialog");
 const btnLogout = document.getElementById("btn-logout");

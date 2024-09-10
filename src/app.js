@@ -28,7 +28,7 @@ import process from "process";
 import { configServer } from "./server.js";
 
 const secretKey = getSecretKey();
-const db = await getDbInstance(); //TODO: le paso archivo?
+export const db = await getDbInstance(); //TODO: le paso archivo?
 console.log("DB connected", db);
 
 const app = configServer();

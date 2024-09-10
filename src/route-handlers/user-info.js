@@ -8,7 +8,7 @@ async function handleUserInfo(req, res) {
   if (!req.cookies) {
     return res.status(401).json({ error: "nocookies" });
   }
-  const accessToken = req.cookies.authToken;
+  const githubToken = req.cookies.authToken;
   //VER ARCHIVOS FLUJO OFFLINE.MD
   //TODO: tendría que llamarlo githubToken?
   //TODO: pero ojo! está bien traer la info de github? no debería traerla de mi bd?
@@ -27,7 +27,7 @@ async function handleUserInfo(req, res) {
     }
   }
 
-  if (!accessToken) {
+  if (!githubToken) {
     return res.status(401).json({ error: "No user authenticated" });
   }
 
@@ -35,7 +35,7 @@ async function handleUserInfo(req, res) {
   const userResponse = await fetch("https://api.github.com/user", {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${githubToken}`,
     },
   });
   if (!userResponse.ok) {
@@ -51,5 +51,5 @@ async function handleUserInfo(req, res) {
     return res.status(401).json({ error: "User not authenticated" });
   }
 
-  res.status(200).json({ token: accessToken, user: req.session.user });
+  res.status(200).json({ token: githubToken, user: req.session.user });
 }

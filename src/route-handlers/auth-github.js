@@ -1,6 +1,11 @@
 export { handleAuthGitHub, handleAuthGitHubCallback };
 import { apiURL, gitHubEP } from "../endpoints.js";
 import process from "process";
+import { getUserByEmail, insertUser } from "../utils-db.js";
+import { hashPassword, generateToken } from "../util-auth.js";
+
+import { db } from "../app.js";
+const secretKey = process.env.SECRET_KEY;
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -35,37 +40,93 @@ async function handleAuthGitHubCallback(req, res) {
       }),
     });
     const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
-    if (!accessToken) {
+    const githubToken = tokenData.access_token;
+    if (!githubToken) {
       return res.status(400).send("Error obtaining access token");
     }
 
     const userResponse = await fetch(gitHubEP.USER, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${githubToken}`,
       },
     });
     if (!userResponse.ok) {
       return res.status(400).send("Error obtaining user data");
     }
 
-    const user = await userResponse.json();
+    const gitHubUser = await userResponse.json();
+
+    req.session.user = gitHubUser;
+    req.session.accessToken = githubToken;
 
     //TODO: debería checkiar si el usuario ya existe en la db y si no crearlo
 
-    req.session.user = user;
-    req.session.accessToken = accessToken;
+    const userInDB = await getUserByEmail(gitHubUser.email);
+    if (!userInDB) {
+      try {
+        const timestamp = Date.now();
 
-    res.cookie("authToken", accessToken, {
-      httpOnly: true, // Evita que el frontend acceda a esta cookie
-      secure: false, // Cambiar a true en producción con HTTPS
-    });
+        //TODO: db y secretkey me tienen que llegar en la funciòn
+        const id = await insertUser(
+          db,
+          gitHubUser.email,
+          hashPassword(timestamp.toString())
+        );
+        const token = await generateToken(
+          {
+            user: {
+              id: id,
+              email: gitHubUser.email,
+            },
+          },
+          secretKey
+        );
 
-    let returnTo = req.session.returnTo || "/";
-    delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
+        res.cookie("jwtToken", token, {
+          httpOnly: true, // Evita que el frontend acceda a esta cookie
+          secure: false, //TODO: Cambiar a true en producción con HTTPS
+        });
 
-    res.redirect(returnTo);
+        /*  return res.status(201).json({
+          user: {
+            email: email,
+            id: id,
+          },
+          token: token,
+        }); */
+      } catch (error) {
+        return res
+          .status(500)
+          .json({ error: "Error registering user: " + error });
+      }
+    } else {
+      //TODO: si el usuario ya existe
+      res.cookie("authToken", githubToken, {
+        httpOnly: true, // Evita que el frontend acceda a esta cookie
+        secure: false, // Cambiar a true en producción con HTTPS
+      });
+
+      const token = await generateToken(
+        {
+          user: {
+            id: userInDB.id,
+            email: userInDB.email,
+          },
+        },
+        secretKey
+      );
+
+      res.cookie("jwtToken", token, {
+        httpOnly: true, // Evita que el frontend acceda a esta cookie
+        secure: false, //TODO: Cambiar a true en producción con HTTPS
+      });
+
+      let returnTo = req.session.returnTo || "/";
+      delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
+
+      res.redirect(returnTo);
+    }
   } catch (error) {
     console.error("Error during authentication", error);
     res.status(500).send("Authentication failed");
