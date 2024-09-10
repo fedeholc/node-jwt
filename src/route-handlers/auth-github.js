@@ -105,7 +105,7 @@ async function handleAuthGitHubCallback(req, res) {
           .json({ error: "Error registering user: " + error });
       }
     } else {
-      //TODO: si el usuario ya existe
+      //TODO: ya no debería mandarlo más el de github. 
       res.cookie("authToken", githubToken, {
         httpOnly: true, // Evita que el frontend acceda a esta cookie
         secure: false, // Cambiar a true en producción con HTTPS
