@@ -1,5 +1,5 @@
 import express from "express";
-import { ALLOWED_ORIGINS, apiEP } from "./endpoints.js";
+import { ALLOWED_ORIGINS } from "./endpoints.js";
 import process from "process";
 import { getSessionKey } from "./secret-key.js";
 import cors from "cors";
