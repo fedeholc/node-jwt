@@ -9,18 +9,13 @@
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
 
-// Servidor (Node.js con Express)
-import express from "express";
-import session from "express-session";
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
-import cors from "cors";
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
-import { getSecretKey, getSessionKey } from "./secret-key.js";
-import cookieParser from "cookie-parser";
-import { sessionCounter, ensureAuthenticated } from "./middleware.js";
+import { getSecretKey } from "./secret-key.js";
+import { ensureAuthenticated } from "./middleware.js";
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
@@ -28,44 +23,15 @@ import {
 import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
-import { ALLOWED_ORIGINS, apiEP } from "./endpoints.js";
+import { apiEP } from "./endpoints.js";
 import process from "process";
+import { configServer } from "./server.js";
 
 const secretKey = getSecretKey();
 const db = await getDbInstance(); //TODO: le paso archivo?
 console.log("DB connected", db);
-const app = express();
-app.use(express.json());
-app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("origin", origin);
-      // Permitir solicitudes sin origen (por ejemplo, archivos locales)
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, // Permite enviar cookies y credenciales
-  })
-);
-
-app.use(
-  session({
-    secret: getSessionKey(), // Cambiar esto por una clave secreta
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === "production" }, //cookies seguras en producción (para usar HTTPS)
-  })
-);
-
-app.use(sessionCounter);
+const app = configServer();
 
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
