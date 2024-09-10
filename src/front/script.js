@@ -1,3 +1,24 @@
+//TODO: usuar id/uuid en lugar de mail para identificar usuario
+
+/*
+Inicio
+- hay ¿token/info usuario?
+  --> NO 
+    --> state: no auth --> mostrar login (si es requerido, tal vez es la pagina principal y no requiere login para usar ciertas funcionalidades).
+  --> SI 
+    --> ¿hay conexion? 
+      --> SI 
+        --> ¿es valido el token/usuario?
+          --> NO --> state: no auth --> logout, mostrar login
+          --> SI --> state: auth --> mostrar info usuario
+      --> NO
+        --> state: offline --> mostrar info usuario (si es posible)
+
+debería haber un evento para cuando se retoma la conexion, y si aun no está autorizado validar token
+
+Lo que hay que decidir es segùn el tipo de aplicaciòn que funcionalidades estàn offline y cual sin usuario, eso podrìa alterar un poco ese flujo.
+*/
+
 //TODO: algo a resolver es, si tengo token, podría dar por logueado al usuario? como esta ahora no tengo mas info que el token, con lo cual estoy obligado a chekiar con mi base de datos cuales son los datos de ese usuario. Un modelo màs tipo local first implicaría tener los datos del usuario (còmo guardarlos sin comprometer la seguridad), y en ese caso si no hay conexion no importaria tanto, luego cuando se conecta se chekea si el usuario existe y se actualiza lo que haga falta.
 
 import { apiURL } from "./endpoints-front.js";
@@ -170,7 +191,6 @@ btnSignUp.addEventListener("click", async (event) => {
 
     //TODO: que hacer una vez que un usuario se loguea o se registra?
     //? como template debería poner un par de opciones, como ir a la página principal o a su perfil, pero si es una spa tal vez es simplemente como un refresh, pero no real sino tipo react re-rendereando la página pero mostrando otras cosas porque ahora es con el usuario logueado, para lo cual tendria que tener como un objeto global con la info del usuario logueado.
-
   }
   dialog.close();
 });
