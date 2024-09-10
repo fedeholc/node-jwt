@@ -3,9 +3,10 @@ import { apiURL, gitHubEP } from "../endpoints.js";
 import process from "process";
 import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
+import { getSecretKey } from "../secret-key.js";
 
 import { db } from "../app.js";
-const secretKey = process.env.SECRET_KEY;
+const secretKey = getSecretKey();
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -62,7 +63,7 @@ async function handleAuthGitHubCallback(req, res) {
 
     //TODO: debería checkiar si el usuario ya existe en la db y si no crearlo
 
-    const userInDB = await getUserByEmail(gitHubUser.email);
+    const userInDB = await getUserByEmail(db, gitHubUser.email);
     if (!userInDB) {
       try {
         const timestamp = Date.now();
@@ -82,12 +83,15 @@ async function handleAuthGitHubCallback(req, res) {
           },
           secretKey
         );
-
+        console.log("NUEVO USUARIO CREADO");
         res.cookie("jwtToken", token, {
           httpOnly: true, // Evita que el frontend acceda a esta cookie
           secure: false, //TODO: Cambiar a true en producción con HTTPS
         });
+        let returnTo = req.session.returnTo || "/";
+        delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
 
+        res.redirect(returnTo);
         /*  return res.status(201).json({
           user: {
             email: email,
