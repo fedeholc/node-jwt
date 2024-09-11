@@ -1,5 +1,6 @@
 import { insertUser, getUserByEmail } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
+import process from "process";
 
 export function handleRegister(db, secretKey) {
   return async function (req, res) {
@@ -30,7 +31,8 @@ export function handleRegister(db, secretKey) {
 
       res.cookie("jwtToken", token, {
         httpOnly: true, // Evita que el frontend acceda a esta cookie
-        secure: false, //TODO: Cambiar a true en producción con HTTPS
+        secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+        sameSite: "lax", // Additional protection against CSRF
       });
 
       return res.status(201).json({

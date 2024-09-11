@@ -16,120 +16,88 @@ function handleAuthGitHub(req, res) {
   res.status(200).json({ ghauth: githubAuthURL });
 }
 
-async function handleAuthGitHubCallback(db, secretKey) {
+function handleAuthGitHubCallback(db, secretKey) {
   return async function (req, res) {
-    const code = req.query.code;
-    if (!code) {
-      return res.status(400).send("No authorization code received");
-    }
-
     try {
-      const tokenResponse = await fetch(gitHubEP.ACCESS_TOKEN, {
+      const gitHubCode = req.query.code;
+      if (!gitHubCode) {
+        throw new Error("No authorization code received");
+      }
+
+      // Solicita el token de acceso a GitHub
+      const ghResponse = await fetch(gitHubEP.ACCESS_TOKEN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json", // Recibe la respuesta en formato JSON
+          Accept: "application/json",
         },
         body: JSON.stringify({
           client_id: clientID,
           client_secret: clientSecret,
-          code: code,
+          code: gitHubCode,
           redirect_uri: redirectURI,
         }),
       });
-      const tokenData = await tokenResponse.json();
-      const githubToken = tokenData.access_token;
-      if (!githubToken) {
-        return res.status(400).send("Error obtaining access token");
+
+      if (!ghResponse.ok) {
+        throw new Error(`GitHub error: ${ghResponse.statusText}`);
       }
 
-      const userResponse = await fetch(gitHubEP.USER, {
+      const { access_token: ghAccessToken } = await ghResponse.json();
+      if (!ghAccessToken) {
+        throw new Error("Error obtaining access token from GitHub");
+      }
+
+      // Solicita los datos del usuario de GitHub
+      const ghUserResponse = await fetch(gitHubEP.USER, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${githubToken}`,
+          Authorization: `Bearer ${ghAccessToken}`,
         },
       });
-      if (!userResponse.ok) {
-        return res.status(400).send("Error obtaining user data");
-      }
 
-      const gitHubUser = await userResponse.json();
-
-      req.session.user = gitHubUser;
-      req.session.accessToken = githubToken;
-
-      //checkea si el usuario existe en la bd y si no lo crea
-      const userInDB = await getUserByEmail(db, gitHubUser.email);
-      if (!userInDB) {
-        try {
-          const timestamp = Date.now();
-
-          //TODO: db y secretkey me tienen que llegar en la funciòn
-          const id = await insertUser(
-            db,
-            gitHubUser.email,
-            hashPassword(timestamp.toString())
-          );
-          const token = await generateToken(
-            {
-              user: {
-                id: id,
-                email: gitHubUser.email,
-              },
-            },
-            secretKey
-          );
-          console.log("NUEVO USUARIO CREADO");
-          res.cookie("jwtToken", token, {
-            httpOnly: true, // Evita que el frontend acceda a esta cookie
-            secure: false, //TODO: Cambiar a true en producción con HTTPS
-          });
-          let returnTo = req.session.returnTo || "/";
-          delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
-
-          res.redirect(returnTo);
-          /*  return res.status(201).json({
-          user: {
-            email: email,
-            id: id,
-          },
-          token: token,
-        }); */
-        } catch (error) {
-          return res
-            .status(500)
-            .json({ error: "Error registering user: " + error });
-        }
-      } else {
-        //TODO: ya no debería mandarlo más el de github.
-        res.cookie("authToken", githubToken, {
-          httpOnly: true, // Evita que el frontend acceda a esta cookie
-          secure: false, // Cambiar a true en producción con HTTPS
-        });
-
-        const token = await generateToken(
-          {
-            user: {
-              id: userInDB.id,
-              email: userInDB.email,
-            },
-          },
-          secretKey
+      if (!ghUserResponse.ok) {
+        throw new Error(
+          `Error fetching GitHub user: ${ghUserResponse.statusText}`
         );
-
-        res.cookie("jwtToken", token, {
-          httpOnly: true, // Evita que el frontend acceda a esta cookie
-          secure: false, //TODO: Cambiar a true en producción con HTTPS
-        });
-
-        let returnTo = req.session.returnTo || "/";
-        delete req.session.returnTo; // Elimina la URL de la sesión después de redirigir
-
-        res.redirect(returnTo);
       }
+
+      const ghUserData = await ghUserResponse.json();
+      if (!ghUserData || !ghUserData.email) {
+        throw new Error("Invalid GitHub user data");
+      }
+
+      // Verifica si el usuario existe en la base de datos
+      let userInDB = await getUserByEmail(db, ghUserData.email);
+      if (!userInDB) {
+        const timestamp = Date.now();
+        const id = await insertUser(
+          db,
+          ghUserData.email,
+          hashPassword(timestamp.toString())
+        );
+        req.session.user = { id: id, email: ghUserData.email };
+      } else {
+        req.session.user = { id: userInDB.id, email: userInDB.email };
+      }
+
+      // Genera el token JWT
+      const jwtToken = await generateToken(
+        { user: req.session.user },
+        secretKey
+      );
+      res.cookie("jwtToken", jwtToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+        sameSite: "lax", // Additional protection against CSRF
+      });
+
+      let returnTo = req.session.returnTo || "/";
+      delete req.session.returnTo;
+      res.redirect(returnTo);
     } catch (error) {
-      console.error("Error during authentication", error);
-      res.status(500).send("Authentication failed");
+      console.error("Error during GitHub authentication", error.message);
+      res.status(500).send(error.message || "Authentication failed");
     }
   };
 }
