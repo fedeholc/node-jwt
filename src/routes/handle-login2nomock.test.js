@@ -8,13 +8,7 @@ import { getDbInstance } from "../db.js";
 import { getSecretKey } from "../secret-key.js";
 
 const secretKey = getSecretKey();
-
-generateToken.mockResolvedValue("mocked-token");
-
-vi.mock("../util-auth", () => ({
-  generateToken: vi.fn(),
-}));
-
+console.log("secretKey", secretKey);
 const db = await getDbInstance();
 //const db = await getDbInstance();
 const app = express();
