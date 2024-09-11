@@ -34,7 +34,9 @@ console.log("DB connected", db);
 const app = configServer();
 
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
-app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
+
+//TODO: repensar esto de pasar la db y la secretkey que es para facilitar el testeo, pero no se si se esta usando una db y el token o si se esta mockeando todo igual. Revisar. Ver como sería sin pasarlos, teniendo un objeto global tal vez.
+app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback(db, secretKey));
 
 app.get(apiEP.USER_INFO, handleUserInfo);
 
