@@ -3,29 +3,38 @@ import express from "express";
 import request from "supertest";
 import { hashPassword, generateToken } from "../util-auth";
 import { handleLogin2 } from "./handle-login2";
-import { getDbInstance } from "../db";
 import { getUserByEmail } from "../utils-db";
+import { getDbInstance } from "../utils-db";
 
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
   generateToken: vi.fn(),
 }));
-vi.mock("../utils-db", () => ({
-  getUserByEmail: vi.fn(),
-}));
-vi.mock("../db", () => ({
+vi.mock("../utils-db", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    // your mocked methods
+    getUserByEmail: vi.fn(),
+    getDbInstance: vi.fn(),
+  };
+});
+/* vi.mock("../db", () => ({
   getDbInstance: vi.fn(),
+})); */
+vi.mock("../secret-key", () => ({
+  getSecretKey: vi.fn(),
+  getSessionKey: vi.fn(),
 }));
+
+const db = getDbInstance();
 
 const app = express();
 app.use(express.json());
 
-const secretKey = "your-secret-key";
-const db = await getDbInstance();
-console.log(db);
 app.post("/login", handleLogin2);
 
-describe("Login Endpoint", () => {
+describe("Login Endpoint2", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
