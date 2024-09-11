@@ -4,7 +4,10 @@ import request from "supertest";
 import { hashPassword, generateToken } from "../util-auth";
 import { handleLogin2 } from "./handle-login2";
 import { getUserByEmail } from "../utils-db";
-import { getDbInstance } from "../utils-db";
+import { getDbInstance } from "../db.js";
+import { getSecretKey } from "../secret-key";
+
+const secretKey = getSecretKey();
 
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
@@ -16,19 +19,20 @@ vi.mock("../utils-db", async (importOriginal) => {
     ...actual,
     // your mocked methods
     getUserByEmail: vi.fn(),
-    getDbInstance: vi.fn(),
   };
 });
-/* vi.mock("../db", () => ({
+vi.mock("../db", () => ({
   getDbInstance: vi.fn(),
-})); */
+}));
+
 vi.mock("../secret-key", () => ({
   getSecretKey: vi.fn(),
   getSessionKey: vi.fn(),
 }));
 
-const db = getDbInstance();
-
+getDbInstance.mockResolvedValue(undefined);
+const db = await getDbInstance();
+//const db = await getDbInstance();
 const app = express();
 app.use(express.json());
 

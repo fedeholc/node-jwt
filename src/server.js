@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import { sessionCounter } from "./middleware.js";
 
+const sessionKey = getSessionKey();
+
 export function configServer() {
   const app = express();
 
@@ -34,7 +36,7 @@ export function configServer() {
 
   app.use(
     session({
-      secret: getSessionKey(), // Cambiar esto por una clave secreta
+      secret: sessionKey, // Cambiar esto por una clave secreta
       resave: false,
       saveUninitialized: false,
       cookie: { secure: process.env.NODE_ENV === "production" }, //cookies seguras en producción (para usar HTTPS)
