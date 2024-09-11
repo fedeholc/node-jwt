@@ -11,6 +11,8 @@
 
 import { loginRouter } from "./routes/login-router.js";
 import { handleLogin } from "./routes/handle-login.js";
+import { handleLogin2 } from "./routes/handle-login2.js";
+
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
@@ -27,7 +29,7 @@ import { apiEP } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
 
-const secretKey = getSecretKey();
+export const secretKey = getSecretKey();
 export const db = await getDbInstance(); //TODO: le paso archivo?
 console.log("DB connected", db);
 
@@ -56,7 +58,9 @@ app.get(apiEP.ROOT, (req, res) => {
 
 //VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
 app.use(apiEP.LOGIN_2, loginRouter);
-app.post(apiEP.LOGIN, handleLogin(db, secretKey));
+//app.post(apiEP.LOGIN, handleLogin(db, secretKey));
+app.post(apiEP.LOGIN, handleLogin2);
+
 
 app.get(apiEP.LOGOUT, handleLogOut);
 
