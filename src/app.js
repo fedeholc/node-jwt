@@ -56,9 +56,6 @@ app.get(apiEP.ROOT, (req, res) => {
     );
 });
 
-//VER dos formas de hacer lo mismo, solo que con el router se introduce un paso más de separación que es útil si el login tuviera mas rutas internas, pues serían todas manejadas por el router. Pero en nuestro caso hay una sola, no tiene sentido complejizarlo.
-app.use(apiEP.LOGIN_2, loginRouter);
-
 //TODO: handleLogin2 era una prueba de loguin sin tener que pasar la db y la secretkey, en principio funciona, habrìa que modificar en los demas lugares.
 //app.post(apiEP.LOGIN, handleLogin(db, secretKey));
 app.post(apiEP.LOGIN, handleLogin2);

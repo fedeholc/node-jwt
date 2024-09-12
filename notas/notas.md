@@ -15,6 +15,45 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 - Se puede trabajar con app pasándole el handler al método como por ejemplo `app.get("/login", handlerLogin")` o se puede trabajar con el router, que es un middleware que se puede montar en la app con `app.use("/login", routerLogin)`. Luego el router si va a tener el app.get/post/etc y los correspondientes handlers.
 - El router sirve por ejemplo para cuando hay varias subrutas dentro de una ruta, como por ejemplo `/login` que tiene `/login` y `/login/verify`. El router maneja todas las subrutas de `/login`.
 
+#### Pasar parámetros a la función handler
+
+- Si hago `app.post("/login", handlerLogin)` y quiero pasarle parámetros a `handlerLogin` tengo que hacerlo con un middleware. Por ejemplo si quiero pasarle el secretKey para que lo use en la función, tengo que hacer algo así:
+
+```js
+app.post("/login", (req, res) => handlerLogin(req, res, secretKey));
+```
+
+También se puede hacer con un middleware que se ejecute antes de la función handler, por ejemplo:
+
+```js
+app.post(
+  "/login",
+  (req, res, next) => {
+    req.secretKey = secretKey;
+    next();
+  },
+  handlerLogin
+);
+```
+
+Otra opción sería hacer un middleware que se ejecute antes de todas las rutas y que guarde el secretKey en el req, para que todas las rutas tengan acceso a él.
+Por ejemplo:
+
+```js
+app.use((req, res, next) => {
+  req.secretKey = secretKey;
+  next();
+});
+```
+
+Otra que handlerLogin sea una función que devuelva otra función, y que la función devuelta sea la que reciba los parámetros:
+
+```js
+function handlerLogin (secretKey) => async (req, res) => {
+  // hacer algo con secretKey
+}
+```
+
 ### Testing / Vitest
 
 #### Mocking
