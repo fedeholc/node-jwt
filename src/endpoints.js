@@ -1,17 +1,18 @@
-export { apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP };
+export { dbURI, apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP };
 import process from "process";
 
-const apiBase = {
-  DEV: `http://127.0.0.1:${process.env.PORT || 3000}`,
-  PROD: "https://api.example.com",
-};
+const ENV = process.env.NODE_ENV || "development";
 
-let env;
-if (process.env.NODE_ENV === "production") {
-  env = "PROD";
-} else {
-  env = "DEV";
-}
+const dbURIs = {
+  production: "mydb.sqlite",
+  development: process.env.DB_DEV_URI || "mydb.sqlite",
+};
+const dbURI = dbURIs[ENV];
+
+const apiBase = {
+  development: `http://127.0.0.1:${process.env.PORT || 3000}`,
+  production: "https://api.example.com",
+};
 
 const apiEP = {
   AUTH_GITHUB: "/auth/github",
@@ -27,17 +28,17 @@ const apiEP = {
 };
 
 const apiURL = {
-  BASE: apiBase[env],
-  AUTH_GITHUB: apiBase[env] + apiEP.AUTH_GITHUB,
-  AUTH_GITHUB_CALLBACK: apiBase[env] + apiEP.AUTH_GITHUB_CALLBACK,
-  LOGIN: apiBase[env] + apiEP.LOGIN,
-  LOGIN_2: apiBase[env] + apiEP.LOGIN_2,
-  LOGOUT: apiBase[env] + apiEP.LOGOUT,
-  PROFILE: apiBase[env] + apiEP.PROFILE,
-  PROFILE_X: apiBase[env] + apiEP.PROFILE_X,
-  REGISTER: apiBase[env] + apiEP.REGISTER,
-  ROOT: apiBase[env] + apiEP.ROOT,
-  USER_INFO: apiBase[env] + apiEP.USER_INFO,
+  BASE: apiBase[ENV],
+  AUTH_GITHUB: apiBase[ENV] + apiEP.AUTH_GITHUB,
+  AUTH_GITHUB_CALLBACK: apiBase[ENV] + apiEP.AUTH_GITHUB_CALLBACK,
+  LOGIN: apiBase[ENV] + apiEP.LOGIN,
+  LOGIN_2: apiBase[ENV] + apiEP.LOGIN_2,
+  LOGOUT: apiBase[ENV] + apiEP.LOGOUT,
+  PROFILE: apiBase[ENV] + apiEP.PROFILE,
+  PROFILE_X: apiBase[ENV] + apiEP.PROFILE_X,
+  REGISTER: apiBase[ENV] + apiEP.REGISTER,
+  ROOT: apiBase[ENV] + apiEP.ROOT,
+  USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
 };
 
 const ALLOWED_ORIGINS = [

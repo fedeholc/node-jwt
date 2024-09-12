@@ -1,3 +1,5 @@
+//TODO: agregue node_env y db_dev_uri a la env file. documentar
+//TODO: haacer un creador de env file
 //TODO: crear unit test y ver si también se puede hacer E2E
 
 //TODO: Probar si con session se reemplaza lo de mandar las cookies a mano.
@@ -9,8 +11,7 @@
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
 
-import { loginRouter } from "./routes/login-router.js";
-import { handleLogin } from "./routes/handle-login.js";
+ import { handleLogin } from "./routes/handle-login.js";
 import { handleLogin2 } from "./routes/handle-login2.js";
 
 import { getUserByEmail } from "./utils-db.js";
