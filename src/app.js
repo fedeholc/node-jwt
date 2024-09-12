@@ -11,8 +11,7 @@
 //todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
 //ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
 
- import { handleLogin } from "./routes/handle-login.js";
-import { handleLogin2 } from "./routes/handle-login2.js";
+import { handleLogin } from "./routes/handle-login.js";
 
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
@@ -30,8 +29,8 @@ import { apiEP } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
 
-export const secretKey = getSecretKey();
-export const db = await getDbInstance(); //TODO: le paso archivo?
+const secretKey = getSecretKey();
+const db = await getDbInstance();
 console.log("DB connected", db);
 
 const app = configServer();
@@ -57,9 +56,8 @@ app.get(apiEP.ROOT, (req, res) => {
     );
 });
 
-//TODO: handleLogin2 era una prueba de loguin sin tener que pasar la db y la secretkey, en principio funciona, habrìa que modificar en los demas lugares.
-//app.post(apiEP.LOGIN, handleLogin(db, secretKey));
-app.post(apiEP.LOGIN, handleLogin2);
+//TODO: handleLogin era una prueba de loguin sin tener que pasar la db y la secretkey, en principio funciona, habrìa que modificar en los demas lugares.
+app.post(apiEP.LOGIN, handleLogin);
 
 app.get(apiEP.LOGOUT, handleLogOut);
 

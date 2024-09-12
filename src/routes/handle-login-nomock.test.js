@@ -2,12 +2,12 @@ import { expect, test, describe, vi, beforeEach } from "vitest";
 import express from "express";
 import request from "supertest";
 
-import { handleLogin2 } from "./handle-login2.js";
+import { handleLogin} from "./handle-login.js";
 
 const app = express();
 app.use(express.json());
 
-app.post("/login", handleLogin2);
+app.post("/login", handleLogin);
 
 describe("Login Endpoint2 no mock", () => {
   beforeEach(() => {
