@@ -8,6 +8,7 @@ export const secretKey = getSecretKey();
 export const db = await getDbInstance();
 
 export async function handleLogin(req, res) {
+  console.log("db y secret", db, secretKey);
   try {
     const { pass, email } = req.body;
     let userInDB = await getUserByEmail(db, email);

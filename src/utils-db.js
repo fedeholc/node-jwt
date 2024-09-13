@@ -66,6 +66,7 @@ function closeDbConnection(db) {
 }
 
 async function createDbConnection(filepath) {
+  console.log("filepath", filepath)
   return new Promise((resolve, reject) => {
     if (fs.existsSync(filepath)) {
       console.log("Database exists");

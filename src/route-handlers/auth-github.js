@@ -3,6 +3,11 @@ import { apiURL, gitHubEP } from "../endpoints.js";
 import process from "process";
 import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
+import { getSecretKey } from "../secret-key.js";
+import { getDbInstance } from "../db.js";
+
+export const secretKey = getSecretKey();
+export const db = await getDbInstance();
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -16,8 +21,7 @@ function handleAuthGitHub(req, res) {
   res.status(200).json({ ghauth: githubAuthURL });
 }
 
-function handleAuthGitHubCallback(db, secretKey) {
-  return async function (req, res) {
+async function handleAuthGitHubCallback(req, res) {
     try {
       const gitHubCode = req.query.code;
       if (!gitHubCode) {
@@ -99,5 +103,5 @@ function handleAuthGitHubCallback(db, secretKey) {
       console.error("Error during GitHub authentication", error.message);
       res.status(500).send(error.message || "Authentication failed");
     }
-  };
+  
 }

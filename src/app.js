@@ -1,3 +1,4 @@
+//TODO: ojo, tengo que correr NODE_ENV=development npm test para que pase el test sin mocks porque sino no està tomando las variables de entorno para la base de datos. Revisar. Ver como se puede hacer pero automaticamente. Si ponerlo en la linea de escript. O si habría que usar NODE_ENV=test y tener el .env.test (supuestamente lo leeria solo si node_env=test)
 //TODO: agregue node_env y db_dev_uri a la env file. documentar
 //TODO: haacer un creador de env file
 //TODO: crear unit test y ver si también se puede hacer E2E
@@ -38,7 +39,7 @@ const app = configServer();
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 
 //TODO: repensar esto de pasar la db y la secretkey que es para facilitar el testeo, pero no se si se esta usando una db y el token o si se esta mockeando todo igual. Revisar. Ver como sería sin pasarlos, teniendo un objeto global tal vez.
-app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback(db, secretKey));
+app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
 
