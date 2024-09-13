@@ -19,7 +19,6 @@ export function configServer() {
   app.use(
     cors({
       origin: function (origin, callback) {
-        console.log("origin", origin);
         // Permitir solicitudes sin origen (por ejemplo, archivos locales)
         if (!origin) {
           return callback(null, true);

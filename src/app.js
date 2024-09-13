@@ -1,16 +1,8 @@
-//TODO: ojo, tengo que correr NODE_ENV=development npm test para que pase el test sin mocks porque sino no està tomando las variables de entorno para la base de datos. Revisar. Ver como se puede hacer pero automaticamente. Si ponerlo en la linea de escript. O si habría que usar NODE_ENV=test y tener el .env.test (supuestamente lo leeria solo si node_env=test)
-//TODO: agregue node_env y db_dev_uri a la env file. documentar
-//TODO: haacer un creador de env file
-//TODO: crear unit test y ver si también se puede hacer E2E
-
-//TODO: Probar si con session se reemplaza lo de mandar las cookies a mano.
+//TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: leer web.dev cookies
 
-//TODO: ver donde poner los try catch si dentro y/o fuera de los métodos, y como menejar las respuestas del server, si throw error o no.
-
-//todo: cuál sería un protocolo correcto para registro? mandar mail de verificación??
-//ahora que tengo jwt, ver si con auth0 gratis puedo hacer algo de eso
+//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
 
 import { handleLogin } from "./routes/handle-login.js";
 
@@ -32,32 +24,15 @@ import { configServer } from "./server.js";
 
 const secretKey = getSecretKey();
 const db = await getDbInstance();
-console.log("DB connected", db);
 
 const app = configServer();
 
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 
-//TODO: repensar esto de pasar la db y la secretkey que es para facilitar el testeo, pero no se si se esta usando una db y el token o si se esta mockeando todo igual. Revisar. Ver como sería sin pasarlos, teniendo un objeto global tal vez.
 app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
 
-app.get(apiEP.ROOT, (req, res) => {
-  console.log(req.session.id);
-  if (req.session.views) {
-    req.session.views++;
-  } else {
-    req.session.views = 1;
-  }
-  res
-    .status(200)
-    .send(
-      "Hello World! user:" + req.session.user + " views:" + req.session.views
-    );
-});
-
-//TODO: handleLogin era una prueba de loguin sin tener que pasar la db y la secretkey, en principio funciona, habrìa que modificar en los demas lugares.
 app.post(apiEP.LOGIN, handleLogin);
 
 app.get(apiEP.LOGOUT, handleLogOut);
@@ -65,7 +40,7 @@ app.get(apiEP.LOGOUT, handleLogOut);
 // Endpoint de registro
 // TODO: distintos endpoints según el tipo de registro?
 // TODO: y cómo se haría la parte de verificación de mail?
-app.post(apiEP.REGISTER, handleRegister(db, secretKey));
+app.post(apiEP.REGISTER, handleRegister);
 
 app.get(apiEP.PROFILE_X, ensureAuthenticated, (req, res) => {
   // La ruta está protegida, el usuario debe estar autenticado
@@ -92,6 +67,20 @@ app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
       usuarioToken: req.payload,
     });
   }
+});
+
+app.get(apiEP.ROOT, (req, res) => {
+  console.log(req.session.id);
+  if (req.session.views) {
+    req.session.views++;
+  } else {
+    req.session.views = 1;
+  }
+  res
+    .status(200)
+    .send(
+      "Hello World! user:" + req.session.user + " views:" + req.session.views
+    );
 });
 
 app.get("*", (req, res) => {

@@ -13,7 +13,7 @@ import sqlite3 from "sqlite3";
 /**
  * @param {Database} db - SQLite database object
  * @param {string} email - User email
- * 
+ *
  */
 
 async function getUserByEmail(db, email) {
@@ -66,7 +66,6 @@ function closeDbConnection(db) {
 }
 
 async function createDbConnection(filepath) {
-  console.log("filepath en utils", filepath)
   return new Promise((resolve, reject) => {
     if (fs.existsSync(filepath)) {
       console.log("Database exists");
