@@ -1,3 +1,4 @@
+//TODO: Mail. La verificacion durante el registro no sé si es indispensable. Tal vez más importante es la posibilidad de recuperar la contraseña usando el mail.
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: leer web.dev cookies
