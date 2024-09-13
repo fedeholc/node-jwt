@@ -1,6 +1,5 @@
 import { createDbConnection } from "./utils-db.js";
-import path from "path";
-import { rootPath } from "./root-path.js";
+
 import { dbURI } from "./endpoints.js";
 let dbInstance = null;
 

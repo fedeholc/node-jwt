@@ -1,15 +1,15 @@
-export { apiURL, apiEP, env, apiBase };
+export { apiURL, apiEP, ENV as env, apiBase };
 const apiPort = 1234;
 const apiBase = {
-  DEV: `http://127.0.0.1:${apiPort}`,
-  PROD: "https://api.example.com",
+  development: `http://127.0.0.1:${apiPort}`,
+  production: "https://api.example.com",
 };
 
-let env;
+let ENV;
 if (window.location.hostname === "127.0.0.1") {
-  env = "DEV";
+  ENV = "development";
 } else {
-  env = "PROD";
+  ENV = "production";
 }
 
 const apiEP = {
@@ -25,15 +25,15 @@ const apiEP = {
   USER_INFO: "/user-info",
 };
 const apiURL = {
-  BASE: apiBase[env],
-  AUTH_GITHUB: apiBase[env] + apiEP.AUTH_GITHUB,
-  AUTH_GITHUB_CALLBACK: apiBase[env] + apiEP.AUTH_GITHUB_CALLBACK,
-  LOGIN: apiBase[env] + apiEP.LOGIN,
-  LOGIN_2: apiBase[env] + apiEP.LOGIN_2,
-  LOGOUT: apiBase[env] + apiEP.LOGOUT,
-  PROFILE: apiBase[env] + apiEP.PROFILE,
-  PROFILE_X: apiBase[env] + apiEP.PROFILE_X,
-  REGISTER: apiBase[env] + apiEP.REGISTER,
-  ROOT: apiBase[env] + apiEP.ROOT,
-  USER_INFO: apiBase[env] + apiEP.USER_INFO,
+  BASE: apiBase[ENV],
+  AUTH_GITHUB: apiBase[ENV] + apiEP.AUTH_GITHUB,
+  AUTH_GITHUB_CALLBACK: apiBase[ENV] + apiEP.AUTH_GITHUB_CALLBACK,
+  LOGIN: apiBase[ENV] + apiEP.LOGIN,
+  LOGIN_2: apiBase[ENV] + apiEP.LOGIN_2,
+  LOGOUT: apiBase[ENV] + apiEP.LOGOUT,
+  PROFILE: apiBase[ENV] + apiEP.PROFILE,
+  PROFILE_X: apiBase[ENV] + apiEP.PROFILE_X,
+  REGISTER: apiBase[ENV] + apiEP.REGISTER,
+  ROOT: apiBase[ENV] + apiEP.ROOT,
+  USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
 };

@@ -3,14 +3,18 @@ import process from "process";
 
 const ENV = process.env.NODE_ENV || "development";
 
+console.log("ENV", process.env.NODE_ENV);
+
 const dbURIs = {
-  production: "mydb.sqlite",
+  production: process.env.DB_PROD_URI || "mydb.sqlite",
   development: process.env.DB_DEV_URI || "mydb.sqlite",
+  test: process.env.DB_TEST_URI || "mydb.sqlite",
 };
 const dbURI = dbURIs[ENV];
 
 const apiBase = {
   development: `http://127.0.0.1:${process.env.PORT || 3000}`,
+  test: `http://127.0.0.1:${process.env.PORT || 3000}`,
   production: "https://api.example.com",
 };
 
