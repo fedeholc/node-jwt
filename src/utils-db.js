@@ -5,6 +5,7 @@ export {
   deleteDbFile,
   deleteTable,
   closeDbConnection,
+  deleteUser,
 };
 
 import fs from "fs";
@@ -48,6 +49,18 @@ async function insertUser(db, email, pass) {
         }
       }
     );
+  });
+}
+
+async function deleteUser(db, email) {
+  return new Promise((resolve, reject) => {
+    db.run("DELETE FROM user WHERE email = ?", email, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 }
 

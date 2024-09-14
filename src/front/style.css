@@ -47,12 +47,12 @@
     background-color: #a50073;
   }
 
-  #btn-logout {
+  #btn-logout, #btn-delete-open {
     color: black;
     background-color: rgb(255, 196, 0);
   }
 
-  #btn-logout:hover {
+  #btn-logout:hover, #btn-delete-open:hover {
     background-color: rgb(255, 215, 85);
   }
 

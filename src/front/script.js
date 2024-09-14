@@ -23,28 +23,57 @@ Lo que hay que decidir es segùn el tipo de aplicaciòn que funcionalidades est�
 
 import { apiURL } from "./endpoints-front.js";
 
-const dialog = document.querySelector("dialog");
+let userData = null;
+
+const dialogSignup = document.getElementById("dialog-signup");
 const btnOpenDialog = document.getElementById("btn-signup-open");
 const btnCloseDialog = document.getElementById("close-dialog");
+
+const dialogDelete = document.getElementById("dialog-delete");
+const btnOpenDelete = document.getElementById("btn-delete-open");
+const btnCloseDelete = document.getElementById("close-delete");
+const btnDelete = document.getElementById("btn-delete");
+
 const btnLogout = document.getElementById("btn-logout");
 const btnLoginGH = document.getElementById("btn-login-gh");
+
 const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
 const divInfo = document.getElementById("info");
 
+const formLogin = document.getElementById("login-form");
+
 btnOpenDialog.addEventListener("click", () => {
-  dialog.showModal();
+  dialogSignup.showModal();
 });
 
 btnCloseDialog.addEventListener("click", () => {
-  dialog.close();
+  dialogSignup.close();
+});
+
+btnOpenDelete.addEventListener("click", () => {
+  console.log("userData", userData);
+  if (!userData) {
+    alert("User not logged in.");
+  } else {
+    dialogDelete.showModal();
+  }
+});
+
+btnCloseDelete.addEventListener("click", () => {
+  dialogDelete.close();
 });
 
 window.addEventListener("click", (event) => {
-  if (event.target === dialog) {
-    dialog.close();
+  if (event.target === dialogSignup) {
+    dialogSignup.close();
+  }
+  if (event.target === dialogDelete) {
+    dialogDelete.close();
   }
 });
+
+displayLoggedOut();
 
 try {
   let response = await fetch(apiURL.USER_INFO, {
@@ -64,15 +93,21 @@ try {
     let data = await response.json();
     console.log("Data:", data);
 
+    userData = data.user;
+
     //TODO: validar que estén los datos esperados
 
     divInfo.innerHTML = `
     <h2>Usuario autorizado.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-    <p>User: ${data.user.email}</p>`;
+    <p>User: ${userData.email}</p>`;
+
+    dialogDelete.querySelector("#delete-title").innerHTML +=
+      "<br>" + userData.email;
+    console.log(dialogDelete);
 
     btnLogout.style.display = "block";
-    hideLogin();
+    displayLoggedIn();
   }
 } catch (error) {
   console.error(error);
@@ -132,11 +167,12 @@ btnLogin.addEventListener("click", async (event) => {
 
   if (response.ok) {
     let data = await response.json();
+    userData = data.user;
     divInfo.innerHTML = `
     <h2>Sesión iniciada.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
     <p>User: ${data.user.id} - ${data.user.email}</p>`;
-    hideLogin();
+    displayLoggedIn();
     //window.location.reload();
   }
 });
@@ -186,17 +222,70 @@ btnSignUp.addEventListener("click", async (event) => {
       <p>Token: ${data.token}</p>`; //TODO: este token creo que debe venir
     //window.location.reload();
 
-    hideLogin();
+    displayLoggedIn();
 
     //TODO: que hacer una vez que un usuario se loguea o se registra?
     //? como template debería poner un par de opciones, como ir a la página principal o a su perfil, pero si es una spa tal vez es simplemente como un refresh, pero no real sino tipo react re-rendereando la página pero mostrando otras cosas porque ahora es con el usuario logueado, para lo cual tendria que tener como un objeto global con la info del usuario logueado.
   }
-  dialog.close();
+  dialogSignup.close();
 });
 
-function hideLogin() {
+btnDelete.addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  if (!userData) {
+    alert("User not logged in.");
+    return;
+  }
+  let email = userData.email;
+  let password = document.querySelector("#delete-password").value;
+
+  let response = await fetch(apiURL.DELETE_USER, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: email, pass: password }),
+  });
+  console.log("Delete Response: ", response);
+
+  if (!response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
+      <h2>Error al eliminar usuario.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Error: ${data.error}</p>`;
+    alert("Error deleting user: " + data.error);
+
+    //TODO: mejor mostrar la info en el form y no en un alert
+    //Todos los textos en ingles??
+  }
+
+  if (response.ok) {
+    divInfo.innerHTML = `
+      <h2>Usuario eliminado.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+       `;
+    //window.location.reload();
+    //hideLogin();
+    displayLoggedOut();
+    dialogDelete.close();
+  }
+});
+
+function displayLoggedIn() {
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
-  document.querySelector("#login-form").style.display = "none";
+  btnOpenDelete.style.display = "block";
+  formLogin.style.display = "none";
   btnOpenDialog.style.display = "none";
+}
+
+function displayLoggedOut() {
+  btnLogout.style.display = "none";
+  btnLoginGH.style.display = "block";
+  btnOpenDelete.style.display = "none";
+  formLogin.style.display = "flex";
+  btnOpenDialog.style.display = "block";
 }

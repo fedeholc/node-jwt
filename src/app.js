@@ -24,6 +24,7 @@ import { handleRegister } from "./route-handlers/register.js";
 import { apiEP } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
+import { handleDeleteUser } from "./route-handlers/delete.js";
 
 const secretKey = getSecretKey();
 const db = await getDbInstance();
@@ -39,6 +40,8 @@ app.get(apiEP.USER_INFO, handleUserInfo);
 app.post(apiEP.LOGIN, handleLogin);
 
 app.get(apiEP.LOGOUT, handleLogOut);
+
+app.delete(apiEP.DELETE_USER, handleDeleteUser);
 
 /**
  * Endpoint de registro, para hacerlo con usuario y password.

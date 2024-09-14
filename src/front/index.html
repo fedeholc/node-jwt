@@ -24,9 +24,10 @@
 
   <button id="btn-signup-open">Sign Up</button>
 
+  <button id="btn-delete-open">Delete Account</button>
   <button class="btn-login" id="btn-logout">Logout</button>
 
-  <dialog>
+  <dialog id="dialog-signup">
     <span class="close-btn" id="close-dialog">&times;</span>
     <h2>Sign Up</h2>
     <form id="signup-form">
@@ -37,6 +38,17 @@
       <label for="su-confirm-password">Confirm Password</label>
       <input type="password" id="su-confirm-password" name="confirm-password" required>
       <button id="btn-signup" type="submit">Sign Up</button>
+    </form>
+  </dialog>
+
+  <dialog id="dialog-delete">
+    <span class="close-btn" id="close-delete">&times;</span>
+    <h2 id="delete-title">Delete Account</h2>
+    <form id="delete-form">
+      <label for="delete-password">Password</label>
+      <input type="password" id="delete-password" name="delete-password" required>
+      <span>Forgot your password? <button class="btn-reset">Reset Password</button></span>
+      <button id="btn-delete" type="submit">Delete Account</button>
     </form>
   </dialog>
 
