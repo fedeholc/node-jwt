@@ -14,11 +14,7 @@ export function configServer() {
 
   app.use(express.json()); //sirve para hacer que los datos que vienen en el body de la request sean parseados a JSON y se puedan acceder con req.body
 
-  //TODO: agregar secret key para firmar cookies. tiene sentido si ya la session tiene una secret key? o es para las cookies que creo por fuera de la session?
-  //? cómo las leo despues?
-  //? las que van a ser leídas en javascript del lado del cliente no hay que firmarlas no? (o es solo para escritura lo de firmar?) y en ese caso, cómo elijo cuáles si y cuáles no?
-  //* eso es con signed = true, y después se accede a req.signedcookies
-  app.use(cookieParser());
+  app.use(cookieParser()); //sirve para parsear las cookies que vienen en la request (en un solo string) y se pueden acceder con req.cookies
 
   app.use(
     cors({

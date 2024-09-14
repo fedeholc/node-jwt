@@ -15,7 +15,6 @@ export async function handleRegister(req, res) {
   }
 
   let userResponse = await getUserByEmail(db, email);
-
   if (userResponse) {
     return res.status(409).json({ error: "User or email already exist." });
   }
@@ -24,12 +23,7 @@ export async function handleRegister(req, res) {
   try {
     const id = await insertUser(db, email, hashPassword(pass));
     const token = await generateToken(
-      {
-        user: {
-          id: id,
-          email: email,
-        },
-      },
+      { user: { id: id, email: email } },
       secretKey
     );
 
@@ -39,13 +33,9 @@ export async function handleRegister(req, res) {
       sameSite: "lax", // Additional protection against CSRF
     });
 
-    return res.status(201).json({
-      user: {
-        email: email,
-        id: id,
-      },
-      token: token,
-    });
+    return res
+      .status(201)
+      .json({ user: { email: email, id: id }, token: token });
   } catch (error) {
     return res.status(500).json({ error: "Error registering user: " + error });
   }

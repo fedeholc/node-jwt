@@ -8,6 +8,11 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 
 ## Aprendizajes
 
+### Cookies
+
+- Las cookies se pueden usar httpOnly para que no se puedan acceder desde el cliente, y secure para que solo se puedan usar en conexiones seguras (https).
+- Las cookies pueden firmarse con un secret para que no se puedan modificar desde el cliente (en realidad se pueden modificar pero luego desde el lado del servidor no se va a poder verificar la firma).
+
 ### Express
 
 #### Routers y handlers

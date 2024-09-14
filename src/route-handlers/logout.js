@@ -7,7 +7,7 @@ export function handleLogOut(req, res) {
       console.error("Error destroying session:", err);
       return res.status(500).send("Error during logout");
     }
-    //res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
+    res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
 
     res.status(200).send("ok"); // Redirige a la página de inicio
   });

@@ -4,6 +4,7 @@
 //TODO: leer web.dev cookies
 
 //TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
+//TODO: poner turso.
 
 import { handleLogin } from "./routes/handle-login.js";
 
@@ -38,9 +39,11 @@ app.post(apiEP.LOGIN, handleLogin);
 
 app.get(apiEP.LOGOUT, handleLogOut);
 
-// Endpoint de registro
-// TODO: distintos endpoints según el tipo de registro?
-// TODO: y cómo se haría la parte de verificación de mail?
+/**
+ * Endpoint de registro, para hacerlo con usuario y password.
+ * Si se registran con GitHub, el insert en la base de datos y el token, se
+ * generan en handleAuthGitHubCallback.
+ */
 app.post(apiEP.REGISTER, handleRegister);
 
 app.get(apiEP.PROFILE_X, ensureAuthenticated, (req, res) => {
