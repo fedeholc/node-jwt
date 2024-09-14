@@ -37,8 +37,10 @@ export function configServer() {
     })
   );
 
-  //TODO: ojo, en nuestro caso la session está guardandose en memoria, si crashea el server se pierden las sesiones. Una opción es guardaras en una base de datos (sirve también para cuando se trabaja con más de un server)
+  //VER: en nuestro caso la session está guardandose en memoria, si crashea el server se pierden las sesiones. Una opción es guardaras en una base de datos (sirve también para cuando se trabaja con más de un server)
   //en el vid no usa session, lo hace a mano generando un session id
+  //en nuestro caso solo estamos usando la session para guardar en req.session el returnTo de github auth
+  //lo mismo que se hace con session se podría hacer con cookies a mano
   app.use(
     session({
       secret: sessionKey, // Cambiar esto por una clave secreta
@@ -48,6 +50,7 @@ export function configServer() {
     })
   );
 
+  //a modo de prueba, no cumple ninguna función
   app.use(sessionCounter);
 
   return app;
