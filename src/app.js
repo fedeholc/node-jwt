@@ -6,13 +6,14 @@
 //TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
 //TODO: poner turso.
 
+//TODO: pendiente lo de cambio y recuperación de contraseña (y borrar cuenta).
+
 import { handleLogin } from "./routes/handle-login.js";
 
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
 import { getDbInstance } from "./db.js";
 import { getSecretKey } from "./secret-key.js";
-import { ensureAuthenticated } from "./middleware.js";
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
@@ -46,17 +47,9 @@ app.get(apiEP.LOGOUT, handleLogOut);
  */
 app.post(apiEP.REGISTER, handleRegister);
 
-app.get(apiEP.PROFILE_X, ensureAuthenticated, (req, res) => {
-  // La ruta está protegida, el usuario debe estar autenticado
-  const user = req.session.user; // Obtén el usuario de la sesión
-  res
-    .status(200)
-    .send(
-      `Hello ${req.session.views}, ${user.login}! Your email is ${user.email}.`
-    ); // Muestra el perfil del usuario
-});
-
 // Ruta protegida (requiere token)
+// Otra opción sería hacer la verificación trabajando con sesiones y pasando
+// el usuario a través de la sesión (tiene sus ventajas y desventajas).
 app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
   let user = getUserByEmail(db, req.payload.user.email);
 
