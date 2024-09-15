@@ -273,9 +273,12 @@ async function handleChangePass(event) {
       <h2>Contraseña cambiada.</h2>
       <p>Server response: ${response.status} ${response.statusText}</p>
        `;
+    alert("Password changed.");
+    dialogReset.close();
     return true;
   }
 }
+
 async function handleSendCode() {
   let email = document.querySelector("#reset-email").value;
 
@@ -304,6 +307,7 @@ async function handleSendCode() {
       <h2>Se envió código de seguridad al mail.</h2>
       <p>Server response: ${response.status} ${response.statusText}</p>
        `;
+    alert("Security code sent to email. Check your inbox.");
     return true;
   }
 }

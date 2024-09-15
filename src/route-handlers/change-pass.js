@@ -1,6 +1,8 @@
 import { getUserByEmail } from "../utils-db.js";
 import { getSecretKey } from "../secret-key.js";
 import { getDbInstance } from "../db.js";
+import { updateUser } from "../utils-db.js";
+import { hashPassword } from "../util-auth.js";
 
 export const secretKey = getSecretKey();
 export const db = await getDbInstance();
@@ -38,11 +40,16 @@ export async function handleChangePass(req, res) {
     return res.status(404).json({ error: "User not found" });
   }
 
-  console.log("user", user);
-  console.log("new pass", req.body.pass);
+  let response = await updateUser(
+    db,
+    req.body.email,
+    hashPassword(req.body.pass)
+  );
+  console.log("response", response);
 
-  //TODO: hacer hash de la nueva contraseña y el update en la base de datos
+  if (!response) {
+    return res.status(500).json({ error: "Error updating password" });
+  }
 
   res.status(200).json({ message: "Password updated" });
-  //update password
 }

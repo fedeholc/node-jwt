@@ -6,6 +6,7 @@ export {
   deleteTable,
   closeDbConnection,
   deleteUser,
+  updateUser
 };
 
 import fs from "fs";
@@ -52,13 +53,29 @@ async function insertUser(db, email, pass) {
   });
 }
 
+async function updateUser(db, email, pass) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "UPDATE user SET pass = ? WHERE email = ?",
+      [pass, email],
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
+}
+
 async function deleteUser(db, email) {
   return new Promise((resolve, reject) => {
     db.run("DELETE FROM user WHERE email = ?", email, (err) => {
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(true);
       }
     });
   });
@@ -72,7 +89,7 @@ function closeDbConnection(db) {
         reject(error);
       } else {
         console.log("Database connection closed");
-        resolve();
+        resolve(true);
       }
     });
   });
