@@ -16,6 +16,8 @@ const btnLoginGH = document.getElementById("btn-login-gh");
 
 const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
+const btnResetPassword = document.getElementById("btn-reset-password");
+
 const divInfo = document.getElementById("info");
 
 const formLogin = document.getElementById("login-form");
@@ -230,6 +232,46 @@ async function handleDeleteUser(event) {
   }
 }
 
+async function handleResetPassword(event) {
+  event.preventDefault();
+
+  if (!userData) {
+    alert("User not logged in.");
+    return;
+  }
+  let email = userData.email;
+
+  let response = await fetch(apiURL.RESET_PASSWORD, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: email }),
+  });
+  console.log("Reset Response: ", response);
+
+  if (!response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
+      <h2>Error al resetear contraseña.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Error: ${data.error}</p>`;
+    alert("Error resetting password: " + data.error);
+  }
+
+  if (response.ok) {
+    divInfo.innerHTML = `
+      <h2>Contraseña reseteada.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+       `;
+    //window.location.reload();
+    //hideLogin();
+    dialogDelete.close();
+    displayLoggedOutUI();
+  }
+}
+
 function displayLoggedInUI() {
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
@@ -283,6 +325,8 @@ function setEventListeners() {
   btnCloseDelete.addEventListener("click", () => {
     dialogDelete.close();
   });
+
+  btnResetPassword.addEventListener("click", handleResetPassword);
 
   window.addEventListener("click", (event) => {
     if (event.target === dialogSignup) {

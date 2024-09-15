@@ -25,6 +25,8 @@ import { apiEP } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
+import { handleResetPassword } from "./route-handlers/reset-password.js";
+import { jwtVerify } from "jose";
 
 const secretKey = getSecretKey();
 const db = await getDbInstance();
@@ -42,6 +44,46 @@ app.post(apiEP.LOGIN, handleLogin);
 app.get(apiEP.LOGOUT, handleLogOut);
 
 app.delete(apiEP.DELETE_USER, handleDeleteUser);
+
+app.post(apiEP.RESET_PASSWORD, handleResetPassword);
+
+app.post("/change-password", async (req, res) => {
+  //verify token
+
+  if (!req.body.token) {
+    return res.status(400).json({ error: "Token is required" });
+  }
+
+  let token = req.body.token;
+
+  //TODO: usar el verify como middleware para que llegue el token en el req
+  //generar nuevo token al final y envarlo como cookie???
+
+  let verified = await jwtVerify(token, secretKey);
+
+  if (!verified) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  if (!req.body.pass) {
+    return res.status(400).json({ error: "Password is required" });
+  }
+
+  console.log("verified", verified);
+  //get user from token
+
+  let user = getUserByEmail(db, verified.payload.user.email);
+
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  console.log("user", user);
+  console.log("new pass", req.body.pass);
+
+  res.status(200).json({ message: "Password updated" });
+  //update password
+});
 
 /**
  * Endpoint de registro, para hacerlo con usuario y password.

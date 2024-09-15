@@ -26,6 +26,7 @@ const apiEP = {
   LOGOUT: "/logout",
   PROFILE: "/profile",
   REGISTER: "/register",
+  RESET_PASSWORD: "/reset-password",
   ROOT: "/",
   USER_INFO: "/user-info",
 };
@@ -39,6 +40,7 @@ const apiURL = {
   LOGOUT: apiBase[ENV] + apiEP.LOGOUT,
   PROFILE: apiBase[ENV] + apiEP.PROFILE,
   REGISTER: apiBase[ENV] + apiEP.REGISTER,
+  RESET_PASSWORD: apiBase[ENV] + apiEP.RESET_PASSWORD,
   ROOT: apiBase[ENV] + apiEP.ROOT,
   USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
 };
