@@ -1,12 +1,17 @@
 sudo kill $(sudo lsof -t -i:3000)
 
-//TODO: el secret hay que guardarlo en un .env como hacen aca: <https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs>, o está bien generarlo cada vez?
-
-//TODO: el token en el cliente se guarda en las cookies? cómo?
-
 docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d0060f6e96af/docs>
 
-## Aprendizajes
+## a futuro
+
+- [ ] uuid como identificador en BD?
+- [ ] PWA y service workers (validación token, actualización info al conectar, etc.), guardar config en local storage, etc.
+
+## Aprendizajes / Ideas
+
+### Auth y offline
+
+- En principio ahora no tiene sentido una funcionalidad de auth offline porque si no hay conexión a internet no va a poder acceder a la web. Tendria sentido en una webapp que se puede usar offline, como fotoYOP o foto-v, pero para eso primer tendría que desarrollar la parte de pwa y service workers para vanilla js.
 
 ### Cookies
 

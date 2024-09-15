@@ -1,33 +1,10 @@
-//TODO: usuar id/uuid en lugar de mail para identificar usuario
-
-/*
-Inicio
-- hay ¿token/info usuario?
-  --> NO 
-    --> state: no auth --> mostrar login (si es requerido, tal vez es la pagina principal y no requiere login para usar ciertas funcionalidades).
-  --> SI 
-    --> ¿hay conexion? 
-      --> SI 
-        --> ¿es valido el token/usuario?
-          --> NO --> state: no auth --> logout, mostrar login
-          --> SI --> state: auth --> mostrar info usuario
-      --> NO
-        --> state: offline --> mostrar info usuario (si es posible)
-
-debería haber un evento para cuando se retoma la conexion, y si aun no está autorizado validar token
-
-Lo que hay que decidir es segùn el tipo de aplicaciòn que funcionalidades estàn offline y cual sin usuario, eso podrìa alterar un poco ese flujo.
-*/
-
-//TODO: algo a resolver es, si tengo token, podría dar por logueado al usuario? como esta ahora no tengo mas info que el token, con lo cual estoy obligado a chekiar con mi base de datos cuales son los datos de ese usuario. Un modelo màs tipo local first implicaría tener los datos del usuario (còmo guardarlos sin comprometer la seguridad), y en ese caso si no hay conexion no importaria tanto, luego cuando se conecta se chekea si el usuario existe y se actualiza lo que haga falta.
-
 import { apiURL } from "./endpoints-front.js";
 
 let userData = null;
 
 const dialogSignup = document.getElementById("dialog-signup");
 const btnOpenDialog = document.getElementById("btn-signup-open");
-const btnCloseDialog = document.getElementById("close-dialog");
+const btnCloseDialog = document.getElementById("close-signup");
 
 const dialogDelete = document.getElementById("dialog-delete");
 const btnOpenDelete = document.getElementById("btn-delete-open");
@@ -43,106 +20,59 @@ const divInfo = document.getElementById("info");
 
 const formLogin = document.getElementById("login-form");
 
-btnOpenDialog.addEventListener("click", () => {
-  dialogSignup.showModal();
-});
+document.addEventListener("DOMContentLoaded", main);
 
-btnCloseDialog.addEventListener("click", () => {
-  dialogSignup.close();
-});
-
-btnOpenDelete.addEventListener("click", () => {
-  console.log("userData", userData);
-  if (!userData) {
-    alert("User not logged in.");
-  } else {
-    dialogDelete.showModal();
-  }
-});
-
-btnCloseDelete.addEventListener("click", () => {
-  dialogDelete.close();
-});
-
-window.addEventListener("click", (event) => {
-  if (event.target === dialogSignup) {
-    dialogSignup.close();
-  }
-  if (event.target === dialogDelete) {
-    dialogDelete.close();
-  }
-});
-
-displayLoggedOut();
-
-try {
-  let response = await fetch(apiURL.USER_INFO, {
-    method: "GET",
-    credentials: "include", // Asegura que las cookies se envíen en la solicitud
-  });
-
-  console.log("Response: ", response);
-
-  if (!response.ok) {
-    divInfo.innerHTML = `
-    <h2>No hay usuario autenticado.</h2>
-    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>`;
-  }
-
-  if (response.ok) {
-    let data = await response.json();
-    console.log("Data:", data);
-
-    userData = data.user;
-
-    //TODO: validar que estén los datos esperados
-
-    divInfo.innerHTML = `
-    <h2>Usuario autorizado.</h2>
-    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-    <p>User: ${userData.email}</p>`;
-
-    dialogDelete.querySelector("#delete-title").innerHTML +=
-      "<br>" + userData.email;
-    console.log(dialogDelete);
-
-    btnLogout.style.display = "block";
-    displayLoggedIn();
-  }
-} catch (error) {
-  console.error(error);
-  divInfo.innerHTML = `
-    <h2> Error connecting with server </h2>`;
-
-  throw error; // Propagamos el error para que pueda ser manejado más arriba si es necesario
+function main() {
+  setEventListeners();
+  displayLoggedOutUI();
+  loadUserData();
 }
 
-btnLogout.addEventListener("click", async () => {
-  let response = await fetch(apiURL.LOGOUT, {
-    method: "GET",
-    credentials: "include",
-  });
-  console.log("Logout Response: ", response);
-  if (response.ok) {
-    window.location.reload();
+async function loadUserData() {
+  try {
+    let response = await fetch(apiURL.USER_INFO, {
+      method: "GET",
+      credentials: "include", // Asegura que las cookies se envíen en la solicitud
+    });
+
+    console.log("Response: ", response);
+
+    if (!response.ok) {
+      divInfo.innerHTML = `
+    <h2>No hay usuario autenticado.</h2>
+    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>`;
+    }
+
+    if (response.ok) {
+      let data = await response.json();
+      console.log("Data:", data);
+
+      userData = data.user;
+
+      //TODO: validar que estén los datos esperados
+
+      divInfo.innerHTML = `
+      <h2>Usuario autorizado.</h2>
+      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>User: ${userData.email}</p>`;
+
+      dialogDelete.querySelector("#delete-title").innerHTML +=
+        "<br>" + userData.email;
+      console.log(dialogDelete);
+
+      btnLogout.style.display = "block";
+      displayLoggedInUI();
+    }
+  } catch (error) {
+    console.error(error);
+    divInfo.innerHTML = `
+    <h2> Error connecting with server </h2>`;
+
+    throw error; // Propagamos el error para que pueda ser manejado más arriba si es necesario
   }
-});
+}
 
-btnLoginGH.addEventListener("click", async (event) => {
-  event.preventDefault();
-  let response = await fetch(apiURL.AUTH_GITHUB, {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  let data = await response.json();
-
-  window.location.href = data.ghauth;
-});
-
-btnLogin.addEventListener("click", async (event) => {
+async function handleLogin(event) {
   event.preventDefault();
   let email = document.querySelector("#email").value;
   let password = document.querySelector("#password").value;
@@ -172,14 +102,40 @@ btnLogin.addEventListener("click", async (event) => {
     <h2>Sesión iniciada.</h2>
     <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
     <p>User: ${data.user.id} - ${data.user.email}</p>`;
-    displayLoggedIn();
-    //window.location.reload();
+    displayLoggedInUI();
   }
-});
+}
 
-//TODO agregar validación de email y password
-//TODO checkeo de mail con resend?
-btnSignUp.addEventListener("click", async (event) => {
+async function handleLoginGH(event) {
+  event.preventDefault();
+  let response = await fetch(apiURL.AUTH_GITHUB, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  let data = await response.json();
+
+  window.location.href = data.ghauth;
+}
+
+async function handleLogOut() {
+  let response = await fetch(apiURL.LOGOUT, {
+    method: "GET",
+    credentials: "include",
+  });
+  console.log("Logout Response: ", response);
+  if (response.ok) {
+    //window.location.reload();
+    displayLoggedOutUI();
+    loadUserData();
+  }
+}
+
+async function handleSignUp(event) {
+  //TODO agregar validación de email y password
+  //TODO checkeo de mail con resend?
   event.preventDefault();
   let email = document.querySelector("#su-email").value;
   let password = document.querySelector("#su-password").value;
@@ -222,15 +178,15 @@ btnSignUp.addEventListener("click", async (event) => {
       <p>Token: ${data.token}</p>`; //TODO: este token creo que debe venir
     //window.location.reload();
 
-    displayLoggedIn();
+    displayLoggedInUI();
 
     //TODO: que hacer una vez que un usuario se loguea o se registra?
     //? como template debería poner un par de opciones, como ir a la página principal o a su perfil, pero si es una spa tal vez es simplemente como un refresh, pero no real sino tipo react re-rendereando la página pero mostrando otras cosas porque ahora es con el usuario logueado, para lo cual tendria que tener como un objeto global con la info del usuario logueado.
   }
   dialogSignup.close();
-});
+}
 
-btnDelete.addEventListener("click", async (event) => {
+async function handleDeleteUser(event) {
   event.preventDefault();
 
   if (!userData) {
@@ -269,12 +225,12 @@ btnDelete.addEventListener("click", async (event) => {
        `;
     //window.location.reload();
     //hideLogin();
-    displayLoggedOut();
+    displayLoggedOutUI();
     dialogDelete.close();
   }
-});
+}
 
-function displayLoggedIn() {
+function displayLoggedInUI() {
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
   btnOpenDelete.style.display = "block";
@@ -282,10 +238,58 @@ function displayLoggedIn() {
   btnOpenDialog.style.display = "none";
 }
 
-function displayLoggedOut() {
+function displayLoggedOutUI() {
   btnLogout.style.display = "none";
   btnLoginGH.style.display = "block";
   btnOpenDelete.style.display = "none";
   formLogin.style.display = "flex";
   btnOpenDialog.style.display = "block";
+
+  document.querySelector("#email").value = "";
+  document.querySelector("#password").value = "";
+  document.querySelector("#su-email").value = "";
+  document.querySelector("#su-password").value = "";
+  document.querySelector("#su-confirm-password").value = "";
+  document.querySelector("#delete-password").value = "";
+}
+
+function setEventListeners() {
+  btnLogout.addEventListener("click", handleLogOut);
+
+  btnLoginGH.addEventListener("click", handleLoginGH);
+
+  btnLogin.addEventListener("click", handleLogin);
+
+  btnSignUp.addEventListener("click", handleSignUp);
+
+  btnDelete.addEventListener("click", handleDeleteUser);
+
+  btnOpenDialog.addEventListener("click", () => {
+    dialogSignup.showModal();
+  });
+
+  btnCloseDialog.addEventListener("click", () => {
+    dialogSignup.close();
+  });
+
+  btnOpenDelete.addEventListener("click", () => {
+    if (!userData) {
+      alert("User not logged in.");
+    } else {
+      dialogDelete.showModal();
+    }
+  });
+
+  btnCloseDelete.addEventListener("click", () => {
+    dialogDelete.close();
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target === dialogSignup) {
+      dialogSignup.close();
+    }
+    if (event.target === dialogDelete) {
+      dialogDelete.close();
+    }
+  });
 }
