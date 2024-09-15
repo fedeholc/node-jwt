@@ -52,6 +52,30 @@
     </form>
   </dialog>
 
+  <dialog id="dialog-reset">
+    <span class="close-btn" id="close-reset">&times;</span>
+    <h2 id="reset-title">Reset Password</h2>
+    <form id="reset-form">
+
+      <!-- codigo -->
+      <label for="reset-email">E-mail</label>
+      <input type="email" id="reset-email" name="reset-email" required>
+      <button id="btn-send-code">Send me a code</button>
+      <label for="reset-code">Enter security code:</label>
+      <input type="text" id="reset-code" name="reset-code" required>
+
+      <!-- confirm -->
+      <label for="reset-password">New Password</label>
+      <input type="password" id="reset-password" name="reset-password" required>
+      <label for="reset-confirm-password">Confirm Password</label>
+      <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
+
+      <button id="btn-change-password" type="submit">Change Password</button>
+
+    </form>
+  </dialog>
+
+  <span>Forgot your password? <button id="btn-reset-open" class="btn-reset">Reset Password</button></span>
 </body>
 
 </html>

@@ -33,9 +33,7 @@ export async function handleRegister(req, res) {
       sameSite: "lax", // Additional protection against CSRF
     });
 
-    return res
-      .status(201)
-      .json({ user: { email: email, id: id }, token: token });
+    return res.status(201).json({ user: { email: email, id: id } });
   } catch (error) {
     return res.status(500).json({ error: "Error registering user: " + error });
   }

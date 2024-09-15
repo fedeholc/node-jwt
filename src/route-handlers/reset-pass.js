@@ -1,15 +1,14 @@
 import nodemailer from "nodemailer";
-
-import { insertUser, getUserByEmail } from "../utils-db.js";
-import { hashPassword, generateToken } from "../util-auth.js";
+import { getUserByEmail } from "../utils-db.js";
 import process from "process";
 import { getSecretKey } from "../secret-key.js";
 import { getDbInstance } from "../db.js";
+import crypto from "crypto";
 
 export const secretKey = getSecretKey();
 export const db = await getDbInstance();
 
-export async function handleResetPassword(req, res) {
+export async function handleResetPass(req, res) {
   if (!req.body.email) {
     return res.status(400).json({ error: "Email is required." });
   }
@@ -19,20 +18,13 @@ export async function handleResetPassword(req, res) {
     return res.status(404).json({ error: "User not found." });
   }
 
-  const token = await generateToken(
-    { user: { id: user.id, email: user.email } },
-    secretKey,
-    "1h"
-  );
-
-  //TODO: deshardcodear la URL
-  const resetURL = `http://127.0.0.1:8080/change-password/?token=${token}`;
+  let code = crypto.randomBytes(3).toString("hex").toUpperCase();
 
   const mailOptions = {
     from: process.env.GMAIL_USER,
     to: user.email,
     subject: "Reset your password",
-    text: `Click on the following link to reset your password: ${resetURL}`,
+    text: `Code: ${code}`,
   };
   const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -51,6 +43,9 @@ export async function handleResetPassword(req, res) {
       console.log("Email sent: ", info.response);
     }
   });
+
+  req.session.resetCode = code;
+  req.session.resetCodeExpires = Date.now() + 15 * 60 * 1000; // Expira en 15 minutos
 
   return res.status(200).json({ message: "Email sent." });
 }

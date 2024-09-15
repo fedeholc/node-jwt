@@ -11,12 +11,17 @@ const btnOpenDelete = document.getElementById("btn-delete-open");
 const btnCloseDelete = document.getElementById("close-delete");
 const btnDelete = document.getElementById("btn-delete");
 
+const dialogReset = document.getElementById("dialog-reset");
+const btnOpenReset = document.getElementById("btn-reset-open");
+const btnCloseReset = document.getElementById("close-reset");
+const btnChangePass = document.getElementById("btn-change-password");
+const btnSendCode = document.getElementById("btn-send-code");
+
 const btnLogout = document.getElementById("btn-logout");
 const btnLoginGH = document.getElementById("btn-login-gh");
 
 const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
-const btnResetPassword = document.getElementById("btn-reset-password");
 
 const divInfo = document.getElementById("info");
 
@@ -41,21 +46,26 @@ async function loadUserData() {
 
     if (!response.ok) {
       divInfo.innerHTML = `
-    <h2>No hay usuario autenticado.</h2>
-    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>`;
+      <h2>No hay usuario autenticado.</h2>
+      <p>Server response: ${response.status} ${response.statusText}</p>`;
     }
 
     if (response.ok) {
       let data = await response.json();
       console.log("Data:", data);
 
-      userData = data.user;
+      if (!data.user) {
+        divInfo.innerHTML = `
+        <h2>No hay usuario autenticado.</h2>
+        <p>Server response: ${response.status} ${response.statusText}</p>`;
+        return;
+      }
 
-      //TODO: validar que estén los datos esperados
+      userData = data.user;
 
       divInfo.innerHTML = `
       <h2>Usuario autorizado.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Server response: ${response.status} ${response.statusText}</p>
       <p>User: ${userData.email}</p>`;
 
       dialogDelete.querySelector("#delete-title").innerHTML +=
@@ -93,7 +103,7 @@ async function handleLogin(event) {
     let data = await response.json();
     divInfo.innerHTML = `
     <h2>Error al iniciar sesión.</h2>
-    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+    <p>Server response: ${response.status} ${response.statusText}</p>
     <p>Error: ${data.error}</p>`;
   }
 
@@ -101,8 +111,8 @@ async function handleLogin(event) {
     let data = await response.json();
     userData = data.user;
     divInfo.innerHTML = `
-    <h2>Sesión iniciada.</h2>
-    <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+    <h2>Login successful</h2>
+    <p>Server response: ${response.status} ${response.statusText}</p>
     <p>User: ${data.user.id} - ${data.user.email}</p>`;
     displayLoggedInUI();
   }
@@ -136,20 +146,18 @@ async function handleLogOut() {
 }
 
 async function handleSignUp(event) {
-  //TODO agregar validación de email y password
-  //TODO checkeo de mail con resend?
   event.preventDefault();
   let email = document.querySelector("#su-email").value;
   let password = document.querySelector("#su-password").value;
   let confirmPassword = document.querySelector("#su-confirm-password").value;
 
-  if (password !== confirmPassword) {
-    alert("Las contraseñas no coinciden.");
+  if (email === "" || password === "" || confirmPassword === "") {
+    alert("Please fill in all fields.");
     return;
   }
 
-  if (email === "" || password === "" || confirmPassword === "") {
-    alert("Please fill in all fields.");
+  if (password !== confirmPassword) {
+    alert("Passwords don't match.");
     return;
   }
 
@@ -167,7 +175,7 @@ async function handleSignUp(event) {
     let data = await response.json();
     divInfo.innerHTML = `
       <h2>Error al registrar usuario.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Server response: ${response.status} ${response.statusText}</p>
       <p>Error: ${data.error}</p>`;
   }
 
@@ -175,15 +183,14 @@ async function handleSignUp(event) {
     let data = await response.json();
     divInfo.innerHTML = `
       <h2>Usuario registrado.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
-      <p>User: ${data.user.id} - ${data.user.email}</p>
-      <p>Token: ${data.token}</p>`; //TODO: este token creo que debe venir
-    //window.location.reload();
+      <p>Server response: ${response.status} ${response.statusText}</p>
+      <p>User: ${data.user.id} - ${data.user.email}</p>`;
 
     displayLoggedInUI();
 
-    //TODO: que hacer una vez que un usuario se loguea o se registra?
-    //? como template debería poner un par de opciones, como ir a la página principal o a su perfil, pero si es una spa tal vez es simplemente como un refresh, pero no real sino tipo react re-rendereando la página pero mostrando otras cosas porque ahora es con el usuario logueado, para lo cual tendria que tener como un objeto global con la info del usuario logueado.
+    // Según el tipo de web, aquí puede cambiar la interfaz o puede
+    // redirigir a otra página:
+    // window.location.href = "/profile";
   }
   dialogSignup.close();
 }
@@ -212,18 +219,15 @@ async function handleDeleteUser(event) {
     let data = await response.json();
     divInfo.innerHTML = `
       <h2>Error al eliminar usuario.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Server response: ${response.status} ${response.statusText}</p>
       <p>Error: ${data.error}</p>`;
     alert("Error deleting user: " + data.error);
-
-    //TODO: mejor mostrar la info en el form y no en un alert
-    //Todos los textos en ingles??
   }
 
   if (response.ok) {
     divInfo.innerHTML = `
       <h2>Usuario eliminado.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Server response: ${response.status} ${response.statusText}</p>
        `;
     //window.location.reload();
     //hideLogin();
@@ -232,16 +236,50 @@ async function handleDeleteUser(event) {
   }
 }
 
-async function handleResetPassword(event) {
+async function handleChangePass(event) {
   event.preventDefault();
+  let code = document.querySelector("#reset-code").value;
+  let pass = document.querySelector("#reset-password").value;
+  let confirmPass = document.querySelector("#reset-confirm-password").value;
+  let email = document.querySelector("#reset-email").value;
 
-  if (!userData) {
-    alert("User not logged in.");
+  if (pass !== confirmPass) {
+    alert("Las contraseñas no coinciden.");
     return;
   }
-  let email = userData.email;
 
-  let response = await fetch(apiURL.RESET_PASSWORD, {
+  let response = await fetch(apiURL.CHANGE_PASS, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email: email, pass: pass, code: code }),
+  });
+  console.log("Change Password Response: ", response);
+
+  if (!response.ok) {
+    let data = await response.json();
+    divInfo.innerHTML = `
+      <h2>Error al cambiar contraseña.</h2>
+      <p>Server response: ${response.status} ${response.statusText}</p>
+      <p>Error: ${data.error}</p>`;
+    alert("Error changing password: " + data.error);
+    return false;
+  }
+
+  if (response.ok) {
+    divInfo.innerHTML = `
+      <h2>Contraseña cambiada.</h2>
+      <p>Server response: ${response.status} ${response.statusText}</p>
+       `;
+    return true;
+  }
+}
+async function handleSendCode() {
+  let email = document.querySelector("#reset-email").value;
+
+  let response = await fetch(apiURL.RESET_PASS, {
     method: "POST",
     credentials: "include",
     headers: {
@@ -255,20 +293,18 @@ async function handleResetPassword(event) {
     let data = await response.json();
     divInfo.innerHTML = `
       <h2>Error al resetear contraseña.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <p>Server response: ${response.status} ${response.statusText}</p>
       <p>Error: ${data.error}</p>`;
     alert("Error resetting password: " + data.error);
+    return false;
   }
 
   if (response.ok) {
     divInfo.innerHTML = `
-      <h2>Contraseña reseteada.</h2>
-      <p>Respuesta del servidor: ${response.status} ${response.statusText}</p>
+      <h2>Se envió código de seguridad al mail.</h2>
+      <p>Server response: ${response.status} ${response.statusText}</p>
        `;
-    //window.location.reload();
-    //hideLogin();
-    dialogDelete.close();
-    displayLoggedOutUI();
+    return true;
   }
 }
 
@@ -326,7 +362,16 @@ function setEventListeners() {
     dialogDelete.close();
   });
 
-  btnResetPassword.addEventListener("click", handleResetPassword);
+  btnOpenReset.addEventListener("click", async () => {
+    dialogReset.showModal();
+  });
+
+  btnCloseReset.addEventListener("click", () => {
+    dialogReset.close();
+  });
+
+  btnSendCode.addEventListener("click", handleSendCode);
+  btnChangePass.addEventListener("click", handleChangePass);
 
   window.addEventListener("click", (event) => {
     if (event.target === dialogSignup) {
