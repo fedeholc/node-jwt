@@ -29,8 +29,6 @@ export async function handleDeleteUser(req, res) {
     res.clearCookie("jwtToken");
     req.session.destroy();
 
-    //TODO: el cliente tendría que hacer reload
-
     return res.status(204).end();
   } catch (error) {
     return res.status(500).json({ error: "Error deleting user: " + error });

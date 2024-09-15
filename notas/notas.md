@@ -12,6 +12,8 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 - [ ] Poner todos los try catch y throw error
 - [ ] Hacer todos los tests
 - [ ] poner colores (y algo más) en variables css
+- [ ] implementar cambiar contraseña? (ahora solo se puede con reset)
+- [ ] leer web.dev sobre cookies
 
 ## Aprendizajes / Ideas
 

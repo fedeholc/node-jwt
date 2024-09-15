@@ -1,12 +1,9 @@
-//TODO: Mail. La verificacion durante el registro no sé si es indispensable. Tal vez más importante es la posibilidad de recuperar la contraseña usando el mail.
-//TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
-
-//TODO: leer web.dev cookies
-
-//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
 //TODO: poner turso.
 
-//TODO: pendiente lo de cambio y recuperación de contraseña (y borrar cuenta).
+//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
+
+//TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
+ 
 
 import { handleLogin } from "./routes/handle-login.js";
 
@@ -26,7 +23,6 @@ import process from "process";
 import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
-import { jwtVerify } from "jose";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 
 const secretKey = getSecretKey();
