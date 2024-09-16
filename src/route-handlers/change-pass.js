@@ -33,18 +33,18 @@ export async function handleChangePass(req, res) {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    let user = await getUserByEmail(db, req.body.email);
+    const user = await getUserByEmail(db, req.body.email);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    let response = await updateUser(
+    const response = await updateUser(
       db,
       req.body.email,
       hashPassword(req.body.pass)
     );
-    console.log("response", response);
+
 
     if (!response) {
       return res.status(500).json({ error: "Error updating password" });

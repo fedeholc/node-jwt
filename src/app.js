@@ -5,14 +5,12 @@
 //TODO: textos y diseño
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
- 
 
 import { handleLogin } from "./routes/handle-login.js";
 
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
-import { getDbInstance } from "./db.js";
-import { getSecretKey } from "./secret-key.js";
+ 
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
@@ -26,9 +24,7 @@ import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
-
-const secretKey = getSecretKey();
-const db = await getDbInstance();
+import { db, secretKey } from "./global-store.js";
 
 const app = configServer();
 

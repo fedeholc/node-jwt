@@ -1,10 +1,6 @@
 import { deleteUser, getUserByEmail } from "../utils-db.js";
 import { hashPassword } from "../util-auth.js";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
-
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+import { db } from "../global-store.js";
 
 export async function handleDeleteUser(req, res) {
   try {

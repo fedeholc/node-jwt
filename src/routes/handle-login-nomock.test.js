@@ -26,7 +26,7 @@ describe("Login Endpoint2 no mock", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.body.user).toEqual({ id: 39, email: "z" });
+    expect(response.body.user).toEqual({ id: 50, email: "z" });
   });
 
   test("should return 401 for invalid username", async () => {

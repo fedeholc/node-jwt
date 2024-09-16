@@ -1,8 +1,7 @@
-import { getSecretKey } from "../secret-key.js";
 import { jwtVerify } from "jose";
 export { handleUserInfo };
 
-const secretKey = getSecretKey();
+import { secretKey } from "../global-store.js";
 
 async function handleUserInfo(req, res) {
   try {

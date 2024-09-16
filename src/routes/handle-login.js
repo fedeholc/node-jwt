@@ -1,15 +1,15 @@
 import { hashPassword, generateToken } from "../util-auth.js";
 import { getUserByEmail } from "../utils-db.js";
 import process from "process";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
+ 
 
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+import { db } from "../global-store.js";
+import { secretKey } from "../global-store.js";
 
-console.log("db y secret", db, secretKey);
+ 
 
 export async function handleLogin(req, res) {
+  console.log("db y secret", db, secretKey);
   try {
     const { pass, email } = req.body;
     let userInDB = await getUserByEmail(db, email);

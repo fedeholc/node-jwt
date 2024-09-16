@@ -1,20 +1,17 @@
 export { handleAuthGitHub, handleAuthGitHubCallback };
+import crypto from "crypto";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import process from "process";
 import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
-
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+import { db, secretKey } from "../global-store.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 
 function handleAuthGitHub(req, res) {
-  req.session.returnTo = req.query.returnTo || req.get("referer") || "/";
+  req.session.returnTo = req.query.returnTo || req.get("Referer") || "/";
 
   const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}`;
 
@@ -28,7 +25,7 @@ async function handleAuthGitHubCallback(req, res) {
       return res.status(500).send("No authorization code received");
     }
 
-    // Solicita el token de acceso a GitHub
+    // Request access token from GitHub
     const ghResponse = await fetch(gitHubEP.ACCESS_TOKEN, {
       method: "POST",
       headers: {
@@ -42,17 +39,22 @@ async function handleAuthGitHubCallback(req, res) {
         redirect_uri: redirectURI,
       }),
     });
-    const { access_token: ghAccessToken } = await ghResponse.json();
 
-    if (!ghResponse.ok || !ghAccessToken) {
+    if (!ghResponse.ok) {
       return res
         .status(500)
         .send(
-          "Error obtaining access token from GitHub" + ghResponse.statusText
+          `Error obtaining access token from GitHub: ${ghResponse.statusText}`
         );
     }
 
-    // Solicita los datos del usuario de GitHub
+    const { access_token: ghAccessToken } = await ghResponse.json();
+
+    if (!ghAccessToken) {
+      return res.status(500).send("No access token received from GitHub");
+    }
+
+    // Request GitHub user data
     const ghUserResponse = await fetch(gitHubEP.USER, {
       method: "GET",
       headers: {
@@ -65,7 +67,7 @@ async function handleAuthGitHubCallback(req, res) {
       return res
         .status(500)
         .send(
-          "Error obtaining user data from GitHub" + ghUserResponse.statusText
+          `Error obtaining user data from GitHub: ${ghUserResponse.statusText}`
         );
     }
 
@@ -87,14 +89,13 @@ async function handleAuthGitHubCallback(req, res) {
     res.cookie("jwtToken", jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: "lax", // Additional protection against CSRF
+      sameSite: "lax", // Use 'lax' to provide additional protection against CSRF
     });
 
-    let returnTo = req.session.returnTo || "/";
+    res.redirect(req.session.returnTo || "/");
     delete req.session.returnTo;
-    res.redirect(returnTo);
   } catch (error) {
-    console.error("Error during GitHub authentication", error.message);
+    console.error("Error during GitHub authentication", error);
     res.status(500).send(error.message || "Authentication failed");
   }
 }

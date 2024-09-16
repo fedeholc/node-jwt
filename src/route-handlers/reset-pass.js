@@ -1,12 +1,10 @@
 import nodemailer from "nodemailer";
 import { getUserByEmail } from "../utils-db.js";
 import process from "process";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
+
 import crypto from "crypto";
 
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+import { db } from "../global-store.js";
 
 export async function handleResetPass(req, res) {
   try {

@@ -1,11 +1,8 @@
 import { insertUser, getUserByEmail } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
+import { db, secretKey } from "../global-store.js";
 
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
 
 export async function handleRegister(req, res) {
   try {
