@@ -186,6 +186,8 @@ async function handleSignUp(event) {
       <p>Server response: ${response.status} ${response.statusText}</p>
       <p>User: ${data.user.id} - ${data.user.email}</p>`;
 
+    userData = data.user;
+
     displayLoggedInUI();
 
     // Según el tipo de web, aquí puede cambiar la interfaz o puede
