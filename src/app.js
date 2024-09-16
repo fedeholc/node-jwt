@@ -1,6 +1,6 @@
 //TODO: poner turso.
 
-//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en handle-login)
+//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en authGH)
 
 //TODO: textos y diseño
 

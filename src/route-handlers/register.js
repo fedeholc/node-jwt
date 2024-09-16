@@ -8,19 +8,20 @@ export const secretKey = getSecretKey();
 export const db = await getDbInstance();
 
 export async function handleRegister(req, res) {
-  const { pass, email } = req.body;
-
-  if (!pass || !email) {
-    return res.status(400).json({ error: "All fields are required." });
-  }
-
-  let userResponse = await getUserByEmail(db, email);
-  if (userResponse) {
-    return res.status(409).json({ error: "User or email already exist." });
-  }
-
-  // Crear nuevo usuario
   try {
+    const { pass, email } = req.body;
+
+    if (!pass || !email) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    let userResponse = await getUserByEmail(db, email);
+    if (userResponse) {
+      return res.status(409).json({ error: "User or email already exist." });
+    }
+
+    // Crear nuevo usuario
+
     const id = await insertUser(db, email, hashPassword(pass));
     const token = await generateToken(
       { user: { id: id, email: email } },

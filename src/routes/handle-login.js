@@ -3,7 +3,7 @@ import { getUserByEmail } from "../utils-db.js";
 import process from "process";
 import { getSecretKey } from "../secret-key.js";
 import { getDbInstance } from "../db.js";
- 
+
 export const secretKey = getSecretKey();
 export const db = await getDbInstance();
 
@@ -19,12 +19,7 @@ export async function handleLogin(req, res) {
       hashPassword(pass) === userInDB.pass
     ) {
       const jwtToken = await generateToken(
-        {
-          user: {
-            id: userInDB.id,
-            email: userInDB.email,
-          },
-        },
+        { user: { id: userInDB.id, email: userInDB.email } },
         secretKey
       );
       res.cookie("jwtToken", jwtToken, {
@@ -34,10 +29,7 @@ export async function handleLogin(req, res) {
       });
 
       return res.status(200).json({
-        user: {
-          email: userInDB.email,
-          id: userInDB.id,
-        },
+        user: { email: userInDB.email, id: userInDB.id },
         token: jwtToken,
       });
     } else {

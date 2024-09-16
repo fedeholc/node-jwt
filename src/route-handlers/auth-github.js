@@ -16,7 +16,7 @@ const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 function handleAuthGitHub(req, res) {
   req.session.returnTo = req.query.returnTo || req.get("referer") || "/";
 
-  const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}&scope=user:email`;
+  const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}`;
 
   res.status(200).json({ ghauth: githubAuthURL });
 }
@@ -25,7 +25,7 @@ async function handleAuthGitHubCallback(req, res) {
   try {
     const gitHubCode = req.query.code;
     if (!gitHubCode) {
-      throw new Error("No authorization code received");
+      return res.status(500).send("No authorization code received");
     }
 
     // Solicita el token de acceso a GitHub
@@ -42,14 +42,14 @@ async function handleAuthGitHubCallback(req, res) {
         redirect_uri: redirectURI,
       }),
     });
-
-    if (!ghResponse.ok) {
-      throw new Error(`GitHub error: ${ghResponse.statusText}`);
-    }
-
     const { access_token: ghAccessToken } = await ghResponse.json();
-    if (!ghAccessToken) {
-      throw new Error("Error obtaining access token from GitHub");
+
+    if (!ghResponse.ok || !ghAccessToken) {
+      return res
+        .status(500)
+        .send(
+          "Error obtaining access token from GitHub" + ghResponse.statusText
+        );
     }
 
     // Solicita los datos del usuario de GitHub
@@ -59,16 +59,14 @@ async function handleAuthGitHubCallback(req, res) {
         Authorization: `Bearer ${ghAccessToken}`,
       },
     });
-
-    if (!ghUserResponse.ok) {
-      throw new Error(
-        `Error fetching GitHub user: ${ghUserResponse.statusText}`
-      );
-    }
-
     const ghUserData = await ghUserResponse.json();
-    if (!ghUserData || !ghUserData.email) {
-      throw new Error("Invalid GitHub user data");
+
+    if (!ghUserResponse.ok || !ghUserData || !ghUserData.email) {
+      return res
+        .status(500)
+        .send(
+          "Error obtaining user data from GitHub" + ghUserResponse.statusText
+        );
     }
 
     // Verifica si el usuario existe en la base de datos
