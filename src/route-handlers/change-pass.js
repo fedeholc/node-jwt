@@ -1,11 +1,6 @@
-import { getUserByEmail } from "../utils-db.js";
-import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
-import { updateUser } from "../utils-db.js";
+import { getUserByEmail, updateUser } from "../utils-db.js";
 import { hashPassword } from "../util-auth.js";
-
-export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+import { db } from "../global-store.js";
 
 export async function handleChangePass(req, res) {
   try {
@@ -13,7 +8,7 @@ export async function handleChangePass(req, res) {
       return res.status(400).json({ error: "Code is required" });
     }
 
-    if (!req.session.resetCode || req.session.resetCodeExpires < Date.now()) {
+    if (!req.session.resetCode || !req.session.resetCodeExpires || req.session.resetCodeExpires < Date.now()) {
       return res
         .status(400)
         .json({ error: "El código ha expirado o no es válido." });
@@ -22,7 +17,7 @@ export async function handleChangePass(req, res) {
     if (req.body.code !== req.session.resetCode) {
       return res
         .status(400)
-        .json({ error: "El código ingresado es incorrecto." });
+        .json({ error: "The entered code is incorrect" });
     }
 
     if (!req.body.pass) {
@@ -44,7 +39,6 @@ export async function handleChangePass(req, res) {
       req.body.email,
       hashPassword(req.body.pass)
     );
-
 
     if (!response) {
       return res.status(500).json({ error: "Error updating password" });

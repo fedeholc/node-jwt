@@ -19,14 +19,24 @@ export async function handleDeleteUser(req, res) {
       return res.status(401).json({ error: "Invalid password." });
     }
 
-    await deleteUser(db, email);
+    let response = await deleteUser(db, email);
+
+    if (!response) {
+      return res.status(500).json({ error: "Error deleting user." });
+    }
 
     //hacer logout y borrar sesion
     res.clearCookie("jwtToken");
-    req.session.destroy();
+    req.session.destroy((err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ error: `Error destroying session: ${err}`});
+      }
+    });
 
     return res.status(204).end();
   } catch (error) {
-    return res.status(500).json({ error: "Error deleting user: " + error });
+    return res.status(500).json({ error: `Error deleting user: ${error}` });
   }
 }

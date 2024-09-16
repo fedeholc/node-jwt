@@ -13,7 +13,7 @@ async function verifyToken(req, res, next) {
     req.payload = await jwtVerify(token, secretKey);
     next();
   } catch (error) {
-    res.status(401).json({ error: "Token inválido" + error });
+    res.status(401).json({ error: `Token inválido. ${error}` });
   }
 }
 ```
@@ -34,7 +34,7 @@ function verifyToken(secretKey) {
       req.payload = await jwtVerify(token, secretKey);
       next();
     } catch (error) {
-      return res.status(401).json({ error: "Invalid Token: " + error });
+      return res.status(401).json({ error: `Invalid Token: ${error}` });
     }
   };
 }

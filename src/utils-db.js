@@ -1,3 +1,7 @@
+/**
+ * Utility functions to interact with the SQLite database
+ */
+
 export {
   insertUser,
   getUserByEmail,
@@ -6,23 +10,24 @@ export {
   deleteTable,
   closeDbConnection,
   deleteUser,
-  updateUser
+  updateUser,
 };
 
 import fs from "fs";
 import sqlite3 from "sqlite3";
 
 /**
+ * Get a user by email
  * @param {Database} db - SQLite database object
  * @param {string} email - User email
+ * @returns {Promise<{}> | Promise<Error>} - User object or error
  *
  */
-
 async function getUserByEmail(db, email) {
   return new Promise((resolve, reject) => {
-    db.get("SELECT * FROM user WHERE email = ?", email, (err, row) => {
-      if (err) {
-        reject(err);
+    db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
+      if (error) {
+        reject(error);
       }
       resolve(row);
     });
@@ -30,21 +35,20 @@ async function getUserByEmail(db, email) {
 }
 
 /**
- *
+ * Insert a user into the database
  * @param {Database} db - SQLite database object
- * @param {string} user
- * @param {string} email
- * @param {string} pass
- * @returns Promise<number> | Promise<Error>
+ * @param {string} email - User email
+ * @param {string} pass - User password
+ * @returns {Promise<number> | Promise<Error>} - User ID or error
  */
 async function insertUser(db, email, pass) {
   return new Promise(function (resolve, reject) {
     db.run(
       "INSERT INTO user (email, pass) VALUES (?, ?)",
       [email, pass],
-      function (err) {
-        if (err) {
-          reject(err);
+      function (error) {
+        if (error) {
+          reject(error);
         } else {
           resolve(this.lastID);
         }
@@ -53,14 +57,21 @@ async function insertUser(db, email, pass) {
   });
 }
 
+/**
+ * Update the user password
+ * @param {Database} db - SQLite database object
+ * @param {string} email - User email
+ * @param {string} pass - User password
+ * @returns {Promise<boolean> | Promise<Error>} - True or error
+ */
 async function updateUser(db, email, pass) {
   return new Promise((resolve, reject) => {
     db.run(
       "UPDATE user SET pass = ? WHERE email = ?",
       [pass, email],
-      (err) => {
-        if (err) {
-          reject(err);
+      (error) => {
+        if (error) {
+          reject(error);
         } else {
           resolve(true);
         }
@@ -69,11 +80,17 @@ async function updateUser(db, email, pass) {
   });
 }
 
+/**
+ * Delete a user from the database
+ * @param {Database} db - SQLite database object
+ * @param {string} email - User email
+ * @returns {Promise<boolean> | Promise<Error>} - True or error
+ */
 async function deleteUser(db, email) {
   return new Promise((resolve, reject) => {
-    db.run("DELETE FROM user WHERE email = ?", email, (err) => {
-      if (err) {
-        reject(err);
+    db.run("DELETE FROM user WHERE email = ?", email, (error) => {
+      if (error) {
+        reject(error);
       } else {
         resolve(true);
       }
@@ -81,6 +98,11 @@ async function deleteUser(db, email) {
   });
 }
 
+/**
+ * Close the connection with the database
+ * @param {Database} db - SQLite database object
+ * @returns {Promise<boolean> | Promise<Error>} - True or error
+ */
 function closeDbConnection(db) {
   return new Promise((resolve, reject) => {
     db.close((error) => {
@@ -95,6 +117,12 @@ function closeDbConnection(db) {
   });
 }
 
+/**
+ * Create a connection with the database
+ * @param {string} filepath
+ * @returns {Promise<Database> | Promise<Error>} - SQLite database object or
+ * Error
+ */
 async function createDbConnection(filepath) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(filepath)) {
@@ -123,28 +151,46 @@ async function createDbConnection(filepath) {
   });
 }
 
+/**
+ * Delete the database file
+ * @param {string} filepath
+ * @returns {Promise<boolean> | Promise<Error>} - True or error
+ */
 async function deleteDbFile(filepath) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(filepath)) {
       fs.unlink(filepath, (error) => {
         if (error) {
           console.error(error.message);
-          reject(false);
+          reject(error);
         } else {
           console.log("Database file deleted");
           resolve(true);
         }
       });
+    } else {
+      console.error("File does not exist");
+      reject(new Error("File does not exist"));
     }
   });
 }
 
-function deleteTable(tableName, db) {
-  db.exec(`DROP TABLE IF EXISTS ${tableName}`, (error) => {
-    if (error) {
-      return console.error(error.message);
-    } else {
-      console.log("Table deleted.");
-    }
+/**
+ * Delete a table from the database
+ * @param {string} tableName
+ * @param {Database} db
+ * @returns
+ */
+async function deleteTable(tableName, db) {
+  return new Promise((resolve, reject) => {
+    db.exec(`DROP TABLE IF EXISTS ${tableName}`, (error) => {
+      if (error) {
+        console.error(error.message);
+        reject(error);
+      } else {
+        console.log("Table deleted.");
+        resolve(true);
+      }
+    });
   });
 }

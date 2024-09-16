@@ -1,7 +1,8 @@
 export { handleAuthGitHub, handleAuthGitHubCallback };
+
 import crypto from "crypto";
-import { apiURL, gitHubEP } from "../endpoints.js";
 import process from "process";
+import { apiURL, gitHubEP } from "../endpoints.js";
 import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import { db, secretKey } from "../global-store.js";

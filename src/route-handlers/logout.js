@@ -10,7 +10,7 @@ export function handleLogOut(req, res) {
       }
       res.clearCookie("connect.sid"); // Limpiar la cookie de sesión
 
-      res.status(200).send("ok"); // Redirige a la página de inicio
+      res.status(200).send("ok");
     });
   } catch (error) {
     console.error("Error during logout", error);

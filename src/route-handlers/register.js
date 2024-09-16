@@ -12,8 +12,8 @@ export async function handleRegister(req, res) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    let userResponse = await getUserByEmail(db, email);
-    if (userResponse) {
+    let existingUser = await getUserByEmail(db, email);
+    if (existingUser) {
       return res.status(409).json({ error: "User or email already exist." });
     }
 
@@ -33,6 +33,6 @@ export async function handleRegister(req, res) {
 
     return res.status(201).json({ user: { email: email, id: id } });
   } catch (error) {
-    return res.status(500).json({ error: "Error registering user: " + error });
+    return res.status(500).json({ error: `Error registering user: ${error}`});
   }
 }

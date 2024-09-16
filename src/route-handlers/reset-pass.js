@@ -1,9 +1,7 @@
 import nodemailer from "nodemailer";
 import { getUserByEmail } from "../utils-db.js";
 import process from "process";
-
 import crypto from "crypto";
-
 import { db } from "../global-store.js";
 
 export async function handleResetPass(req, res) {
@@ -17,13 +15,13 @@ export async function handleResetPass(req, res) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    let code = crypto.randomBytes(3).toString("hex").toUpperCase();
+    let resetCode = crypto.randomBytes(3).toString("hex").toUpperCase();
 
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: user.email,
       subject: "Reset your password",
-      text: `Code: ${code}`,
+      text: `Code: ${resetCode}`,
     };
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -38,13 +36,17 @@ export async function handleResetPass(req, res) {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email: ", error);
+        return res.status(500).json({ error: "Failed to send email." });
       } else {
         console.log("Email sent: ", info.response);
       }
     });
 
-    req.session.resetCode = code;
-    req.session.resetCodeExpires = Date.now() + 15 * 60 * 1000; // Expira en 15 minutos
+    if (!req.session) {
+      req.session = {};
+    }
+    req.session.resetCode = resetCode;
+    req.session.resetCodeExpires = Date.now() + 15 * 60 * 1000; // Expires in 15 minutes
 
     return res.status(200).json({ message: "Email sent." });
   } catch (error) {

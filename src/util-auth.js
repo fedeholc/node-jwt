@@ -42,7 +42,7 @@ function verifyToken(secretKey) {
       req.payload = await jwtVerify(token, secretKey);
       next();
     } catch (error) {
-      return res.status(401).json({ error: "Invalid Token: " + error });
+      return res.status(401).json({ error: `Invalid Token: ${error}` });
     }
   };
 }
