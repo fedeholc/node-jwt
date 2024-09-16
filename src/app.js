@@ -1,7 +1,5 @@
 //TODO: poner turso.
 
-//TODO: revisar que try catchs estén bien y donde usar el throw error (revisar como hice en authGH)
-
 //TODO: textos y diseño
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright

@@ -11,21 +11,47 @@
 </head>
 
 <body>
-  <h1>hola</h1>
-  <div id="info"></div>
-  <form id="login-form">
-    <label for="email">Email</label>
-    <input type="email" id="email" placeholder="email" required>
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="password" required>
-    <button class="btn-login" id="btn-login">Login</button>
-  </form>
-  <button class="btn-login" id="btn-login-gh">Login with GitHub</button>
+  <h1>Login page</h1>
 
-  <button id="btn-signup-open">Sign Up</button>
+  <section id="login-section">
 
-  <button id="btn-delete-open">Delete Account</button>
-  <button class="btn-login" id="btn-logout">Logout</button>
+    <div class="row">
+      <button class="btn-login" id="btn-login-gh">Login with GitHub</button>
+      <button class="btn-login" id="btn-login-gg">Login with Google</button>
+    </div>
+    <div class="or">- - - OR - - -</div>
+
+    <form id="login-form">
+      <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="email" required>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="password" required>
+      </div>
+      <div class="remember-me">
+        <input type="checkbox" name="remember-me" id="remember-me">
+        <label for="remember-me">Remember me</label>
+      </div>
+    </form>
+    <div id="login-signup">
+      <button class="btn-login" id="btn-login">Login</button>
+      <button id="btn-signup-open">Sign Up</button></span>
+    </div>
+    <div>
+      <button id="btn-reset-open" class="btn-reset">Reset Password</button>
+    </div>
+
+    <button id="btn-delete-open">Delete Account</button>
+    <button class="btn-login" id="btn-logout">Logout</button>
+
+  </section>
+
+  <section>
+    <p>Info/satus</p>
+    <div id="info"></div>
+  </section>
 
   <dialog id="dialog-signup">
     <span class="close-btn" id="close-signup">&times;</span>
@@ -75,7 +101,6 @@
     </form>
   </dialog>
 
-  <span>Forgot your password? <button id="btn-reset-open" class="btn-reset">Reset Password</button></span>
 </body>
 
 </html>

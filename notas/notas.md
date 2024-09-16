@@ -9,7 +9,6 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 - [ ] validación de mails y passwords en los inputs, con colores, etc.
 - [ ] cambiar alerts por textos en la misma web
 - [ ] Poner todos los textos en ingles
-- [ ] Poner todos los try catch y throw error
 - [ ] Hacer todos los tests
 - [ ] poner colores (y algo más) en variables css
 - [ ] implementar cambiar contraseña? (ahora solo se puede con reset)
