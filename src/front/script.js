@@ -76,11 +76,10 @@ async function loadUserData() {
       displayLoggedInUI();
     }
   } catch (error) {
-    console.error(error);
+    console.error(`Error loading user data: ${error}`);
     divInfo.innerHTML = `
     <h2> Error connecting with server </h2>`;
-
-    throw error; // Propagamos el error para que pueda ser manejado más arriba si es necesario
+ 
   }
 }
 
