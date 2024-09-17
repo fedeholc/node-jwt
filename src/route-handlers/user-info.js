@@ -12,7 +12,7 @@ async function handleUserInfo(req, res) {
         return res.status(200).json({ user: userJWT.payload.user });
       }
     }
-    return res.status(401).json({ error: "No user authenticated" });
+    return res.status(401).json({ error: "No user authenticated." });
   } catch (error) {
     console.error("Error in handleUserInfo", error);
     res.status(500).json({ error: `Internal server error: ${error.message}` });

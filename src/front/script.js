@@ -30,7 +30,6 @@ const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
 
 const divInfo = document.getElementById("info");
-const divLoginInfo = document.getElementById("login-info");
 const userContent = document.getElementById("user-content");
 const formLogin = document.getElementById("login-form");
 
@@ -51,18 +50,16 @@ async function loadUserData() {
 
     if (!response.ok) {
       console.log(
-        `User not authenticated: ${response.status} ${response.statusText}`
+        `No user authenticated: ${response.status} ${response.statusText}`
       );
+      displayLoggedOutUI();
+      return;
     }
 
     if (response.ok) {
       let data = await response.json();
-      console.log(`User data:`, data);
-
       if (!data.user) {
-        console.log(
-          `User not authenticated: ${response.status} ${response.statusText}`
-        );
+        console.log(`No user data. ${response.status} ${response.statusText}`);
       }
       userData = data.user;
       userContent.innerHTML = `
@@ -71,9 +68,9 @@ async function loadUserData() {
 
       dialogDelete.querySelector("#delete-title").innerHTML +=
         "<br>" + userData.email;
-      console.log(dialogDelete);
 
       displayLoggedInUI();
+      return;
     }
   } catch (error) {
     console.error(`Error loading user data: ${error}`);
@@ -81,14 +78,22 @@ async function loadUserData() {
 }
 
 async function handleLogin(event) {
-  //event.preventDefault();
+  event.preventDefault();
+
+  const divLoginInfo = document.getElementById("login-info");
 
   let inputEmail = document.querySelector("#email");
   let inputPassword = document.querySelector("#password");
   let email = inputEmail.value;
   let password = inputPassword.value;
 
-  if (!inputEmail.validity.valid || !inputPassword.validity.valid) {
+  if (
+    !inputEmail.validity.valid ||
+    !inputPassword.validity.valid ||
+    email === "" ||
+    password === ""
+  ) {
+    divLoginInfo.innerHTML = `Enter a valid email and password.`;
     return;
   }
 
@@ -100,7 +105,6 @@ async function handleLogin(event) {
     },
     body: JSON.stringify({ email: email, pass: password }),
   });
-  console.log("Login Response: ", response);
 
   //TODO: reestablecer luego si el usuario hace otra co
   if (!response.ok) {
@@ -462,6 +466,9 @@ function setEventListeners() {
     }
     if (event.target === dialogDelete) {
       dialogDelete.close();
+    }
+    if (event.target === dialogReset) {
+      dialogReset.close();
     }
   });
 }
