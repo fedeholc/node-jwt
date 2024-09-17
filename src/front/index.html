@@ -24,11 +24,11 @@
     <form id="login-form">
       <div>
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="email" required>
+        <input type="email" id="email" name="email" placeholder="email" required>
       </div>
       <div>
         <label for="password">Password</label>
-        <input type="password" id="password" placeholder="password" required>
+        <input type="password" id="password" name="password" placeholder="password" required>
       </div>
       <div class="remember-me">
         <input type="checkbox" name="remember-me" id="remember-me">
@@ -37,7 +37,7 @@
       <div id="login-info"></div>
       <div id="login-signup">
         <button class="btn-login" type="submit" id="btn-login">Login</button>
-        <button id="btn-signup-open">Sign Up</button></span>
+        <button id="btn-signup-open">Sign Up</button>
       </div>
     </form>
     <div>
@@ -64,15 +64,23 @@
   <dialog id="dialog-signup">
     <span class="close-btn" id="close-signup">&times;</span>
     <h2>Sign Up</h2>
+    <br><br>
     <form id="signup-form">
-      <label for="su-email">Email</label>
-      <input type="email" id="su-email" name="su-email" required>
-      <label for="su-password">Password</label>
-      <input type="password" id="su-password" name="su-password" required>
-      <label for="su-confirm-password">Confirm Password</label>
-      <input type="password" id="su-confirm-password" name="confirm-password" required>
+      <div>
+        <label for="su-email">Email</label>
+        <input type="email" id="su-email" name="su-email" required>
+      </div>
+      <div>
+        <label for="su-password">Password</label>
+        <input type="password" id="su-password" name="su-password" required>
+      </div>
+      <div>
+        <label for="su-confirm-password">Confirm Password</label>
+        <input type="password" id="su-confirm-password" name="confirm-password" required>
+      </div>
       <button id="btn-signup" type="submit">Sign Up</button>
     </form>
+    <br>
   </dialog>
 
   <dialog id="dialog-delete">
@@ -92,17 +100,25 @@
     <form id="reset-form">
 
       <!-- codigo -->
-      <label for="reset-email">E-mail</label>
-      <input type="email" id="reset-email" name="reset-email" required>
+      <div>
+        <label for="reset-email">E-mail</label>
+        <input type="email" id="reset-email" name="reset-email" required>
+      </div>
       <button id="btn-send-code">Send me a code</button>
-      <label for="reset-code">Enter security code:</label>
-      <input type="text" id="reset-code" name="reset-code" required>
+      <dev>
+        <label for="reset-code"> Code:</label>
+        <input type="text" id="reset-code" name="reset-code" required>
+      </dev>
 
       <!-- confirm -->
-      <label for="reset-password">New Password</label>
-      <input type="password" id="reset-password" name="reset-password" required>
-      <label for="reset-confirm-password">Confirm Password</label>
-      <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
+      <div>
+        <label for="reset-password">New Password</label>
+        <input type="password" id="reset-password" name="reset-password" required>
+      </div>
+      <div>
+        <label for="reset-confirm-password">Confirm Password</label>
+        <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
+      </div>
 
       <button id="btn-change-password" type="submit">Change Password</button>
 

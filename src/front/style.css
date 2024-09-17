@@ -17,6 +17,11 @@
     font-family: monospace, sans-serif;
   }
 
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
+
   input,
   button,
   p {
@@ -79,9 +84,10 @@
     background-color: white;
     width: 100%;
     max-width: 400px;
-    padding: 2rem;
+    padding: 1rem 1rem;
     margin: 2rem auto;
     border-radius: 10px;
+    border: 2px solid #0071b3;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
     animation: fadeIn 0.3s ease;
@@ -133,7 +139,8 @@
   }
 
   form input[type="email"],
-  form input[type="password"] {
+  form input[type="password"],
+  form input[type="text"] {
     min-width: 250px;
   }
 

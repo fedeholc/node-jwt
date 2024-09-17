@@ -79,9 +79,13 @@ async function loadUserData() {
 }
 
 async function handleLogin(event) {
-  event.preventDefault();
+  //event.preventDefault();
   let email = document.querySelector("#email").value;
   let password = document.querySelector("#password").value;
+
+  if (email.validity.typeMismatch || password === "") {
+    return;
+  }
 
   let response = await fetch(apiURL.LOGIN, {
     method: "POST",
@@ -342,12 +346,17 @@ function setEventListeners() {
 
   btnDelete.addEventListener("click", handleDeleteUser);
 
-  btnOpenDialog.addEventListener("click", () => {
+  btnOpenDialog.addEventListener("click", (e) => {
+    document.querySelector("#email").removeAttribute("required");
+    document.querySelector("#password").removeAttribute("required");
+    e.preventDefault();
     dialogSignup.showModal();
   });
 
   btnCloseDialog.addEventListener("click", () => {
     dialogSignup.close();
+    document.querySelector("#email").setAttribute("required", "");
+    document.querySelector("#password").setAttribute("required", "");
   });
 
   btnOpenDelete.addEventListener("click", () => {
