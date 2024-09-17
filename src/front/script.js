@@ -2,6 +2,8 @@
 
 // TODO: Revisar los dialoga, que los mensajes se muestren ahí, que no haya alerts, etc.
 
+// TODO: implementar fresh tokens. leer la conversacion con gpt, para ver el tema de cuando expira, cuando renovar, etc.
+
 import { apiURL } from "./endpoints-front.js";
 
 let userData = null;
