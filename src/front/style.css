@@ -158,7 +158,7 @@
 
   .or {
     color: gray;
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .row {
@@ -169,6 +169,7 @@
   }
 
   .remember-me {
+    padding-bottom: 0.5rem;
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
