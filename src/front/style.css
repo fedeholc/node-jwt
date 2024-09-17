@@ -152,6 +152,8 @@
     display: flex;
     flex-direction: row;
     gap: 1rem;
+    width: 100%;
+    justify-content: center;
   }
 
 
@@ -168,8 +170,14 @@
     justify-content: space-evenly;
   }
 
+  #login-info {
+    max-width: 250px;
+    color: red;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
   .remember-me {
-    padding-bottom: 0.5rem;
     display: flex;
     flex-direction: row;
     gap: 0.5rem;

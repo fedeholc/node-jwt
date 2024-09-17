@@ -24,7 +24,7 @@ const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
 
 const divInfo = document.getElementById("info");
-
+const divLoginInfo = document.getElementById("login-info");
 const formLogin = document.getElementById("login-form");
 
 document.addEventListener("DOMContentLoaded", main);
@@ -79,7 +79,6 @@ async function loadUserData() {
     console.error(`Error loading user data: ${error}`);
     divInfo.innerHTML = `
     <h2> Error connecting with server </h2>`;
- 
   }
 }
 
@@ -98,12 +97,9 @@ async function handleLogin(event) {
   });
   console.log("Login Response: ", response);
 
+  //TODO: reestablecer luego si el usuario hace otra co
   if (!response.ok) {
-    let data = await response.json();
-    divInfo.innerHTML = `
-    <h2>Error al iniciar sesión.</h2>
-    <p>Server response: ${response.status} ${response.statusText}</p>
-    <p>Error: ${data.error}</p>`;
+    divLoginInfo.innerHTML = `Your email or password is incorrect. Please try again.`;
   }
 
   if (response.ok) {
