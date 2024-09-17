@@ -1,4 +1,7 @@
 // TODO: favicon
+
+// TODO: Revisar los dialoga, que los mensajes se muestren ahí, que no haya alerts, etc.
+
 import { apiURL } from "./endpoints-front.js";
 
 let userData = null;
@@ -59,9 +62,7 @@ async function loadUserData() {
           `User not authenticated: ${response.status} ${response.statusText}`
         );
       }
-
       userData = data.user;
-
       userContent.innerHTML = `
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
@@ -74,8 +75,6 @@ async function loadUserData() {
     }
   } catch (error) {
     console.error(`Error loading user data: ${error}`);
-    divInfo.innerHTML = `
-    <h2> Error connecting with server </h2>`;
   }
 }
 
@@ -102,10 +101,9 @@ async function handleLogin(event) {
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    /*     divInfo.innerHTML = `
-    <h2>Login successful</h2>
-    <p>Server response: ${response.status} ${response.statusText}</p>
-    <p>User: ${data.user.id} - ${data.user.email}</p>`; */
+    userContent.innerHTML = `
+      <p>Id: ${userData.id}</p>
+      <p>Email: ${userData.email}</p>`;
     displayLoggedInUI();
   }
 }
