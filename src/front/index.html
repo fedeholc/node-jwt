@@ -64,7 +64,7 @@
   <dialog id="dialog-signup">
     <span class="close-btn" id="close-signup">&times;</span>
     <h2>Sign Up</h2>
-    <br><br>
+    <!--    <br><br> -->
     <form id="signup-form">
       <div>
         <label for="su-email">Email</label>
@@ -78,9 +78,11 @@
         <label for="su-confirm-password">Confirm Password</label>
         <input type="password" id="su-confirm-password" name="confirm-password" required>
       </div>
+      <div id="signup-info"></div>
       <button id="btn-signup" type="submit">Sign Up</button>
     </form>
-    <br>
+    <!--     <br>
+ -->
   </dialog>
 
   <dialog id="dialog-delete">
@@ -97,18 +99,20 @@
   <dialog id="dialog-reset">
     <span class="close-btn" id="close-reset">&times;</span>
     <h2 id="reset-title">Reset Password</h2>
-    <form id="reset-form">
-
-      <!-- codigo -->
+    <form id="code-form">
       <div>
         <label for="reset-email">E-mail</label>
         <input type="email" id="reset-email" name="reset-email" required>
       </div>
+      <div id="code-info"></div>
       <button id="btn-send-code">Send me a code</button>
-      <dev>
+    </form>
+    <form id="reset-form">
+      <!-- codigo -->
+      <div>
         <label for="reset-code"> Code:</label>
-        <input type="text" id="reset-code" name="reset-code" required>
-      </dev>
+        <input type="text" maxlength="6" minlength="6" id="reset-code" name="reset-code" required>
+      </div>
 
       <!-- confirm -->
       <div>
@@ -119,8 +123,8 @@
         <label for="reset-confirm-password">Confirm Password</label>
         <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
       </div>
-
-      <button id="btn-change-password" type="submit">Change Password</button>
+      <div id="change-info"></div>
+      <button id="btn-change-password">Change Password</button>
 
     </form>
   </dialog>

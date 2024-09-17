@@ -8,16 +8,18 @@ export async function handleChangePass(req, res) {
       return res.status(400).json({ error: "Code is required" });
     }
 
-    if (!req.session.resetCode || !req.session.resetCodeExpires || req.session.resetCodeExpires < Date.now()) {
+    if (
+      !req.session.resetCode ||
+      !req.session.resetCodeExpires ||
+      req.session.resetCodeExpires < Date.now()
+    ) {
       return res
         .status(400)
-        .json({ error: "El código ha expirado o no es válido." });
+        .json({ error: "The code is ivalid or it has expired." });
     }
 
     if (req.body.code !== req.session.resetCode) {
-      return res
-        .status(400)
-        .json({ error: "The entered code is incorrect" });
+      return res.status(400).json({ error: "The entered code is incorrect" });
     }
 
     if (!req.body.pass) {
