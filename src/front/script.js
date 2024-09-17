@@ -1,3 +1,4 @@
+// TODO: favicon
 import { apiURL } from "./endpoints-front.js";
 
 let userData = null;
@@ -25,6 +26,7 @@ const btnSignUp = document.getElementById("btn-signup");
 
 const divInfo = document.getElementById("info");
 const divLoginInfo = document.getElementById("login-info");
+const userContent = document.getElementById("user-content");
 const formLogin = document.getElementById("login-form");
 
 document.addEventListener("DOMContentLoaded", main);
@@ -39,40 +41,35 @@ async function loadUserData() {
   try {
     let response = await fetch(apiURL.USER_INFO, {
       method: "GET",
-      credentials: "include", // Asegura que las cookies se envíen en la solicitud
+      credentials: "include",
     });
 
-    console.log("Response: ", response);
-
     if (!response.ok) {
-      divInfo.innerHTML = `
-      <h2>No hay usuario autenticado.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>`;
+      console.log(
+        `User not authenticated: ${response.status} ${response.statusText}`
+      );
     }
 
     if (response.ok) {
       let data = await response.json();
-      console.log("Data:", data);
+      console.log(`User data:`, data);
 
       if (!data.user) {
-        divInfo.innerHTML = `
-        <h2>No hay usuario autenticado.</h2>
-        <p>Server response: ${response.status} ${response.statusText}</p>`;
-        return;
+        console.log(
+          `User not authenticated: ${response.status} ${response.statusText}`
+        );
       }
 
       userData = data.user;
 
-      divInfo.innerHTML = `
-      <h2>Usuario autorizado.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>
-      <p>User: ${userData.email}</p>`;
+      userContent.innerHTML = `
+      <p>Id: ${userData.id}</p>
+      <p>Email: ${userData.email}</p>`;
 
       dialogDelete.querySelector("#delete-title").innerHTML +=
         "<br>" + userData.email;
       console.log(dialogDelete);
 
-      btnLogout.style.display = "block";
       displayLoggedInUI();
     }
   } catch (error) {
@@ -105,10 +102,10 @@ async function handleLogin(event) {
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    divInfo.innerHTML = `
+    /*     divInfo.innerHTML = `
     <h2>Login successful</h2>
     <p>Server response: ${response.status} ${response.statusText}</p>
-    <p>User: ${data.user.id} - ${data.user.email}</p>`;
+    <p>User: ${data.user.id} - ${data.user.email}</p>`; */
     displayLoggedInUI();
   }
 }
@@ -164,22 +161,19 @@ async function handleSignUp(event) {
     },
     body: JSON.stringify({ email: email, pass: password }),
   });
-  console.log("Signup Response: ", response);
 
   if (!response.ok) {
-    let data = await response.json();
-    divInfo.innerHTML = `
-      <h2>Error al registrar usuario.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>
-      <p>Error: ${data.error}</p>`;
+    console.log(
+      `Error signing up user: ${response.status} ${response.statusText}`
+    );
   }
 
   if (response.ok) {
     let data = await response.json();
-    divInfo.innerHTML = `
-      <h2>Usuario registrado.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>
-      <p>User: ${data.user.id} - ${data.user.email}</p>`;
+    userContent.innerHTML = `
+      <p>User successfully registered.</p>
+      <p>Id: ${userData.id}</p>
+      <p>Email: ${userData.email}</p>`;
 
     userData = data.user;
 
@@ -310,19 +304,26 @@ async function handleSendCode() {
 }
 
 function displayLoggedInUI() {
+  /* 
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
   btnOpenDelete.style.display = "block";
   formLogin.style.display = "none";
   btnOpenDialog.style.display = "none";
+ */
+  document.getElementById("login-section").style.display = "none";
+  document.getElementById("user-section").style.display = "flex";
 }
 
 function displayLoggedOutUI() {
-  btnLogout.style.display = "none";
+  /*   btnLogout.style.display = "none";
   btnLoginGH.style.display = "block";
   btnOpenDelete.style.display = "none";
   formLogin.style.display = "flex";
-  btnOpenDialog.style.display = "block";
+  btnOpenDialog.style.display = "block"; */
+
+  document.getElementById("login-section").style.display = "flex";
+  document.getElementById("user-section").style.display = "none";
 
   document.querySelector("#email").value = "";
   document.querySelector("#password").value = "";
