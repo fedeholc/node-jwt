@@ -89,9 +89,13 @@
     <span class="close-btn" id="close-delete">&times;</span>
     <h2 id="delete-title">Delete Account</h2>
     <form id="delete-form">
-      <label for="delete-password">Password</label>
-      <input type="password" id="delete-password" name="delete-password" required>
-      <span>Forgot your password? <button id="btn-reset-password" class="btn-reset">Reset Password</button></span>
+      <h3 id="delete-user"></h3>
+      <div>
+        <label for="delete-password">Password</label>
+        <input type="password" id="delete-password" name="delete-password" required>
+      </div>
+      <div id="delete-info"></div>
+
       <button id="btn-delete" type="submit">Delete Account</button>
     </form>
   </dialog>

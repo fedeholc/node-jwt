@@ -60,14 +60,13 @@ async function loadUserData() {
       let data = await response.json();
       if (!data.user) {
         console.log(`No user data. ${response.status} ${response.statusText}`);
+        displayLoggedOutUI();
+        return;
       }
       userData = data.user;
       userContent.innerHTML = `
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
-
-      dialogDelete.querySelector("#delete-title").innerHTML +=
-        "<br>" + userData.email;
 
       displayLoggedInUI();
       return;
@@ -106,9 +105,9 @@ async function handleLogin(event) {
     body: JSON.stringify({ email: email, pass: password }),
   });
 
-  //TODO: reestablecer luego si el usuario hace otra co
   if (!response.ok) {
     divLoginInfo.innerHTML = `Your email or password is incorrect. Please try again.`;
+    return;
   }
 
   if (response.ok) {
@@ -118,6 +117,7 @@ async function handleLogin(event) {
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
     displayLoggedInUI();
+    return;
   }
 }
 
@@ -140,11 +140,14 @@ async function handleLogOut() {
     method: "GET",
     credentials: "include",
   });
-  console.log("Logout Response: ", response);
+  if (!response.ok) {
+    console.log(`Error logging out. ${response.status} ${response.statusText}`);
+    return;
+  }
   if (response.ok) {
-    //window.location.reload();
     displayLoggedOutUI();
     loadUserData();
+    return;
   }
 }
 
@@ -187,8 +190,7 @@ async function handleSignUp(event) {
 
     if (!response.ok) {
       let data = await response.json();
-      signupInfo.innerHTML = `
-      Error signing up user: ${data.error}`;
+      signupInfo.innerHTML = `Error signing up user: ${data.error}`;
       console.log(
         `Error signing up. ${response.status} ${response.statusText}`
       );
@@ -196,6 +198,15 @@ async function handleSignUp(event) {
 
     if (response.ok) {
       let data = await response.json();
+
+      if (!data.user) {
+        signupInfo.innerHTML = `Error signing up user: ${data.error}`;
+        console.log(
+          `Error signing up. ${response.status} ${response.statusText}`
+        );
+        return;
+      }
+
       userData = data.user;
       userContent.innerHTML = `
       <p>User successfully registered.</p>
@@ -210,15 +221,14 @@ async function handleSignUp(event) {
       dialogSignup.close();
     }
   } catch (error) {
-    //TODO: mostrar mensaje en el dialog? creo que sí
-    //TODO: hay mucho console log que no sirve mas que para debug, podría sacarlos, o implementar algun tipo de logeo y que desde un solo lugar se active o desactive.? tiene sentido? preguntarle a GPT
+    signupInfo.innerHTML = `Error signing up user: ${error}`;
     console.error("Error signing up: ", error);
   }
 }
 
 async function handleDeleteUser(event) {
   event.preventDefault();
-
+  let deleteInfo = document.querySelector("#delete-info");
   if (!userData) {
     alert("User not logged in.");
     return;
@@ -234,26 +244,29 @@ async function handleDeleteUser(event) {
     },
     body: JSON.stringify({ email: email, pass: password }),
   });
-  console.log("Delete Response: ", response);
 
   if (!response.ok) {
     let data = await response.json();
-    divInfo.innerHTML = `
-      <h2>Error al eliminar usuario.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>
-      <p>Error: ${data.error}</p>`;
-    alert("Error deleting user: " + data.error);
+    deleteInfo.innerHTML = `
+      Error deleting user: ${data.error}`;
+    return;
   }
 
   if (response.ok) {
-    divInfo.innerHTML = `
-      <h2>Usuario eliminado.</h2>
-      <p>Server response: ${response.status} ${response.statusText}</p>
-       `;
+    deleteInfo.innerHTML = `
+      User successfully deleted.`;
+
+    deleteInfo.style.color = "green";
+    deleteInfo.style.fontWeight = "bold";
+
+    userData = null;
+
+    setTimeout(() => {
+      dialogDelete.close();
+      displayLoggedOutUI();
+    }, 2000);
     //window.location.reload();
     //hideLogin();
-    displayLoggedOutUI();
-    dialogDelete.close();
   }
 }
 
@@ -441,6 +454,10 @@ function setEventListeners() {
     if (!userData) {
       alert("User not logged in.");
     } else {
+      document.getElementById(
+        "delete-user"
+      ).innerHTML = `User: ${userData.email}`;
+
       dialogDelete.showModal();
     }
   });

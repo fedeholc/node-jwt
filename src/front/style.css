@@ -17,7 +17,8 @@
     font-family: monospace, sans-serif;
   }
 
-  h2 {
+  h2,
+  h3 {
     margin: 0;
     padding: 0;
   }
@@ -185,7 +186,8 @@
   #login-info,
   #code-info,
   #change-info,
-  #signup-info {
+  #signup-info,
+  #delete-info {
     max-width: 250px;
     color: red;
     font-size: 0.8rem;
