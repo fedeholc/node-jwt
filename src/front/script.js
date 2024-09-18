@@ -29,9 +29,7 @@ const btnLoginGH = document.getElementById("btn-login-gh");
 const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
 
-const divInfo = document.getElementById("info");
-const userContent = document.getElementById("user-content");
-const formLogin = document.getElementById("login-form");
+const userInfoDisplay = document.getElementById("user-info-display");
 
 document.addEventListener("DOMContentLoaded", main);
 
@@ -64,7 +62,7 @@ async function loadUserData() {
         return;
       }
       userData = data.user;
-      userContent.innerHTML = `
+      userInfoDisplay.innerHTML = `
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
 
@@ -76,6 +74,12 @@ async function loadUserData() {
   }
 }
 
+function vibrate(element) {
+  element.classList.add("vibrate");
+  setTimeout(() => {
+    element.classList.remove("vibrate");
+  }, 300);
+}
 async function handleLogin(event) {
   event.preventDefault();
 
@@ -93,6 +97,8 @@ async function handleLogin(event) {
     password === ""
   ) {
     divLoginInfo.innerHTML = `Enter a valid email and password.`;
+    vibrate(divLoginInfo);
+    vibrate(btnLogin);
     return;
   }
 
@@ -105,15 +111,20 @@ async function handleLogin(event) {
     body: JSON.stringify({ email: email, pass: password }),
   });
 
+  console.log("holi1");
+
   if (!response.ok) {
     divLoginInfo.innerHTML = `Your email or password is incorrect. Please try again.`;
+    divLoginInfo.classList.add("vibrate");
+    vibrate(divLoginInfo);
+    vibrate(btnLogin);
     return;
   }
 
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    userContent.innerHTML = `
+    userInfoDisplay.innerHTML = `
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
     displayLoggedInUI();
@@ -208,7 +219,7 @@ async function handleSignUp(event) {
       }
 
       userData = data.user;
-      userContent.innerHTML = `
+      userInfoDisplay.innerHTML = `
       <p>User successfully registered.</p>
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
@@ -343,7 +354,6 @@ async function handleSendCode(e) {
       return;
     }
 
-    //TODO: ojo, corregir
     let response = await fetch(apiURL.RESET_PASS, {
       method: "POST",
       credentials: "include",
@@ -361,8 +371,6 @@ async function handleSendCode(e) {
     }
 
     if (response.ok) {
-      //TODO: mensaje ok code-info
-
       codeInfo.innerHTML = `The secuirity code was sent to your email. 
       Check your inbox.`;
       codeInfo.style.color = "green";
