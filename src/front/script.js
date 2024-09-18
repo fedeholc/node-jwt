@@ -43,8 +43,9 @@ async function loadUserData() {
     });
 
     if (!response.ok) {
+      let data = await response.json();
       console.log(
-        `No user authenticated: ${response.status} ${response.statusText}`
+        `No user authenticated: ${response.status} ${response.statusText} - ${data.error}`
       );
       displayLoggedOutUI();
       return;
@@ -106,8 +107,6 @@ async function handleLogin(event) {
     },
     body: JSON.stringify({ email: email, pass: password }),
   });
-
-  console.log("holi1");
 
   if (!response.ok) {
     divLoginInfo.innerHTML = `Your email or password is incorrect. Please try again.`;
@@ -276,7 +275,7 @@ async function handleChangePass(event) {
   let changeInfo = document.querySelector("#change-info");
 
   let codeInput = document.querySelector("#reset-code");
-  
+
   let code = document.querySelector("#reset-code").value;
   let pass = document.querySelector("#reset-password").value;
   let confirmPass = document.querySelector("#reset-confirm-password").value;
