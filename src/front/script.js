@@ -247,15 +247,12 @@ async function handleDeleteUser(event) {
 
   if (!response.ok) {
     let data = await response.json();
-    deleteInfo.innerHTML = `
-      Error deleting user: ${data.error}`;
+    deleteInfo.innerHTML = `Error deleting user: ${data.error}`;
     return;
   }
 
   if (response.ok) {
-    deleteInfo.innerHTML = `
-      User successfully deleted.`;
-
+    deleteInfo.innerHTML = `User successfully deleted.`;
     deleteInfo.style.color = "green";
     deleteInfo.style.fontWeight = "bold";
 
@@ -285,22 +282,19 @@ async function handleChangePass(event) {
 
   try {
     if (!codeInput.validity.valid) {
-      changeInfo.innerHTML = `
-        Enter a code with six characters.`;
+      changeInfo.innerHTML = `Enter a code with six characters.`;
       return;
     }
 
     //TODO: validar tamaño pass?
 
     if (pass === "" || confirmPass === "" || email === "") {
-      changeInfo.innerHTML = `
-        Please fill in all fields.`;
+      changeInfo.innerHTML = `Please fill in all fields.`;
       return;
     }
 
     if (pass !== confirmPass) {
-      changeInfo.innerHTML = `
-        Passwords don't match.`;
+      changeInfo.innerHTML = `Passwords don't match.`;
       return;
     }
 
@@ -312,18 +306,10 @@ async function handleChangePass(event) {
       },
       body: JSON.stringify({ email: email, pass: pass, code: code }),
     });
-    console.log("Change Password Response: ", response);
 
     if (!response.ok) {
       let data = await response.json();
-      console.log(
-        "Error changing password: ",
-        data.error,
-        response.statusText,
-        response.status
-      );
-      changeInfo.innerHTML = `
-      Error changing password. ${data.error}`;
+      changeInfo.innerHTML = `Error changing password. ${data.error}`;
       return false;
     }
 
@@ -331,10 +317,8 @@ async function handleChangePass(event) {
       changeInfo.style.color = "green";
       changeInfo.style.fontWeight = "bold";
 
-      changeInfo.innerHTML = `
-      Password successfully changed.`;
+      changeInfo.innerHTML = `Password successfully changed.`;
 
-      //delay 2 seconds
       setTimeout(() => {
         dialogReset.close();
         return true;
@@ -342,8 +326,7 @@ async function handleChangePass(event) {
     }
   } catch (error) {
     console.error("Error changing password: ", error);
-    changeInfo.innerHTML = `
-    Error changing password. Try again later.`;
+    changeInfo.innerHTML = `Error changing password. Try again later.`;
   }
 }
 
@@ -356,9 +339,7 @@ async function handleSendCode(e) {
     let email = inputEmail.value;
 
     if (!inputEmail.validity.valid) {
-      codeInfo.innerHTML = `
-        Enter a valid email.`;
-
+      codeInfo.innerHTML = `Enter a valid email.`;
       return;
     }
 
@@ -373,26 +354,24 @@ async function handleSendCode(e) {
     });
     console.log("Reset Response: ", response);
 
-    //TODO: ver de los errores que mando en express cuales les puse data para mostrar.
     if (!response.ok) {
       let data = await response.json();
-      codeInfo.innerHTML = `
-      Error sending code. ${data.error}`;
+      codeInfo.innerHTML = `Error sending code. ${data.error}`;
       return false;
     }
 
     if (response.ok) {
       //TODO: mensaje ok code-info
 
-      codeInfo.innerHTML = `
-      The secuirity code was sent to your email. Check your inbox.`;
+      codeInfo.innerHTML = `The secuirity code was sent to your email. 
+      Check your inbox.`;
       codeInfo.style.color = "green";
       codeInfo.style.fontWeight = "bold";
+      return true;
     }
   } catch (error) {
     console.error("Error sending code: ", error);
-    codeInfo.innerHTML = `
-    Error sending code. Try again later.`;
+    codeInfo.innerHTML = `Error sending code. Try again later.`;
   }
 }
 
