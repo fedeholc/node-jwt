@@ -21,6 +21,7 @@ const btnSendCode = document.getElementById("btn-send-code");
 
 const btnLogout = document.getElementById("btn-logout");
 const btnLoginGH = document.getElementById("btn-login-gh");
+const btnLoginGG = document.getElementById("btn-login-gg");
 
 const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
@@ -139,6 +140,21 @@ async function handleLoginGH(event) {
   let data = await response.json();
 
   window.location.href = data.ghauth;
+}
+
+
+async function handleLoginGG(event) {
+  event.preventDefault();
+  let response = await fetch(apiURL.AUTH_GOOGLE, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  let data = await response.json();
+
+  window.location.href = data.gauth;
 }
 
 async function handleLogOut() {
@@ -405,6 +421,8 @@ function setEventListeners() {
   btnLogout.addEventListener("click", handleLogOut);
 
   btnLoginGH.addEventListener("click", handleLoginGH);
+
+  btnLoginGG.addEventListener("click", handleLoginGG);
 
   btnLogin.addEventListener("click", handleLogin);
 

@@ -22,6 +22,8 @@ const apiBase = {
 const apiEP = {
   AUTH_GITHUB: "/auth/github",
   AUTH_GITHUB_CALLBACK: "/auth/github/callback",
+  AUTH_GOOGLE: "/auth/google",
+  AUTH_GOOGLE_CALLBACK: "/auth/google/callback",
   CHANGE_PASS: "/change-pass",
   DELETE_USER: "/delete",
   LOGIN: "/login",
@@ -37,6 +39,8 @@ const apiURL = {
   BASE: apiBase[ENV],
   AUTH_GITHUB: apiBase[ENV] + apiEP.AUTH_GITHUB,
   AUTH_GITHUB_CALLBACK: apiBase[ENV] + apiEP.AUTH_GITHUB_CALLBACK,
+  AUTH_GOOGLE: apiBase[ENV] + apiEP.AUTH_GOOGLE,
+  AUTH_GOOGLE_CALLBACK: apiBase[ENV] + apiEP.AUTH_GOOGLE_CALLBACK,
   CHANGE_PASS: apiBase[ENV] + apiEP.CHANGE_PASS,
   DELETE_USER: apiBase[ENV] + apiEP.DELETE_USER,
   LOGIN: apiBase[ENV] + apiEP.LOGIN,

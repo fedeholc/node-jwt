@@ -8,11 +8,15 @@ import { handleLogin } from "./routes/handle-login.js";
 
 import { getUserByEmail } from "./utils-db.js";
 import { extractToken, verifyToken } from "./util-auth.js";
- 
+
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
 } from "./route-handlers/auth-github.js";
+import {
+  handleAuthGoogle,
+  handleAuthGoogleCallback,
+} from "./route-handlers/auth-google.js";
 import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
@@ -29,6 +33,10 @@ const app = configServer();
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 
 app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
+
+app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
+
+app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
 
