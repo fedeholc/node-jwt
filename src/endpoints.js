@@ -1,4 +1,5 @@
 export { dbURI, apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP };
+
 import process from "process";
 
 const ENV = process.env.NODE_ENV || "development";
@@ -59,3 +60,10 @@ const gitHubEP = {
   ACCESS_TOKEN: "https://github.com/login/oauth/access_token",
   USER: "https://api.github.com/user",
 };
+
+export const googleEP = {
+  AUTHORIZE: "https://accounts.google.com/o/oauth2/v2/auth",
+  ACCESS_TOKEN: "https://oauth2.googleapis.com/token",
+  USER: "https://www.googleapis.com/oauth2/v1/userinfo?alt=json", // O también puedes usar https://www.googleapis.com/oauth2/v3/userinfo
+}; //TODO: probar la otra url
+//TODO: definir el scope en la url de github, que lo habia quitado
