@@ -66,8 +66,8 @@ const gitHubEP = {
 };
 
 export const googleEP = {
-  AUTHORIZE: "https://accounts.google.com/o/oauth2/v2/auth",
+  AUTHORIZE: "https://accounts.google.com/o/oauth2/auth",
   ACCESS_TOKEN: "https://oauth2.googleapis.com/token",
-  USER: "https://www.googleapis.com/oauth2/v1/userinfo?alt=json", // O también puedes usar https://www.googleapis.com/oauth2/v3/userinfo
+  USER: "https://www.googleapis.com/oauth2/v3/userinfo", // O también puedes usar https://www.googleapis.com/oauth2/v3/userinfo
 }; //TODO: probar la otra url
 //TODO: definir el scope en la url de github, que lo habia quitado

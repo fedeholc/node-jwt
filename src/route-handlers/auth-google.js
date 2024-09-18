@@ -19,6 +19,7 @@ export function handleAuthGoogle(req, res) {
 export async function handleAuthGoogleCallback(req, res) {
   try {
     const googleCode = req.query.code;
+    console.log("googleCode", googleCode);
     if (!googleCode) {
       return res.status(500).send("No authorization code received");
     }
@@ -38,6 +39,8 @@ export async function handleAuthGoogleCallback(req, res) {
       }),
     });
 
+    console.log("gResponse", gResponse);
+
     if (!gResponse.ok) {
       return res
         .status(500)
@@ -53,7 +56,7 @@ export async function handleAuthGoogleCallback(req, res) {
 
     // Request Google user data
     const gUserResponse = await fetch(
-      `${googleEP.USER_INFO}?access_token=${gAccessToken}`,
+      `${googleEP.USER}?access_token=${gAccessToken}`,
       {
         method: "GET",
         headers: {
