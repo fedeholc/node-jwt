@@ -1,7 +1,5 @@
 // TODO: favicon
 
-// TODO: Revisar los dialoga, que los mensajes se muestren ahí, que no haya alerts, etc.
-
 // TODO: implementar fresh tokens. leer la conversacion con gpt, para ver el tema de cuando expira, cuando renovar, etc.
 
 import { apiURL } from "./endpoints-front.js";
@@ -239,11 +237,8 @@ async function handleSignUp(event) {
 
 async function handleDeleteUser(event) {
   event.preventDefault();
+
   let deleteInfo = document.querySelector("#delete-info");
-  if (!userData) {
-    alert("User not logged in.");
-    return;
-  }
   let email = userData.email;
   let password = document.querySelector("#delete-password").value;
 
@@ -439,14 +434,17 @@ function setEventListeners() {
 
   btnOpenDelete.addEventListener("click", () => {
     if (!userData) {
+      // Nunca debería entrar acá, no debería mostrarse el botón de delete account si no está logueado el usuario.
       alert("User not logged in.");
-    } else {
-      document.getElementById(
-        "delete-user"
-      ).innerHTML = `User: ${userData.email}`;
-
-      dialogDelete.showModal();
+      displayLoggedOutUI();
+      return;
     }
+
+    document.getElementById(
+      "delete-user"
+    ).innerHTML = `User: ${userData.email}`;
+
+    dialogDelete.showModal();
   });
 
   btnCloseDelete.addEventListener("click", () => {
