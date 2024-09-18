@@ -1,5 +1,3 @@
-// TODO: favicon
-
 // TODO: implementar fresh tokens. leer la conversacion con gpt, para ver el tema de cuando expira, cuando renovar, etc.
 
 import { apiURL } from "./endpoints-front.js";
@@ -278,9 +276,7 @@ async function handleChangePass(event) {
   let changeInfo = document.querySelector("#change-info");
 
   let codeInput = document.querySelector("#reset-code");
-  let passInput = document.querySelector("#reset-password");
-  let confirmInput = document.querySelector("#reset-confirm-password");
-
+  
   let code = document.querySelector("#reset-code").value;
   let pass = document.querySelector("#reset-password").value;
   let confirmPass = document.querySelector("#reset-confirm-password").value;
@@ -291,8 +287,6 @@ async function handleChangePass(event) {
       changeInfo.innerHTML = `Enter a code with six characters.`;
       return;
     }
-
-    //TODO: validar tamaño pass?
 
     if (pass === "" || confirmPass === "" || email === "") {
       changeInfo.innerHTML = `Please fill in all fields.`;

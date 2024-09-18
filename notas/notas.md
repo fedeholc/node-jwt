@@ -11,6 +11,7 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 - [ ] Poner todos los textos en ingles
 - [ ] Hacer todos los tests
 - [ ] poner colores (y algo más) en variables css
+- [ ] validar passwords y sus tamaños
 - [ ] implementar cambiar contraseña? (ahora solo se puede con reset)
 - [ ] leer web.dev sobre cookies
 - [ ] cuando escriba la explicacion del codigo, dar cuenta de los tradeoffs, explicar por qué cada eleccion. Ej: access token con o sin refresh, cuando renovar, etc.
