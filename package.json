@@ -7,7 +7,9 @@
   "scripts": {
     "test": "vitest",
     "test:file": "vitest run",
-    "start": "node --env-file=.env --watch ./src/app.js"
+    "fullstart": "gnome-terminal -- bash -c 'node --env-file=.env --watch ./src/app.js' && npm run httpserver && google-chrome http:127.0.0.1:8080",
+    "start": "node --env-file=.env --watch ./src/app.js",
+    "httpserver": "gnome-terminal -- bash -c 'npx http-server ./src/front'"
   },
   "author": "",
   "license": "ISC",

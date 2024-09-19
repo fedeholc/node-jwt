@@ -20,6 +20,14 @@ DB_PROD_URI=mydb.sqlite
 GITHUB_CLIENT_ID=xxxxxxxxxxxxxxxxxxx
 GITHUB_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+# Para login con Google
+GOOGLE_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXX
+
+# Para enviar emails
+GMAIL_USER=xxxxxxxxxxx@gmail.com
+GMAIL_PASS='xxxx xxxx xxxx xxxx'
+
 # opcional
 PORT=xxxx
 ```
