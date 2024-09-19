@@ -10,6 +10,7 @@ async function handleUserInfo(req, res) {
       try {
         let userJWT = await jwtVerify(req.cookies.jwtToken, secretKey);
         if (userJWT) {
+          //TODO: ojo devuelve la info del token pero no checkea si el usuario existe en la BD
           return res.status(200).json({ user: userJWT.payload.user });
         }
       } catch (error) {

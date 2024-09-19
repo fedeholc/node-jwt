@@ -28,6 +28,7 @@ import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 import { db, secretKey } from "./global-store.js";
 
+
 const app = configServer();
 
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
