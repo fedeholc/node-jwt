@@ -14,7 +14,9 @@ const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 function handleAuthGitHub(req, res) {
   req.session.returnTo = req.query.returnTo || req.get("Referer") || "/";
 
-  const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}`;
+  const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&scope=user:email&redirect_uri=${redirectURI}`;
+
+  //TODO: al pedir el permiso dice que es solo para el mail pero despues trae un poco mas de info, tal vez es todo el profile que es el minimo, checkiar
 
   res.status(200).json({ ghauth: githubAuthURL });
 }
@@ -71,6 +73,8 @@ async function handleAuthGitHubCallback(req, res) {
           `Error obtaining user data from GitHub: ${ghUserResponse.statusText}`
         );
     }
+
+    console.log("ghUserData", ghUserData);
 
     // Verifica si el usuario existe en la base de datos
     let userInDB = await getUserByEmail(db, ghUserData.email);
