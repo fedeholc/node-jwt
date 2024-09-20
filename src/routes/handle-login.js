@@ -7,7 +7,7 @@ import { secretKey } from "../global-store.js";
 export async function handleLogin(req, res) {
   try {
     const { pass, email } = req.body;
-    const userInDB = await getUserByEmail(db, email);
+    const userInDB = await db.getUserByEmail(email);
     if (
       userInDB &&
       email === userInDB.email &&

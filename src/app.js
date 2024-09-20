@@ -26,8 +26,8 @@ import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
-import { db, secretKey } from "./global-store.js";
-
+import { secretKey } from "./global-store.js";
+import { db } from "./db-adapter.js";
 
 const app = configServer();
 

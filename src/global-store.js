@@ -3,6 +3,7 @@
 import { getSecretKey } from "./secret-key.js";
 import { getDbInstance } from "./db.js";
 import { turso } from "./db.js";
+import { db as dbSqlite3 } from "./db-adapter.js";
 export const secretKey = getSecretKey();
-export const db = await getDbInstance();
+export const db = dbSqlite3;
 export const dbTurso = turso;

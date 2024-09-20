@@ -77,10 +77,9 @@ async function handleAuthGitHubCallback(req, res) {
     console.log("ghUserData", ghUserData);
 
     // Verifica si el usuario existe en la base de datos
-    let userInDB = await getUserByEmail(db, ghUserData.email);
+    let userInDB = await db.getUserByEmail(ghUserData.email);
     if (!userInDB) {
-      const id = await insertUser(
-        db,
+      const id = await db.insertUser(
         ghUserData.email,
         hashPassword(crypto.randomBytes(8).toString("hex"))
       );

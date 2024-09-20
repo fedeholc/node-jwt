@@ -1,6 +1,15 @@
+import sqlite3 from "sqlite3";
+import { dbURI } from "./endpoints.js";
+
 class DBInterface {
-  connect() {
-    throw new Error("El método 'connect()' debe ser implementado");
+  constructor() {
+    if (new.target === DBInterface) {
+      throw new TypeError("Cannot construct DBInterface instances directly");
+    }
+  }
+
+  createDbConnection(dbURI) {
+    throw new Error("El método 'createDbConnection()' debe ser implementado");
   }
 
   getData(query, params) {
@@ -27,14 +36,27 @@ class DBInterface {
   }
 }
 
-import sqlite3 from "sqlite3";
-
 export class dbSqlite3 extends DBInterface {
-  constructor() {
+  constructor(dbURI) {
     super();
-    this.db = null;
+    this.db = this.getDbInstance(dbURI);
+    console.log("DBx", this.db);
   }
-
+  getDbInstance(dbURI) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        console.log("DB URI", dbURI);
+        this.createDbConnection(dbURI)
+          .then((instance) => {
+            this.db = instance;
+            resolve(this.db);
+          })
+          .catch(reject);
+      } else {
+        resolve(this.db);
+      }
+    });
+  }
   async deleteUser(email) {
     return new Promise((resolve, reject) => {
       this.db.run("DELETE FROM user WHERE email = ?", email, (error) => {
@@ -63,6 +85,7 @@ export class dbSqlite3 extends DBInterface {
   }
 
   async getUserByEmail(email) {
+    console.log("this db", this.db);
     return new Promise((resolve, reject) => {
       this.db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
         if (error) {
@@ -72,7 +95,7 @@ export class dbSqlite3 extends DBInterface {
       });
     });
   }
-  async connect(filepath) {
+  async createDbConnection(filepath) {
     return new Promise((resolve, reject) => {
       this.db = new sqlite3.Database(filepath, (error) => {
         if (error) {
@@ -116,3 +139,5 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 }
+
+export const db = new dbSqlite3(dbURI);
