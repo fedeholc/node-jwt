@@ -57,6 +57,26 @@ async function insertUser(db, email, pass) {
   });
 }
 
+export async function insertUserTurso(db, email, pass) {
+  return new Promise(function (resolve, reject) {
+    try {
+      const result = db.execute({
+        sql: "INSERT INTO user (email, pass) VALUES (?,?)",
+        args: [email, pass],
+      });
+      console.log("result: ", result);
+      resolve(result);
+    } catch (error) {
+      console.error(error);
+      reject(error);
+    }
+  });
+}
+/* const result = await client.execute({
+  sql: "SELECT * FROM users WHERE id = ?",
+  args: [1],
+});
+ */
 /**
  * Update the user password
  * @param {Database} db - SQLite database object

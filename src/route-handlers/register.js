@@ -1,7 +1,7 @@
-import { insertUser, getUserByEmail } from "../utils-db.js";
+import { insertUser, getUserByEmail, insertUserTurso } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
-import { db, secretKey } from "../global-store.js";
+import { db, secretKey, dbTurso } from "../global-store.js";
 
 export async function handleRegister(req, res) {
   try {
@@ -16,7 +16,9 @@ export async function handleRegister(req, res) {
       return res.status(409).json({ error: "User or email already exist." });
     }
 
-    const id = await insertUser(db, email, hashPassword(pass));
+    //const id = await insertUser(db, email, hashPassword(pass));
+    //TODO: WIP
+    const id = await insertUserTurso(dbTurso, email, hashPassword(pass));
     const token = await generateToken(
       { user: { id: id, email: email } },
       secretKey
