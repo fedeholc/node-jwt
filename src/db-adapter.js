@@ -56,17 +56,7 @@ export class dbSqlite3 extends DBInterface {
     }
     return new Promise((resolve, reject) => {
       console.log("DB URI", dbURI);
-      this.createDbConnection(dbURI)
-        .then((instance) => {
-          resolve(instance);
-        })
-        .catch(reject);
-    });
-  }
-
-  async createDbConnection(filepath) {
-    return new Promise((resolve, reject) => {
-      let instance = new sqlite3.Database(filepath, (error) => {
+      let instance = new sqlite3.Database(dbURI, (error) => {
         if (error) {
           console.error("Error creating database:", error.message);
           reject(error);

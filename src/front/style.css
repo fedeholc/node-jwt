@@ -122,10 +122,7 @@
   }
 
 
-  form {
-    display: flex;
-    flex-direction: column;
-  }
+
 
   form div {
     display: flex;
@@ -193,6 +190,8 @@
     font-size: 0.8rem;
     text-align: center;
   }
+
+  
 
   .remember-me {
     display: flex;

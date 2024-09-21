@@ -6,8 +6,9 @@ import { dbURI } from "./endpoints.js";
 import process from "process";
 
 export const secretKey = getSecretKey();
-//export const db = new dbSqlite3(dbURI);
-export const db = new dbTurso(
+export const db = new dbSqlite3(dbURI);
+/* export const db = new dbTurso(
   process.env.TURSO_DATABASE_URL,
   process.env.TURSO_AUTH_TOKEN
 );
+ */

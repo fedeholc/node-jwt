@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <link rel="stylesheet" href="style.css">
-  <script src="script.js" type="module" defer></script>
+  <script src="script.js" type="module"></script>
 </head>
 
 <body>
@@ -71,17 +71,19 @@
       </div>
       <div id="signup-info"></div>
       <button id="btn-signup" type="submit">Sign Up</button>
+    </form>
   </dialog>
 
   <dialog id="dialog-delete">
     <span class="close-btn" id="close-delete">&times;</span>
-    <h2 id="delete-title">Delete Account</h2>
     <form id="delete-form">
       <h3 id="delete-user"></h3>
+
       <div>
         <label for="delete-password">Password</label>
         <input type="password" id="delete-password" name="delete-password" required>
       </div>
+
       <div id="delete-info"></div>
       <button id="btn-delete" type="submit">Delete Account</button>
     </form>
