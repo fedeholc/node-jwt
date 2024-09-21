@@ -6,7 +6,7 @@
 
 import { handleLogin } from "./routes/handle-login.js";
 
- import { extractToken, verifyToken } from "./util-auth.js";
+import { extractToken, verifyToken } from "./util-auth.js";
 
 import {
   handleAuthGitHub,
@@ -26,6 +26,8 @@ import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 import { db, secretKey } from "./global-store.js";
+
+checkEnvVariables();
 
 const app = configServer();
 
@@ -96,3 +98,33 @@ console.log("env", process.env.PORT);
 app.listen(process.env.PORT || 3000, () =>
   console.log(`Server running on port ${process.env.PORT || 3000}`)
 );
+
+function checkEnvVariables() {
+  const requiredEnvVars = [
+    "NODE_ENV",
+    "MY_SECRET_KEY",
+    "MY_SESSION_KEY",
+    "DB_DEV_URI",
+    "DB_TEST_URI",
+    "DB_PROD_URI",
+    "GITHUB_CLIENT_SECRET",
+    "GITHUB_CLIENT_ID",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GMAIL_USER",
+    "GMAIL_PASS",
+    "PORT",
+    "TURSO_DATABASE_URL",
+    "TURSO_AUTH_TOKEN",
+  ];
+
+  const missingEnvVars = requiredEnvVars.filter(
+    (envVar) => !process.env[envVar]
+  );
+
+  if (missingEnvVars.length > 0) {
+    throw new Error(
+      `Faltan las siguientes variables de entorno: ${missingEnvVars.join(", ")}`
+    );
+  }
+}
