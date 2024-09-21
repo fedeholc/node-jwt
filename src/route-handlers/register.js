@@ -1,7 +1,6 @@
-
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
-import { db, secretKey, dbTurso } from "../global-store.js";
+import { db, secretKey } from "../global-store.js";
 
 export async function handleRegister(req, res) {
   try {

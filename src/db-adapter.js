@@ -1,4 +1,5 @@
 import sqlite3 from "sqlite3";
+import { createClient } from "@libsql/client";
 
 class DBInterface {
   constructor() {
@@ -37,15 +38,14 @@ class DBInterface {
 }
 
 export class dbSqlite3 extends DBInterface {
- 
   constructor(dbURI) {
     super();
     this.db = null;
     this.dbURI = dbURI;
-    this.init();
+    this.#init();
   }
 
-  async init() {
+  async #init() {
     this.db = await this.#getDbInstance(this.dbURI);
     console.log("DBx", this.db, this.dbURI);
   }
@@ -61,6 +61,34 @@ export class dbSqlite3 extends DBInterface {
           resolve(instance);
         })
         .catch(reject);
+    });
+  }
+
+  async createDbConnection(filepath) {
+    return new Promise((resolve, reject) => {
+      let instance = new sqlite3.Database(filepath, (error) => {
+        if (error) {
+          console.error("Error creating database:", error.message);
+          reject(error);
+        } else {
+          console.log("Connection with SQLite has been established");
+          resolve(instance);
+        }
+      });
+    });
+  }
+
+  async closeDbConnection() {
+    return new Promise((resolve, reject) => {
+      this.db.close((error) => {
+        if (error) {
+          console.error("Error closing the database:", error.message);
+          reject(error);
+        } else {
+          console.log("Database connection closed");
+          resolve(true);
+        }
+      });
     });
   }
 
@@ -91,64 +119,16 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
-  async getUserByEmailX(email) {
-    console.log("this db", this.db);
-    const dbInstance = await this.getDbInstance(this.dbURI);
-    return new Promise((resolve, reject) => {
-      dbInstance.get(
-        "SELECT * FROM user WHERE email = ?",
-        email,
-        (error, row) => {
-          if (error) {
-            reject(error);
-          }
-          resolve(row);
-        }
-      );
-    });
-  }
-
   async getUserByEmail(email) {
     console.log("this db", this.db);
     return new Promise((resolve, reject) => {
-      this.db.get(
-        "SELECT * FROM user WHERE email = ?",
-        email,
-        (error, row) => {
-          if (error) {
-            console.log("Error getting user by email", error);
-            reject(error);
-          }
-          console.log("Row", row);
-          resolve(row);
-        }
-      );
-    });
-  }
-  async createDbConnection(filepath) {
-    return new Promise((resolve, reject) => {
-      let instance = new sqlite3.Database(filepath, (error) => {
+      this.db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
         if (error) {
-          console.error("Error creating database:", error.message);
+          console.log("Error getting user by email", error);
           reject(error);
-        } else {
-          console.log("Connection with SQLite has been established");
-          resolve(instance);
         }
-      });
-    });
-  }
-
-  closeDbConnection() {
-    return new Promise((resolve, reject) => {
-      this.db.close((error) => {
-        if (error) {
-          console.error("Error closing the database:", error.message);
-          reject(error);
-        } else {
-          console.log("Database connection closed");
-          resolve(true);
-        }
+        console.log("Row", row);
+        resolve(row);
       });
     });
   }
@@ -175,12 +155,26 @@ export class dbSqlite3 extends DBInterface {
 }
 
 export class dbTurso extends DBInterface {
-  constructor(turso) {
+  constructor(dbURI, authToken) {
     super();
-    this.turso = turso;
+    this.db = null;
+    this.dbURI = dbURI;
+    this.authToken = authToken;
+    this.#init();
   }
 
- 
+  async #init() {
+    this.db = await this.#getDbInstance(this.dbURI, this.authToken);
+    console.log("DBx turso", this.db, this.dbURI);
+  }
+
+  async #getDbInstance(dbURI, authToken) {
+    if (this.db) {
+      return this.db; // Retorna la instancia existente si ya está creada
+    }
+    let tursoDb = createClient({ url: dbURI, authToken: authToken });
+    return tursoDb;
+  }
 
   async insertUser(email, pass) {
     try {
@@ -190,6 +184,46 @@ export class dbTurso extends DBInterface {
       });
       console.log("typeof result: ", typeof result.lastInsertRowid);
       return Number(result.lastInsertRowid);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  async getUserByEmail(email) {
+    try {
+      const result = await this.db.execute({
+        sql: "SELECT * FROM user WHERE email = ?",
+        args: [email],
+      });
+      console.log("result", result);
+      if (!result.rows.length) {
+        return null;
+      }
+      return result.rows[0];
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  async deleteUser(email) {
+    try {
+      const result = await this.db.execute({
+        sql: "DELETE FROM user WHERE email = ?",
+        args: [email],
+      });
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  async updateUser(email, pass) {
+    try {
+      const result = await this.db.execute({
+        sql: "UPDATE user SET pass = ? WHERE email = ?",
+        args: [pass, email],
+      });
+      return result;
     } catch (error) {
       console.error(error);
       throw error;

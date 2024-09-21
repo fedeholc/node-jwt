@@ -6,8 +6,7 @@
 
 import { handleLogin } from "./routes/handle-login.js";
 
-import { getUserByEmail } from "./utils-db.js";
-import { extractToken, verifyToken } from "./util-auth.js";
+ import { extractToken, verifyToken } from "./util-auth.js";
 
 import {
   handleAuthGitHub,
