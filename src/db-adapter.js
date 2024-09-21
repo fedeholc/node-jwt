@@ -229,4 +229,15 @@ export class dbTurso extends DBInterface {
       throw error;
     }
   }
+  async closeDbConnection() {
+    this.db.close((error) => {
+      if (error) {
+        console.error("Error closing the database:", error.message);
+        return error;
+      } else {
+        console.log("Database connection closed");
+        return true;
+      }
+    });
+  }
 }
