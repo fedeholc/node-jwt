@@ -10,7 +10,7 @@ export async function handleResetPass(req, res) {
       return res.status(400).json({ error: "Email is required." });
     }
 
-    const user = await getUserByEmail(db, req.body.email);
+    const user = await db.getUserByEmail(req.body.email);
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }

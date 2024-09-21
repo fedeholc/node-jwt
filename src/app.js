@@ -26,8 +26,7 @@ import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
-import { secretKey } from "./global-store.js";
-import { db } from "./db-adapter.js";
+import { db, secretKey } from "./global-store.js";
 
 const app = configServer();
 
@@ -62,7 +61,7 @@ app.post(apiEP.REGISTER, handleRegister);
 // Otra opción sería hacer la verificación trabajando con sesiones y pasando
 // el usuario a través de la sesión (tiene sus ventajas y desventajas).
 app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
-  let user = getUserByEmail(db, req.payload.user.email);
+  let user = db.getUserByEmail(req.payload.user.email);
 
   // dada la info que viene en el token esta validación
   // podría no ser necesaria.

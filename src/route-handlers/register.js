@@ -1,4 +1,8 @@
-import { insertUser, getUserByEmail, insertUserWithTurso } from "../utils-db.js";
+import {
+  insertUser,
+  getUserByEmail,
+  insertUserWithTurso,
+} from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
 import { db, secretKey, dbTurso } from "../global-store.js";
@@ -11,14 +15,17 @@ export async function handleRegister(req, res) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    let existingUser = await getUserByEmail(db, email);
+    console.log(pass, email);
+    let existingUser = await db.getUserByEmail(email);
+
     if (existingUser) {
       return res.status(409).json({ error: "User or email already exist." });
     }
 
-    //const id = await insertUser(db, email, hashPassword(pass));
+    const id = await db.insertUser(email, hashPassword(pass));
+    console.log("id", id);
     //TODO: WIP
-    const id = await insertUserWithTurso(dbTurso, email, hashPassword(pass));
+    //const id = await insertUserWithTurso(dbTurso, email, hashPassword(pass));
     const token = await generateToken(
       { user: { id: id, email: email } },
       secretKey

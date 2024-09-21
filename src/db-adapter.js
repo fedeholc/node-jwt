@@ -39,10 +39,27 @@ class DBInterface {
 export class dbSqlite3 extends DBInterface {
   constructor(dbURI) {
     super();
-    this.db = this.getDbInstance(dbURI);
-    console.log("DBx", this.db);
+    this.dbURI = dbURI;
+    this.init();
   }
+
+  async init() {
+    this.db = await this.getDbInstance(this.dbURI);
+    console.log("DBx", this.db, this.dbURI);
+  }
+
   getDbInstance(dbURI) {
+    return new Promise((resolve, reject) => {
+      console.log("DB URI", dbURI);
+      this.createDbConnection(dbURI)
+        .then((instance) => {
+          this.db = instance;
+          resolve(this.db);
+        })
+        .catch(reject);
+    });
+  }
+  getDbInstance2(dbURI) {
     return new Promise((resolve, reject) => {
       if (!this.db) {
         console.log("DB URI", dbURI);
@@ -84,13 +101,32 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
+  async getUserByEmailX(email) {
+    console.log("this db", this.db);
+    const dbInstance = await this.getDbInstance(this.dbURI);
+    return new Promise((resolve, reject) => {
+      dbInstance.get(
+        "SELECT * FROM user WHERE email = ?",
+        email,
+        (error, row) => {
+          if (error) {
+            reject(error);
+          }
+          resolve(row);
+        }
+      );
+    });
+  }
+
   async getUserByEmail(email) {
     console.log("this db", this.db);
     return new Promise((resolve, reject) => {
       this.db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
         if (error) {
+          console.log("Error getting user by email", error);
           reject(error);
         }
+        console.log("Row", row);
         resolve(row);
       });
     });
@@ -123,15 +159,19 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
+  // por no tener la funcion del promise como arrow fallaba el list.lastID ya que apuntaba a otro scope, o sea al de la propia callback y no al this de la base de datos!
   async insertUser(email, pass) {
-    return new Promise(function (resolve, reject) {
+    console.log("this db en insert user", this.db);
+    return new Promise((resolve, reject) => {
       this.db.run(
         "INSERT INTO user (email, pass) VALUES (?, ?)",
         [email, pass],
         function (error) {
           if (error) {
+            console.log("Error inserting user", error);
             reject(error);
           } else {
+            console.log("this lastID", this.lastID);
             resolve(this.lastID);
           }
         }
@@ -140,4 +180,5 @@ export class dbSqlite3 extends DBInterface {
   }
 }
 
-export const db = new dbSqlite3(dbURI);
+/* export const db = new dbSqlite3(dbURI);
+console.log("db en db-adapter.js", db); */

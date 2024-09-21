@@ -5,6 +5,8 @@ import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
+import { db } from "../global-store.js";
+import { secretKey } from "../global-store.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;

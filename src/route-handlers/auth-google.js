@@ -75,7 +75,7 @@ export async function handleAuthGoogleCallback(req, res) {
     }
 
     // Verifica si el usuario existe en la base de datos
-    let userInDB = await getUserByEmail(db, gUserData.email);
+    let userInDB = await db.getUserByEmail(gUserData.email);
     if (!userInDB) {
       const id = await insertUser(
         db,

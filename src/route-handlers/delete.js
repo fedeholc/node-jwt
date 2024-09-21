@@ -10,7 +10,7 @@ export async function handleDeleteUser(req, res) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    let userResponse = await getUserByEmail(db, email);
+    let userResponse = await db.getUserByEmail(email);
     if (!userResponse) {
       return res.status(404).json({ error: "User not found." });
     }
@@ -19,7 +19,7 @@ export async function handleDeleteUser(req, res) {
       return res.status(401).json({ error: "Invalid password." });
     }
 
-    let response = await deleteUser(db, email);
+    let response = await db.deleteUser(email);
 
     if (!response) {
       return res.status(500).json({ error: "Error deleting user." });
