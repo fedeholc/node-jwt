@@ -4,7 +4,7 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 
 ## a futuro
 
-- [ ] uuid como identificador en BD?
+- [ ] uuid como identificador en BD? (creo que no, mejor index email)
 - [ ] PWA y service workers (validación token, actualización info al conectar, etc.), guardar config en local storage, etc.
 - [ ] validación de mails y passwords en los inputs, con colores, etc.
 - [ ] cambiar alerts por textos en la misma web

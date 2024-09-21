@@ -1,5 +1,4 @@
 import { hashPassword, generateToken } from "../util-auth.js";
-import { getUserByEmail } from "../utils-db.js";
 import process from "process";
 import { db } from "../global-store.js";
 import { secretKey } from "../global-store.js";

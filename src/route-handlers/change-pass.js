@@ -1,4 +1,3 @@
-import { getUserByEmail, updateUser } from "../utils-db.js";
 import { hashPassword } from "../util-auth.js";
 import { db } from "../global-store.js";
 

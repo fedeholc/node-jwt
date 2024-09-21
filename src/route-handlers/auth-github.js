@@ -3,7 +3,6 @@ export { handleAuthGitHub, handleAuthGitHubCallback };
 import crypto from "crypto";
 import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
-import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import { db } from "../global-store.js";
 import { secretKey } from "../global-store.js";

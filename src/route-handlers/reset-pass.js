@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { getUserByEmail } from "../utils-db.js";
 import process from "process";
 import crypto from "crypto";
 import { db } from "../global-store.js";

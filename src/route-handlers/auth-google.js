@@ -1,8 +1,6 @@
-//TODO REVISAR
 import crypto from "crypto";
 import process from "process";
 import { apiURL, googleEP } from "../endpoints.js";
-import { getUserByEmail, insertUser } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import { db, secretKey } from "../global-store.js";
 

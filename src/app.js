@@ -1,4 +1,4 @@
-//TODO: poner turso.
+//TODO: rehacer test con nuevo diseño DB
 
 //TODO: textos y diseño
 
