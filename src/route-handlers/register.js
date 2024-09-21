@@ -1,4 +1,4 @@
-import { insertUser, getUserByEmail, insertUserTurso } from "../utils-db.js";
+import { insertUser, getUserByEmail, insertUserWithTurso } from "../utils-db.js";
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
 import { db, secretKey, dbTurso } from "../global-store.js";
@@ -18,7 +18,7 @@ export async function handleRegister(req, res) {
 
     //const id = await insertUser(db, email, hashPassword(pass));
     //TODO: WIP
-    const id = await insertUserTurso(dbTurso, email, hashPassword(pass));
+    const id = await insertUserWithTurso(dbTurso, email, hashPassword(pass));
     const token = await generateToken(
       { user: { id: id, email: email } },
       secretKey
