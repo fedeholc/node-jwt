@@ -1,8 +1,4 @@
-import {
-  insertUser,
-  getUserByEmail,
-  insertUserWithTurso,
-} from "../utils-db.js";
+
 import { hashPassword, generateToken } from "../util-auth.js";
 import process from "process";
 import { db, secretKey, dbTurso } from "../global-store.js";

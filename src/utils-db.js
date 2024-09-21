@@ -57,24 +57,6 @@ async function insertUser(db, email, pass) {
   });
 }
 
-export async function insertUserWithTurso(db, email, pass) {
-  try {
-    const result = await db.execute({
-      sql: "INSERT INTO user (email, pass) VALUES (?,?)",
-      args: [email, pass],
-    });
-    console.log("typeof result: ", typeof result.lastInsertRowid);
-    return Number(result.lastInsertRowid);
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-/* const result = await client.execute({
-  sql: "SELECT * FROM users WHERE id = ?",
-  args: [1],
-});
- */
 /**
  * Update the user password
  * @param {Database} db - SQLite database object

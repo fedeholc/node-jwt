@@ -1,42 +1,44 @@
 import sqlite3 from "sqlite3";
-import { dbURI } from "./endpoints.js";
 
 class DBInterface {
   constructor() {
+    //
     if (new.target === DBInterface) {
       throw new TypeError("Cannot construct DBInterface instances directly");
     }
   }
 
   createDbConnection(dbURI) {
-    throw new Error("El método 'createDbConnection()' debe ser implementado");
+    throw new Error("The method 'createDbConnection()' must be implemented");
   }
 
   getData(query, params) {
-    throw new Error("El método 'obtenerDatos()' debe ser implementado");
+    throw new Error("The method 'getData()' must be implemented");
   }
 
   writeData(query, params) {
-    throw new Error("El método 'escribirDatos()' debe ser implementado");
+    throw new Error("The method 'writeData()' must be implemented");
   }
-  updateUser(email, pass) {
-    throw new Error("El método 'updateUser()' debe ser implementado");
+  updateUser() {
+    throw new Error("The method 'updateUser()' must be implemented");
   }
   deleteUser(email) {
-    throw new Error("El método 'deleteUser()' debe ser implementado");
+    throw new Error("The method 'deleteUser()' must be implemented");
   }
   closeDbConnection() {
-    throw new Error("El método 'closeDbConnection()' debe ser implementado");
+    throw new Error("The method 'closeDbConnection()' must be implemented");
   }
   insertUser(email, pass) {
-    throw new Error("El método 'insertUser()' debe ser implementado");
+    throw new Error("The method 'insertUser()' must be implemented");
   }
   getUserByEmail(email) {
-    throw new Error("El método 'getUserByEmail()' debe ser implementado");
+    throw new Error("The method 'getUserByEmail()' must be implemented");
   }
 }
 
 export class dbSqlite3 extends DBInterface {
+  static dbInstance = null;
+
   constructor(dbURI) {
     super();
     this.dbURI = dbURI;
@@ -44,17 +46,20 @@ export class dbSqlite3 extends DBInterface {
   }
 
   async init() {
-    this.db = await this.getDbInstance(this.dbURI);
+    this.db = await this.#getDbInstance(this.dbURI);
     console.log("DBx", this.db, this.dbURI);
   }
 
-  getDbInstance(dbURI) {
+  async #getDbInstance(dbURI) {
+    if (dbSqlite3.dbInstance) {
+      return dbSqlite3.dbInstance; // Retorna la instancia existente si ya está creada
+    }
     return new Promise((resolve, reject) => {
       console.log("DB URI", dbURI);
       this.createDbConnection(dbURI)
         .then((instance) => {
-          this.db = instance;
-          resolve(this.db);
+          dbSqlite3.dbInstance = instance; // Almacena la instancia en la propiedad estática
+          resolve(dbSqlite3.dbInstance);
         })
         .catch(reject);
     });
@@ -180,5 +185,34 @@ export class dbSqlite3 extends DBInterface {
   }
 }
 
-/* export const db = new dbSqlite3(dbURI);
-console.log("db en db-adapter.js", db); */
+export class dbTurso extends DBInterface {
+  constructor(turso) {
+    super();
+    this.turso = turso;
+  }
+
+  async getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+      this.turso
+        .query("SELECT * FROM user WHERE email = ?", [email])
+        .then((result) => {
+          resolve(result);
+        })
+        .catch(reject);
+    });
+  }
+
+  async insertUser(email, pass) {
+    try {
+      const result = await this.db.execute({
+        sql: "INSERT INTO user (email, pass) VALUES (?,?)",
+        args: [email, pass],
+      });
+      console.log("typeof result: ", typeof result.lastInsertRowid);
+      return Number(result.lastInsertRowid);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+}
