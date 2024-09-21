@@ -37,7 +37,7 @@ class DBInterface {
 }
 
 export class dbSqlite3 extends DBInterface {
-  static dbInstance = null;
+  static db = null;
 
   constructor(dbURI) {
     super();
@@ -46,42 +46,27 @@ export class dbSqlite3 extends DBInterface {
   }
 
   async init() {
-    this.db = await this.#getDbInstance(this.dbURI);
-    console.log("DBx", this.db, this.dbURI);
+    dbSqlite3.db = await this.#getDbInstance(this.dbURI);
+    console.log("DBx", dbSqlite3.db, this.dbURI);
   }
 
   async #getDbInstance(dbURI) {
-    if (dbSqlite3.dbInstance) {
-      return dbSqlite3.dbInstance; // Retorna la instancia existente si ya está creada
+    if (dbSqlite3.db) {
+      return dbSqlite3.db; // Retorna la instancia existente si ya está creada
     }
     return new Promise((resolve, reject) => {
       console.log("DB URI", dbURI);
       this.createDbConnection(dbURI)
         .then((instance) => {
-          dbSqlite3.dbInstance = instance; // Almacena la instancia en la propiedad estática
-          resolve(dbSqlite3.dbInstance);
+          resolve(instance);
         })
         .catch(reject);
     });
   }
-  getDbInstance2(dbURI) {
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        console.log("DB URI", dbURI);
-        this.createDbConnection(dbURI)
-          .then((instance) => {
-            this.db = instance;
-            resolve(this.db);
-          })
-          .catch(reject);
-      } else {
-        resolve(this.db);
-      }
-    });
-  }
+
   async deleteUser(email) {
     return new Promise((resolve, reject) => {
-      this.db.run("DELETE FROM user WHERE email = ?", email, (error) => {
+      dbSqlite3.db.run("DELETE FROM user WHERE email = ?", email, (error) => {
         if (error) {
           reject(error);
         } else {
@@ -92,7 +77,7 @@ export class dbSqlite3 extends DBInterface {
   }
   async updateUser(email, pass) {
     return new Promise((resolve, reject) => {
-      this.db.run(
+      dbSqlite3.db.run(
         "UPDATE user SET pass = ? WHERE email = ?",
         [pass, email],
         (error) => {
@@ -107,7 +92,7 @@ export class dbSqlite3 extends DBInterface {
   }
 
   async getUserByEmailX(email) {
-    console.log("this db", this.db);
+    console.log("this db", dbSqlite3.db);
     const dbInstance = await this.getDbInstance(this.dbURI);
     return new Promise((resolve, reject) => {
       dbInstance.get(
@@ -124,27 +109,31 @@ export class dbSqlite3 extends DBInterface {
   }
 
   async getUserByEmail(email) {
-    console.log("this db", this.db);
+    console.log("this db", dbSqlite3.db);
     return new Promise((resolve, reject) => {
-      this.db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
-        if (error) {
-          console.log("Error getting user by email", error);
-          reject(error);
+      dbSqlite3.db.get(
+        "SELECT * FROM user WHERE email = ?",
+        email,
+        (error, row) => {
+          if (error) {
+            console.log("Error getting user by email", error);
+            reject(error);
+          }
+          console.log("Row", row);
+          resolve(row);
         }
-        console.log("Row", row);
-        resolve(row);
-      });
+      );
     });
   }
   async createDbConnection(filepath) {
     return new Promise((resolve, reject) => {
-      this.db = new sqlite3.Database(filepath, (error) => {
+      let instance = new sqlite3.Database(filepath, (error) => {
         if (error) {
           console.error("Error creating database:", error.message);
           reject(error);
         } else {
           console.log("Connection with SQLite has been established");
-          resolve(this.db);
+          resolve(instance);
         }
       });
     });
@@ -152,7 +141,7 @@ export class dbSqlite3 extends DBInterface {
 
   closeDbConnection() {
     return new Promise((resolve, reject) => {
-      this.db.close((error) => {
+      dbSqlite3.db.close((error) => {
         if (error) {
           console.error("Error closing the database:", error.message);
           reject(error);
@@ -166,9 +155,9 @@ export class dbSqlite3 extends DBInterface {
 
   // por no tener la funcion del promise como arrow fallaba el list.lastID ya que apuntaba a otro scope, o sea al de la propia callback y no al this de la base de datos!
   async insertUser(email, pass) {
-    console.log("this db en insert user", this.db);
+    console.log("this db en insert user", dbSqlite3.db);
     return new Promise((resolve, reject) => {
-      this.db.run(
+      dbSqlite3.db.run(
         "INSERT INTO user (email, pass) VALUES (?, ?)",
         [email, pass],
         function (error) {
