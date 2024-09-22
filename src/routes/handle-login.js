@@ -30,6 +30,7 @@ export async function handleLogin(req, res) {
       res.status(401).json({ error: "Invalid credentials" });
     }
   } catch (error) {
+    console.log("error", error);
     return res.status(500).json({ error: `Error logging in user: ${error}` });
   }
 }

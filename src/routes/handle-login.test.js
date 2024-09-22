@@ -3,42 +3,26 @@ import express from "express";
 import request from "supertest";
 import { hashPassword, generateToken } from "../util-auth.js";
 import { handleLogin } from "./handle-login";
-import { getUserByEmail } from "../utils-db.js";
-import { getDbInstance } from "../db.js";
-import { getSecretKey } from "../secret-key.js";
-
-const secretKey = getSecretKey();
+import { db, secretKey } from "../global-store.js";
 
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
   generateToken: vi.fn(),
 }));
-vi.mock("../utils-db", async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    // your mocked methods
+
+vi.mock("../global-store", () => ({
+  db: {
     getUserByEmail: vi.fn(),
-  };
-});
-vi.mock("../db", () => ({
-  getDbInstance: vi.fn(),
+  },
+  secretKey: vi.fn(),
 }));
 
-vi.mock("../secret-key", () => ({
-  getSecretKey: vi.fn(),
-  getSessionKey: vi.fn(),
-}));
-
-getDbInstance.mockResolvedValue(undefined);
-const db = await getDbInstance();
-//const db = await getDbInstance();
 const app = express();
 app.use(express.json());
 
 app.post("/login", handleLogin);
 
-describe("Login Endpoint2", () => {
+describe("Login Endpoint (mocked)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -51,7 +35,7 @@ describe("Login Endpoint2", () => {
       pass: "hashedpassword",
     };
 
-    getUserByEmail.mockResolvedValue(mockUser);
+    db.getUserByEmail.mockResolvedValue(mockUser);
     hashPassword.mockReturnValue("hashedpassword");
     generateToken.mockResolvedValue("mocked-token");
 
@@ -66,7 +50,7 @@ describe("Login Endpoint2", () => {
       token: "mocked-token",
       user: { id: mockUser.id, email: mockUser.email },
     });
-    expect(getUserByEmail).toHaveBeenCalledWith(db, "test@example.com");
+    expect(db.getUserByEmail).toHaveBeenCalledWith("test@example.com");
     expect(hashPassword).toHaveBeenCalledWith("password123");
     expect(generateToken).toHaveBeenCalledWith(
       {
@@ -85,7 +69,7 @@ describe("Login Endpoint2", () => {
       pass: "hashedpassword",
     };
 
-    getUserByEmail.mockResolvedValue(mockUser);
+    db.getUserByEmail.mockResolvedValue(mockUser);
     hashPassword.mockReturnValue("hashedpassword");
 
     const response = await request(app).post("/login").send({
@@ -104,7 +88,7 @@ describe("Login Endpoint2", () => {
       pass: "correcthashedpassword",
     };
 
-    getUserByEmail.mockResolvedValue(mockUser);
+    db.getUserByEmail.mockResolvedValue(mockUser);
     hashPassword.mockReturnValue("wronghashedpassword");
 
     const response = await request(app).post("/login").send({
@@ -118,7 +102,7 @@ describe("Login Endpoint2", () => {
   });
 
   test("should handle case when user is not found", async () => {
-    getUserByEmail.mockResolvedValue(null);
+    db.getUserByEmail.mockResolvedValue(null);
 
     const response = await request(app).post("/login").send({
       user: "nonexistentuser",
