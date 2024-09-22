@@ -4,6 +4,8 @@
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
+//TODO: convendría crear la BD (con algunos datos) en caso de que no exista??
+
 import { handleLogin } from "./routes/handle-login.js";
 
 import { extractToken, verifyToken } from "./util-auth.js";
