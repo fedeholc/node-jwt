@@ -10,7 +10,6 @@ export async function handleRegister(req, res) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    console.log(pass, email);
     let existingUser = await db.getUserByEmail(email);
 
     if (existingUser) {
@@ -18,9 +17,7 @@ export async function handleRegister(req, res) {
     }
 
     const id = await db.insertUser(email, hashPassword(pass));
-    console.log("id", id);
-    //TODO: WIP
-    //const id = await insertUserWithTurso(dbTurso, email, hashPassword(pass));
+     
     const token = await generateToken(
       { user: { id: id, email: email } },
       secretKey

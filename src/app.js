@@ -1,10 +1,16 @@
-//TODO: rehacer test con nuevo diseño DB
-
-//TODO: textos y diseño
+//TODO: refresh/access token + remember me
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: convendría crear la BD (con algunos datos) en caso de que no exista??
+
+//TODO: tema environment para testing, ver si tener otra base para eso y definirla en el endpoint.
+
+//TODO: ver el tema port, que en algún lado está puesto que si no hay env use 3000, pero ojo porque ahora la auth de google lo tiene hardcodeado en la uri
+
+//TODO: habría que probar implementarlo en alguna app para ver que funcione todo bien en producción
+
+//TODO: eleccion de base de datos con .env
 
 import { handleLogin } from "./routes/handle-login.js";
 
