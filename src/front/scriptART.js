@@ -47,6 +47,10 @@ async function renewToken() {
   if (data.accessToken) {
     // Almacenar el nuevo access token (en memoria o localStorage)
     localStorage.setItem("accessToken", data.accessToken);
+    return data.accessToken;
+  } else {
+    console.log("Error renewing token: ", data);
+    return null;
   }
 }
 
@@ -60,18 +64,19 @@ async function fetchWithToken(url, options) {
   };
 
   let response = await fetch(url, options);
-
+  console.log("response status en fetchwithtoken: ", response.status);
   // Si la respuesta es 401, el token puede haber expirado
   if (response.status === 401) {
     // Intentar renovar el access token
     const newAccessToken = await renewToken();
-
+    console.log("newAccessToken: ", newAccessToken);
     if (newAccessToken) {
       // Guardar el nuevo token
       localStorage.setItem("accessToken", newAccessToken);
 
       // Reintentar la solicitud original con el nuevo token
       options.headers.Authorization = `Bearer ${newAccessToken}`;
+      console.log("Reintentando solicitud con nuevo token", options);
       response = await fetch(url, options);
     }
   }
@@ -184,7 +189,7 @@ async function handleLoginGH(event) {
   event.preventDefault();
   let response = await fetch(apiURL.AUTH_GITHUB, {
     method: "GET",
-    credentials: "include",
+    credentials: "include", //estás credentials sí son necesarias, para el envío de la cookie de session y el returnTo
     headers: {
       "Content-Type": "application/json",
     },
@@ -211,7 +216,7 @@ async function handleLoginGG(event) {
 async function handleLogOut() {
   let response = await fetch(apiURL.LOGOUT, {
     method: "GET",
-    credentials: "include",
+    credentials: "include", //acá también hacen falta manter las credentials para enviar la cookie de session
   });
   if (!response.ok) {
     console.log(`Error logging out. ${response.status} ${response.statusText}`);
@@ -255,7 +260,7 @@ async function handleSignUp(event) {
   try {
     let response = await fetch(apiURL.REGISTER, {
       method: "POST",
-      credentials: "include",
+      //credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -313,7 +318,7 @@ async function handleDeleteUser(event) {
 
   let response = await fetch(apiURL.DELETE_USER, {
     method: "DELETE",
-    credentials: "include",
+    //credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -371,7 +376,7 @@ async function handleChangePass(event) {
 
     let response = await fetch(apiURL.CHANGE_PASS, {
       method: "POST",
-      credentials: "include",
+      //credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -416,7 +421,7 @@ async function handleSendCode(e) {
 
     let response = await fetch(apiURL.RESET_PASS, {
       method: "POST",
-      credentials: "include",
+      credentials: "include", //no quitar las credentials, porque se necesita enviar la cookie de session
       headers: {
         "Content-Type": "application/json",
       },

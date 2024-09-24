@@ -25,12 +25,14 @@ export async function handleDeleteUser(req, res) {
     }
 
     //hacer logout y borrar sesion
-    res.clearCookie("jwtToken");
+    Object.keys(req.cookies).forEach((cookie) => {
+      res.clearCookie(cookie);
+    });
     req.session.destroy((err) => {
       if (err) {
         return res
           .status(500)
-          .json({ error: `Error destroying session: ${err}`});
+          .json({ error: `Error destroying session: ${err}` });
       }
     });
 

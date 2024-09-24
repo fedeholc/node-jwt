@@ -43,6 +43,10 @@ import {
   handleAuthGitHubART,
   handleAuthGitHubCallbackART,
 } from "./route-handlers/auth-githubART.js";
+import {
+  handleAuthGoogleART,
+  handleAuthGoogleCallbackART,
+} from "./route-handlers/auth-googleART.js";
 
 checkEnvVariables();
 
@@ -54,8 +58,11 @@ const app = configServer();
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHubART);
 app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallbackART);
 
-app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
-app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
+//app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
+//app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
+
+app.get(apiEP.AUTH_GOOGLE, handleAuthGoogleART);
+app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallbackART);
 
 //app.get(apiEP.USER_INFO, handleUserInfo);
 app.get(apiEP.USER_INFO, handleUserInfoART);

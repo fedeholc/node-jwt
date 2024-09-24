@@ -89,7 +89,7 @@ async function handleAuthGitHubCallbackART(req, res) {
     }
 
     const refreshToken = await genRefreshToken(
-      { user: { id: userInDB.id, email: userInDB.email } },
+      { user: req.session.user },
       secretKey
     );
 
