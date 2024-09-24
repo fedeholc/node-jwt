@@ -1,4 +1,11 @@
-export { extractToken, generateToken, hashPassword, verifyToken };
+export {
+  extractToken,
+  genAccessToken,
+  genRefreshToken,
+  generateToken,
+  hashPassword,
+  verifyToken,
+};
 
 import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
@@ -15,6 +22,22 @@ async function generateToken(payload, secretKey) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("1h")
+    .sign(secretKey);
+}
+
+async function genAccessToken(payload, secretKey) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("15m")
+    .sign(secretKey);
+}
+
+async function genRefreshToken(payload, secretKey) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
     .sign(secretKey);
 }
 
@@ -42,11 +65,10 @@ function verifyToken(secretKey) {
       req.payload = await jwtVerify(token, secretKey);
       next();
     } catch (error) {
-      return res.status(401).json({ error: `Invalid Token: ${error}` });
+      return res.status(401).json({ error: `Invalid Token: ${error}` }); //TODO: debería ser 403?
     }
   };
 }
-
 
 /**
  * Middleware to extract the token from the Authorization header

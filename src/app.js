@@ -34,22 +34,68 @@ import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 import { db, secretKey } from "./global-store.js";
+import { jwtVerify } from "jose";
+import { genAccessToken } from "./util-auth.js";
+import { handleLoginART } from "./routes/handle-login-ART.js";
+import { handleRegisterART } from "./route-handlers/registerART.js";
+import { handleUserInfoART } from "./route-handlers/user-infoART.js";
+import {
+  handleAuthGitHubART,
+  handleAuthGitHubCallbackART,
+} from "./route-handlers/auth-githubART.js";
 
 checkEnvVariables();
 
 const app = configServer();
 
-app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
+//app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
+//app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
-app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
+app.get(apiEP.AUTH_GITHUB, handleAuthGitHubART);
+app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallbackART);
 
 app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
-
 app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
-app.get(apiEP.USER_INFO, handleUserInfo);
+//app.get(apiEP.USER_INFO, handleUserInfo);
+app.get(apiEP.USER_INFO, handleUserInfoART);
 
-app.post(apiEP.LOGIN, handleLogin);
+//app.post(apiEP.LOGIN, handleLogin);
+app.post(apiEP.LOGIN, handleLoginART);
+
+app.post("/refresh-token", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(403).json({ message: "Refresh token no proporcionado" });
+  }
+
+  // Verificar el refresh token
+  try {
+    let response = await jwtVerify(refreshToken, secretKey);
+    console.log("response jwt verify: ", response);
+
+    if (!response) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    // Generar un nuevo access token
+    const newAccessToken = await genAccessToken(
+      {
+        user: {
+          id: response.payload.user.id,
+          email: response.payload.user.email,
+        },
+      },
+      secretKey
+    );
+    console.log("newAccessToken: ", newAccessToken);
+    // Enviar el nuevo access token al cliente
+    res.status(200).json({ accessToken: newAccessToken });
+  } catch (error) {
+    return res.status(403).json({ message: `Invalid refresh token. ${error}` });
+  }
+});
 
 app.get(apiEP.LOGOUT, handleLogOut);
 
@@ -64,7 +110,8 @@ app.post(apiEP.CHANGE_PASS, handleChangePass);
  * Si se registran con GitHub, el insert en la base de datos y el token, se
  * generan en handleAuthGitHubCallback.
  */
-app.post(apiEP.REGISTER, handleRegister);
+//app.post(apiEP.REGISTER, handleRegister);
+app.post(apiEP.REGISTER, handleRegisterART);
 
 // Ruta protegida (requiere token)
 // Otra opción sería hacer la verificación trabajando con sesiones y pasando
