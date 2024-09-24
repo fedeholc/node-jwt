@@ -71,9 +71,8 @@ async function fetchWithToken(url, options) {
 
   if (!accessToken || isTokenExpired(accessToken)) {
     accessToken = await renewToken();
-
     if (accessToken) {
-      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("accessToken", JSON.stringify(accessToken));
     }
   }
 
@@ -102,20 +101,17 @@ async function fetchWithToken2(url, options) {
   };
 
   let response = await fetch(url, options);
-  console.log("response status en fetchwithtoken: ", response.status);
 
   // Si la respuesta es 401, el token puede haber expirado
   if (response.status === 401) {
     // Intentar renovar el access token
     const newAccessToken = await renewToken();
-    console.log("newAccessToken: ", newAccessToken);
     if (newAccessToken) {
       // Guardar el nuevo token
-      localStorage.setItem("accessToken", newAccessToken);
+      localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
 
       // Reintentar la solicitud original con el nuevo token
       options.headers.Authorization = `Bearer ${newAccessToken}`;
-      console.log("Reintentando solicitud con nuevo token", options);
       response = await fetch(url, options);
     }
   }
@@ -124,10 +120,6 @@ async function fetchWithToken2(url, options) {
 
 async function loadUserData() {
   try {
-    let accessToken = localStorage.getItem("accessToken");
-
-    console.log("Access Token: ", accessToken);
-
     //TODO: ojo, revisar donde se estan enviando las credentials(cookies), porque no debería hacer falta salvo para renovar el token, sino vamos a estar mandando siempre el refresh tambien
     let response = await fetchWithToken(apiURL.USER_INFO, {
       method: "GET",
@@ -135,9 +127,8 @@ async function loadUserData() {
     });
 
     if (!response.ok) {
-      let data = await response.json();
       console.log(
-        `No user authenticated: ${response.status} ${response.statusText} - ${data.error}`
+        `No user authenticated: ${response.status} ${response.statusText}`
       );
       displayLoggedOutUI();
       return;
@@ -218,7 +209,7 @@ async function handleLogin(event) {
 
     console.log("response data: ", data);
 
-    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
 
     return;
   }
@@ -331,9 +322,7 @@ async function handleSignUp(event) {
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
 
-      console.log("response data: ", data);
-
-      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
 
       displayLoggedInUI();
 
@@ -466,7 +455,6 @@ async function handleSendCode(e) {
       },
       body: JSON.stringify({ email: email }),
     });
-    console.log("Reset Response: ", response);
 
     if (!response.ok) {
       let data = await response.json();

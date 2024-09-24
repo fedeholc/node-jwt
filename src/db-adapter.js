@@ -1,5 +1,6 @@
 import sqlite3 from "sqlite3";
 import { createClient } from "@libsql/client";
+import { dbURI } from "./endpoints.js";
 
 class DBInterface {
   constructor() {
@@ -35,37 +36,35 @@ class DBInterface {
   getUserByEmail(email) {
     throw new Error("The method 'getUserByEmail()' must be implemented");
   }
+  createTables() {
+    throw new Error("The method 'createTables()' must be implemented");
+  }
 }
 
 export class dbSqlite3 extends DBInterface {
   constructor(dbURI) {
     super();
-    this.db = null;
     this.dbURI = dbURI;
+    this.db = null;
     this.#init();
   }
 
-  async #init() {
-    this.db = await this.#getDbInstance(this.dbURI);
+  #init() {
+    this.db = this.#getDbInstance(this.dbURI);
     console.log("DBx", this.db, this.dbURI);
   }
 
-  async #getDbInstance(dbURI) {
+  #getDbInstance(dbURI) {
     if (this.db) {
       return this.db; // Retorna la instancia existente si ya está creada
     }
-    return new Promise((resolve, reject) => {
-      console.log("DB URI", dbURI);
-      let instance = new sqlite3.Database(dbURI, (error) => {
-        if (error) {
-          console.error("Error creating database:", error.message);
-          reject(error);
-        } else {
-          console.log("Connection with SQLite has been established");
-          resolve(instance);
-        }
-      });
-    });
+    try {
+      let instance = new sqlite3.Database(dbURI);
+      return instance;
+    } catch (error) {
+      console.error("Error creating database", error);
+      throw error;
+    }
   }
 
   async closeDbConnection() {
@@ -140,6 +139,46 @@ export class dbSqlite3 extends DBInterface {
           }
         }
       );
+    });
+  }
+
+  async createTables() {
+    console.log("this.db", this.db);
+    return new Promise((resolve, reject) => {
+      this.db.serialize(() => {
+        this.db.run(
+          `CREATE TABLE IF NOT EXISTS user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            pass TEXT NOT NULL
+          )`,
+          (error) => {
+            if (error) {
+              console.error("Error creating 'user' table:", error.message);
+              reject(error); // Rechaza la promesa si hay un error
+              return; // Detiene la ejecución
+            } else {
+              console.log("'user' table created");
+            }
+          }
+        );
+
+        this.db.run(
+          `CREATE TABLE IF NOT EXISTS denylist (
+            token TEXT PRIMARY KEY,
+            expiration INTEGER
+          )`,
+          (error) => {
+            if (error) {
+              console.error("Error creating 'denylist' table:", error.message);
+              reject(error); // Rechaza la promesa si hay un error
+            } else {
+              console.log("'denylist' table created");
+              resolve(true); // Resuelve la promesa cuando ambas tablas hayan sido creadas
+            }
+          }
+        );
+      });
     });
   }
 }

@@ -31,7 +31,7 @@ import {
 import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
-import { apiEP } from "./endpoints.js";
+import { apiEP, dbURI } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
@@ -54,8 +54,11 @@ import {
 
 checkEnvVariables();
 
+db.createTables();
+
 const app = configServer();
 
+//db.createTables();
 //app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 //app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
