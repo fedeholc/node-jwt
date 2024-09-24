@@ -1,26 +1,15 @@
+/* eslint-disable no-unused-vars */
 import sqlite3 from "sqlite3";
 import { createClient } from "@libsql/client";
 
 class DBInterface {
   constructor() {
-    //
     if (new.target === DBInterface) {
       throw new TypeError("Cannot construct DBInterface instances directly");
     }
   }
-
-  createDbConnection(dbURI) {
-    throw new Error("The method 'createDbConnection()' must be implemented");
-  }
-
-  getData(query, params) {
-    throw new Error("The method 'getData()' must be implemented");
-  }
-
-  writeData(query, params) {
-    throw new Error("The method 'writeData()' must be implemented");
-  }
-  updateUser() {
+ 
+  updateUser(email, pass) {
     throw new Error("The method 'updateUser()' must be implemented");
   }
   deleteUser(email) {
