@@ -1,6 +1,5 @@
 import sqlite3 from "sqlite3";
 import { createClient } from "@libsql/client";
-import { dbURI } from "./endpoints.js";
 
 class DBInterface {
   constructor() {
@@ -192,12 +191,12 @@ export class dbTurso extends DBInterface {
     this.#init();
   }
 
-  async #init() {
-    this.db = await this.#getDbInstance(this.dbURI, this.authToken);
+  #init() {
+    this.db = this.#getDbInstance(this.dbURI, this.authToken);
     console.log("DBx turso", this.db, this.dbURI);
   }
 
-  async #getDbInstance(dbURI, authToken) {
+  #getDbInstance(dbURI, authToken) {
     if (this.db) {
       return this.db; // Retorna la instancia existente si ya está creada
     }
@@ -267,6 +266,26 @@ export class dbTurso extends DBInterface {
         console.log("Database connection closed");
         return true;
       }
+    });
+  }
+
+  async createTables() {
+    console.log("this.db turso", this.db);
+    this.db.execute({
+      sql: `CREATE TABLE IF NOT EXISTS user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            pass TEXT NOT NULL
+          )`,
+      args: [],
+    });
+
+    this.db.execute({
+      sql: `CREATE TABLE IF NOT EXISTS denylist (
+            token TEXT PRIMARY KEY,
+            expiration INTEGER
+          )`,
+      args: [],
     });
   }
 }
