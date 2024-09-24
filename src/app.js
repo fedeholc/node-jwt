@@ -1,4 +1,4 @@
-//TODO: refresh/access token + remember me
+//TODO: pendiente blacklist, expiracion, + remember me
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
