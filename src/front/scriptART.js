@@ -92,7 +92,7 @@ async function loadUserData() {
     //TODO: ojo, revisar donde se estan enviando las credentials(cookies), porque no debería hacer falta salvo para renovar el token, sino vamos a estar mandando siempre el refresh tambien
     let response = await fetchWithToken(apiURL.USER_INFO, {
       method: "GET",
-      //credentials: "include",
+      credentials: "omit",
     });
 
     if (!response.ok) {
@@ -154,7 +154,7 @@ async function handleLogin(event) {
 
   let response = await fetch(apiURL.LOGIN, {
     method: "POST",
-    //credentials: "include",
+    credentials: "omit",
     headers: {
       "Content-Type": "application/json",
     },
@@ -260,7 +260,7 @@ async function handleSignUp(event) {
   try {
     let response = await fetch(apiURL.REGISTER, {
       method: "POST",
-      //credentials: "include",
+      credentials: "omit",
       headers: {
         "Content-Type": "application/json",
       },
@@ -318,7 +318,7 @@ async function handleDeleteUser(event) {
 
   let response = await fetch(apiURL.DELETE_USER, {
     method: "DELETE",
-    //credentials: "include",
+    credentials: "omit",
     headers: {
       "Content-Type": "application/json",
     },
@@ -376,7 +376,7 @@ async function handleChangePass(event) {
 
     let response = await fetch(apiURL.CHANGE_PASS, {
       method: "POST",
-      //credentials: "include",
+      credentials: "omit",
       headers: {
         "Content-Type": "application/json",
       },
