@@ -18,6 +18,16 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 
 ## Aprendizajes / Ideas
 
+### estrategias y tradeoffs
+
+- access token con o sin refresh
+- cuando renovar el access token, si antes de que expire o cuando ya expiró
+- si guardar el refresh token en una cookie o en el local storage
+- si hacer el refresh token con un tiempo de vida largo o corto, cuando renovarlo
+- en teoría el access token junto con el refresh token, evitan el tener que consultar la base de datos para cada request, solo se consulta la base de datos cuando se renueva el access token? (o cuando se renueva el refresh token?)
+- el refresh token también permite las blacklists de tokens (ver).
+- el jwt se puede decodificar en el cliente (no su firma), por ejemplo para ver su fecha de expiración, etc. Por eso no se debe guardar información sensible en el jwt.
+
 ### Auth y offline
 
 - En principio ahora no tiene sentido una funcionalidad de auth offline porque si no hay conexión a internet no va a poder acceder a la web. Tendria sentido en una webapp que se puede usar offline, como fotoYOP o foto-v, pero para eso primer tendría que desarrollar la parte de pwa y service workers para vanilla js.

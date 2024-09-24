@@ -23,6 +23,8 @@ export async function handleLoginART(req, res) {
         { user: { id: userInDB.id, email: userInDB.email } },
         secretKey
       );
+
+      //TODO: acá estoy generando el refresh cada vez que se loguea, ¿debería hacerlo solo si está por expirar?
       const refreshToken = await genRefreshToken(
         { user: { id: userInDB.id, email: userInDB.email } },
         secretKey

@@ -1,5 +1,7 @@
 //TODO: pendiente blacklist, expiracion, + remember me
 
+//TODO: la cookie del refresh la estoy mandando firmada? hace falta si ya está firmado el token?
+
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: convendría crear la BD (con algunos datos) en caso de que no exista??

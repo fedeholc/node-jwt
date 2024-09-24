@@ -43,18 +43,56 @@ async function renewToken() {
     credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
   });
   const data = await response.json();
-  console.log("Renew token data: ", data);
   if (data.accessToken) {
     // Almacenar el nuevo access token (en memoria o localStorage)
     localStorage.setItem("accessToken", data.accessToken);
     return data.accessToken;
   } else {
-    console.log("Error renewing token: ", data);
     return null;
   }
 }
 
+function isTokenExpired(token) {
+  if (token) {
+    try {
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decodedToken.exp < currentTime;
+    } catch (error) {
+      console.error("Error decoding token: ", error);
+      return true;
+    }
+  }
+  return true;
+}
+
 async function fetchWithToken(url, options) {
+  let accessToken = JSON.parse(localStorage.getItem("accessToken"));
+
+  if (!accessToken || isTokenExpired(accessToken)) {
+    accessToken = await renewToken();
+
+    if (accessToken) {
+      localStorage.setItem("accessToken", accessToken);
+    }
+  }
+
+  //TODO: está haciendo el fetch aunque no haya token, pasa que si devuelvo error tengo que cambiar la forma de manejar la response donde se hace la llamada al fetchwithtoken
+  // tal vez debería dividr en dos, por un lado checkiar y renovar y por otro hacer el fetch.
+
+  // Agregar el token a las cabeceras de la solicitud
+  options.headers = {
+    ...options.headers,
+    Authorization: `Bearer ${accessToken}`,
+  };
+
+  let response = await fetch(url, options);
+
+  return response;
+}
+
+//esta fetch no checkea si expiro el token, directamente prueba usarlo y si expiro pide nuevo.
+async function fetchWithToken2(url, options) {
   const accessToken = localStorage.getItem("accessToken");
 
   // Agregar el token a las cabeceras de la solicitud
@@ -65,6 +103,7 @@ async function fetchWithToken(url, options) {
 
   let response = await fetch(url, options);
   console.log("response status en fetchwithtoken: ", response.status);
+
   // Si la respuesta es 401, el token puede haber expirado
   if (response.status === 401) {
     // Intentar renovar el access token
@@ -80,9 +119,9 @@ async function fetchWithToken(url, options) {
       response = await fetch(url, options);
     }
   }
-
   return response;
 }
+
 async function loadUserData() {
   try {
     let accessToken = localStorage.getItem("accessToken");
