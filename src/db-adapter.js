@@ -55,6 +55,10 @@ export class dbSqlite3 extends DBInterface {
     }
   }
 
+  /**
+   * Close the connection with the database
+   * @returns {Promise<boolean> | Promise<Error>} - True or error
+   */
   async closeDbConnection() {
     return new Promise((resolve, reject) => {
       this.db.close((error) => {
@@ -69,10 +73,16 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
+  /**
+   * Delete a user from the database
+   * @param {string} email - User email
+   * @returns {Promise<boolean> | Promise<Error>} - True or error
+   */
   async deleteUser(email) {
     return new Promise((resolve, reject) => {
       this.db.run("DELETE FROM user WHERE email = ?", email, (error) => {
         if (error) {
+          console.error("Error deleting user", error);
           reject(error);
         } else {
           resolve(true);
@@ -81,6 +91,12 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
+  /**
+   * Update the user password
+   * @param {string} email - User email
+   * @param {string} pass - User password
+   * @returns {Promise<boolean> | Promise<Error>} - True or error
+   */
   async updateUser(email, pass) {
     return new Promise((resolve, reject) => {
       this.db.run(
@@ -88,6 +104,7 @@ export class dbSqlite3 extends DBInterface {
         [pass, email],
         (error) => {
           if (error) {
+            console.error("Error updating user", error);
             reject(error);
           } else {
             resolve(true);
@@ -97,20 +114,23 @@ export class dbSqlite3 extends DBInterface {
     });
   }
 
+  /**
+   * Get a user by email
+   * @param {string} email - User email
+   * @returns {Promise<{}> | Promise<Error>} - User object or error
+   */
   async getUserByEmail(email) {
-    console.log("this db", this.db);
     return new Promise((resolve, reject) => {
       this.db.get("SELECT * FROM user WHERE email = ?", email, (error, row) => {
         if (error) {
-          console.log("Error getting user by email", error);
+          console.error("Error getting user by email: ", error);
           reject(error);
         }
-        console.log("Row", row);
         resolve(row);
       });
     });
   }
-  // Middleware para verificar si un refresh token está en la blacklist
+
   async isDeniedToken(token) {
     return new Promise((resolve, reject) => {
       this.db.get(
@@ -118,10 +138,9 @@ export class dbSqlite3 extends DBInterface {
         [token],
         (error, row) => {
           if (error) {
-            console.log("Error getting denied token", error);
+            console.error("Error getting denied token", error);
             reject(error);
           }
-          console.log("denied token query, row: ", row);
           if (row) {
             resolve(true);
           } else {
@@ -130,13 +149,6 @@ export class dbSqlite3 extends DBInterface {
         }
       );
     });
-
-    /*  const result = await this.db.get(
-      "SELECT token FROM denylist WHERE token = ?",
-      [token]
-    );
-    console.log("isDeniedToken result", result);
-    return result !== undefined; */
   }
   async addToDenyList(token, expiration) {
     return new Promise((resolve, reject) => {
@@ -145,7 +157,7 @@ export class dbSqlite3 extends DBInterface {
         [token, expiration],
         (error) => {
           if (error) {
-            console.log("Error adding token to blacklist", error);
+            console.error("Error adding token to blacklist", error);
             reject(error);
           } else {
             resolve(true);
@@ -156,18 +168,22 @@ export class dbSqlite3 extends DBInterface {
   }
 
   // por no tener la funcion del promise como arrow fallaba el list.lastID ya que apuntaba a otro scope, o sea al de la propia callback y no al this de la base de datos!
+  /**
+   * Insert a user into the database
+   * @param {string} email - User email
+   * @param {string} pass - User password
+   * @returns {Promise<number> | Promise<Error>} - User ID or error
+   */
   async insertUser(email, pass) {
-    console.log("this db en insert user", this.db);
     return new Promise((resolve, reject) => {
       this.db.run(
         "INSERT INTO user (email, pass) VALUES (?, ?)",
         [email, pass],
         function (error) {
           if (error) {
-            console.log("Error inserting user", error);
+            console.error("Error inserting user", error);
             reject(error);
           } else {
-            console.log("this lastID", this.lastID);
             resolve(this.lastID);
           }
         }
