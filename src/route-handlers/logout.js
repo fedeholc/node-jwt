@@ -1,5 +1,18 @@
-export function handleLogOut(req, res) {
+import { jwtVerify } from "jose";
+import { db, secretKey } from "../global-store.js";
+export async function handleLogOut(req, res) {
   try {
+    //get token exp date
+    const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
+
+    console.log(
+      "newRefreshToken: ",
+      req.cookies.refreshToken,
+      "date:",
+      decoded.payload.exp
+    );
+    db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
+
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie);
     });

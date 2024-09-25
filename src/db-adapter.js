@@ -8,7 +8,7 @@ class DBInterface {
       throw new TypeError("Cannot construct DBInterface instances directly");
     }
   }
- 
+
   updateUser(email, pass) {
     throw new Error("The method 'updateUser()' must be implemented");
   }
@@ -80,6 +80,7 @@ export class dbSqlite3 extends DBInterface {
       });
     });
   }
+
   async updateUser(email, pass) {
     return new Promise((resolve, reject) => {
       this.db.run(
@@ -108,6 +109,33 @@ export class dbSqlite3 extends DBInterface {
         resolve(row);
       });
     });
+  }
+
+  async addToDenyList(token, expiration) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        "INSERT INTO denylist (token, expiration) VALUES (?, ?)",
+        [token, expiration],
+        (error) => {
+          if (error) {
+            console.log("Error adding token to blacklist", error);
+            reject(error);
+          } else {
+            resolve(true);
+          }
+        }
+      );
+    });
+  }
+
+  // Middleware para verificar si un refresh token está en la blacklist
+  async isDeniedToken(token) {
+    const result = await this.db.get(
+      "SELECT token FROM denylist WHERE token = ?",
+      [token]
+    );
+    console.log("isDeniedToken result", result);
+    return result !== undefined;
   }
 
   // por no tener la funcion del promise como arrow fallaba el list.lastID ya que apuntaba a otro scope, o sea al de la propia callback y no al this de la base de datos!
