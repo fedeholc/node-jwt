@@ -443,7 +443,7 @@ async function handleChangePass(event) {
 
     let response = await fetch(apiURL.CHANGE_PASS, {
       method: "POST",
-      credentials: "omit",
+      credentials: "include", //para que vaya la session cookie
       headers: {
         "Content-Type": "application/json",
       },
