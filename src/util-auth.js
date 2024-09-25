@@ -9,7 +9,7 @@ export {
 
 import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
- 
+
 /**
  * Function to generate a token
  * @param {{}} payload - Information to be included in the token
@@ -29,7 +29,7 @@ async function genAccessToken(payload, secretKey) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("15m")
+    .setExpirationTime("1m")
     .sign(secretKey);
 }
 

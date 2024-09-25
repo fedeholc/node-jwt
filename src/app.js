@@ -85,7 +85,10 @@ app.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
   //TODO: ojo testear bien esto
+  //TODO: puede ser que al expirar el token esté llegando nulo,
+  //TODO:o también puede que lo este mandando nulo desde el front, revisar ahì porque tambièn checkiaba algo si vencìa, de cualquier modo hay que evitar el veryfy si es nulo creo, porque si no tira error y no llega a esta parte de refresh token denegado.
   let isDenied = await db.isDeniedToken(refreshToken);
+  //isDenied = true;
   if (isDenied) {
     return res.status(403).json({ message: "Refresh token denegado" });
   }
