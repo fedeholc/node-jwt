@@ -92,30 +92,32 @@
   <dialog id="dialog-reset">
     <span class="close-btn" id="close-reset">&times;</span>
     <h2 id="reset-title">Reset Password</h2>
-    <form id="code-form">
-      <div>
-        <label for="reset-email">E-mail</label>
-        <input type="email" id="reset-email" name="reset-email" required>
-      </div>
-      <div id="code-info"></div>
-      <button id="btn-send-code">Send me a code</button>
-    </form>
-    <form id="reset-form">
-      <div>
-        <label for="reset-code"> Code:</label>
-        <input type="text" maxlength="6" minlength="6" id="reset-code" name="reset-code" required>
-      </div>
-      <div>
-        <label for="reset-password">New Password</label>
-        <input type="password" id="reset-password" name="reset-password" required>
-      </div>
-      <div>
-        <label for="reset-confirm-password">Confirm Password</label>
-        <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
-      </div>
-      <div id="change-info"></div>
-      <button id="btn-change-password">Change Password</button>
-    </form>
+    <div id="reset-container">
+      <form id="code-form">
+        <div>
+          <label for="reset-email">E-mail</label>
+          <input type="email" id="reset-email" name="reset-email" required>
+        </div>
+        <div id="code-info"></div>
+        <button id="btn-send-code">Send me a code</button>
+      </form>
+      <form id="reset-form">
+        <div>
+          <label for="reset-code"> Code:</label>
+          <input type="text" maxlength="6" minlength="6" id="reset-code" name="reset-code" required>
+        </div>
+        <div>
+          <label for="reset-password">New Password</label>
+          <input type="password" id="reset-password" name="reset-password" required>
+        </div>
+        <div>
+          <label for="reset-confirm-password">Confirm Password</label>
+          <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
+        </div>
+        <div id="change-info"></div>
+        <button id="btn-change-password">Change Password</button>
+      </form>
+    </div>
   </dialog>
 
 </body>
