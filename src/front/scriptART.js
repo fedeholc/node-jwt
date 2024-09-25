@@ -87,60 +87,6 @@ async function getAccessToken() {
   }
   return accessToken;
 }
-async function fetchWithToken(url, options) {
-  let accessToken = JSON.parse(localStorage.getItem("accessToken"));
-
-  if (!accessToken || isTokenExpired(accessToken)) {
-    console.log("Token expired or not found. Renewing token...");
-    accessToken = await renewToken();
-    console.log("new token: ", accessToken);
-    if (accessToken) {
-      localStorage.setItem("accessToken", JSON.stringify(accessToken));
-    }
-  }
-
-  //TODO: está haciendo el fetch aunque no haya token, pasa que si devuelvo error tengo que cambiar la forma de manejar la response donde se hace la llamada al fetchwithtoken
-  // tal vez debería dividr en dos, por un lado checkiar y renovar y por otro hacer el fetch.
-
-  // Agregar el token a las cabeceras de la solicitud
-  options.headers = {
-    ...options.headers,
-    Authorization: `Bearer ${accessToken}`,
-  };
-
-  let response = await fetch(url, options);
-  console.log("response fetch with token: ", response);
-
-  return response;
-}
-
-//esta fetch no checkea si expiro el token, directamente prueba usarlo y si expiro pide nuevo.
-async function fetchWithToken2(url, options) {
-  const accessToken = localStorage.getItem("accessToken");
-
-  // Agregar el token a las cabeceras de la solicitud
-  options.headers = {
-    ...options.headers,
-    Authorization: `Bearer ${accessToken}`,
-  };
-
-  let response = await fetch(url, options);
-
-  // Si la respuesta es 401, el token puede haber expirado
-  if (response.status === 401) {
-    // Intentar renovar el access token
-    const newAccessToken = await renewToken();
-    if (newAccessToken) {
-      // Guardar el nuevo token
-      localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
-
-      // Reintentar la solicitud original con el nuevo token
-      options.headers.Authorization = `Bearer ${newAccessToken}`;
-      response = await fetch(url, options);
-    }
-  }
-  return response;
-}
 
 async function loadUserData() {
   try {
@@ -519,7 +465,7 @@ async function handleSendCode(e) {
   }
 }
 
-function displayLoggedInUI() {
+async function displayLoggedInUI() {
   /* 
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
@@ -529,9 +475,46 @@ function displayLoggedInUI() {
  */
   document.getElementById("login-section").style.display = "none";
   document.getElementById("user-section").style.display = "flex";
+
+  logUserProfile();
+}
+
+async function logUserProfile() {
+  let accessToken = await getAccessToken();
+  if (!accessToken) {
+    console.log("--- UP no token");
+    return;
+  }
+  try {
+    let user = await fetch(apiURL.PROFILE, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!user.ok) {
+      console.error(
+        `Error fetching user profile: ${user.status} ${user.statusText}`
+      );
+      return;
+    }
+    user = await user.json();
+    if (!user) {
+      console.log("**** user profile");
+      return;
+    }
+    console.log("**** user profile: ", user);
+  } catch (error) {
+    console.error("Error fetching user profile: ", error);
+    return;
+  }
 }
 
 function displayLoggedOutUI() {
+  logUserProfile();
+
   /*   btnLogout.style.display = "none";
   btnLoginGH.style.display = "block";
   btnOpenDelete.style.display = "none";

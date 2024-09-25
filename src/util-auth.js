@@ -64,7 +64,8 @@ function verifyToken(secretKey) {
       return res.status(403).json({ error: "Token not found." });
     }
     try {
-      req.payload = await jwtVerify(token, secretKey);
+      let response = await jwtVerify(token, secretKey);
+      req.payload = response.payload;
       next();
     } catch (error) {
       return res.status(401).json({ error: `Invalid Token: ${error}` }); //TODO: debería ser 403?
@@ -80,6 +81,7 @@ function verifyToken(secretKey) {
  */
 function extractToken(req, res, next) {
   const authHeader = req.headers["authorization"];
+  console.log("-- extract token: ", authHeader);
   if (authHeader && authHeader.startsWith("Bearer ")) {
     req.token = authHeader.split(" ")[1].trim();
     if (!req.token || req.token.trim() === "") {

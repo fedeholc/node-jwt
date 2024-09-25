@@ -1,4 +1,5 @@
 //TODO: pendiente blacklist, expiracion, + remember me
+//TODO: meter algun ejemplo de ruta protegida
 //TODO: probar caso en el que se general el access token junto con el referesh al loguearse, luego pasa un rato, se expira el access token, y se vuelve a usar el refresh para generar el access, ahi en ese caso antes de regenerar tiene que checkiar que ese refresh no esté en la blacklist, si está en la blacklist no se puede regenerar el access token y se tiene que loguear de nuevo
 
 //VER respecto a la dnylist no me queda del todo claro cuando podrìa pasar que el token haya sido invalidado por ejemplo al logout pero que igual alguien lo pueda llegar a querer usar... revisar posibles casos.. el que SI se me ocurre es si el usuario se loguea desde varios dispositivos y quiere cerrar todas sus sessiones ahì si habrìa que ivalidar todos los refresh token del usuario
@@ -55,7 +56,6 @@ import {
   handleAuthGoogleART,
   handleAuthGoogleCallbackART,
 } from "./route-handlers/auth-googleART.js";
-import { error } from "console";
 
 checkEnvVariables();
 
@@ -147,8 +147,9 @@ app.post(apiEP.REGISTER, handleRegisterART);
 // Otra opción sería hacer la verificación trabajando con sesiones y pasando
 // el usuario a través de la sesión (tiene sus ventajas y desventajas).
 app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
-  let user = db.getUserByEmail(req.payload.user.email);
-
+  //let user = db.getUserByEmail(req.payload.user.email);
+  let user = req.payload.user;
+  console.log("Profile user: ", user);
   // dada la info que viene en el token esta validación
   // podría no ser necesaria.
   if (!user) {
@@ -169,11 +170,7 @@ app.get(apiEP.ROOT, (req, res) => {
   } else {
     req.session.views = 1;
   }
-  res
-    .status(200)
-    .send(
-      "Hello World! user:" + req.session.user + " views:" + req.session.views
-    );
+  res.status(200).send("Hello World! views:" + req.session.views);
 });
 
 app.get("*", (req, res) => {
