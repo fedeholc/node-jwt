@@ -1,6 +1,5 @@
-//TODO: ver handle user info
-//TODO: pendiente blacklist en otros lugares aparte del logout, expiracion, + remember me
-//TODO: probar caso en el que se general el access token junto con el referesh al loguearse, luego pasa un rato, se expira el access token, y se vuelve a usar el refresh para generar el access, ahi en ese caso antes de regenerar tiene que checkiar que ese refresh no esté en la blacklist, si está en la blacklist no se puede regenerar el access token y se tiene que loguear de nuevo
+//TODO: pendiente blacklist en otros lugares aparte del logout, expiracion, + remember me.
+//TODO: blacklist postlogout ya está, otra sería cuando se cambia de refresh, pero si se cambia cuando expira... no tendrìa sentido, o si? en reset password tiene sentido?, eliminacion de cuenta, token robado o comprometido, cierre de sesion en otro dispositivo
 
 //VER respecto a la dnylist no me queda del todo claro cuando podrìa pasar que el token haya sido invalidado por ejemplo al logout pero que igual alguien lo pueda llegar a querer usar... revisar posibles casos.. el que SI se me ocurre es si el usuario se loguea desde varios dispositivos y quiere cerrar todas sus sessiones ahì si habrìa que ivalidar todos los refresh token del usuario
 //TODO: pero para eso también tengo que tener una lista de tokens generados por usuario, no solo de los denegados.. o hay otra forma?
