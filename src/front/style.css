@@ -83,6 +83,7 @@
 
   dialog {
     background-color: white;
+    max-height: fit-content;
     width: 100%;
     max-width: 400px;
     padding: 1rem 1rem;
@@ -191,7 +192,7 @@
     text-align: center;
   }
 
-  
+
 
   .remember-me {
     display: flex;
