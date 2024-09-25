@@ -80,9 +80,11 @@ app.post(apiEP.LOGIN, handleLoginART);
 app.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
-  console.log("hola desde refresh token");
-  let a = await db.isDeniedToken(refreshToken);
-  console.log("isDeniedToken:", a);
+  //TODO: ojo testear bien esto
+  let isDenied = await db.isDeniedToken(refreshToken);
+  if (isDenied) {
+    return res.status(403).json({ message: "Refresh token denegado" });
+  }
 
   if (!refreshToken) {
     return res.status(403).json({ message: "Refresh token no proporcionado" });

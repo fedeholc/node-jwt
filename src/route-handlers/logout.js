@@ -13,7 +13,7 @@ export async function handleLogOut(req, res) {
     );
     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
 
-    Object.keys(req.cookies).forEach((cookie) => {
+   Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie);
     });
     req.session.destroy((err) => {
@@ -23,7 +23,7 @@ export async function handleLogOut(req, res) {
       }
 
       res.status(200).send("ok");
-    });
+    }); 
   } catch (error) {
     console.error("Error during logout", error);
     res.status(500).send("Error during logout");
