@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import process from "process";
 import { apiURL, googleEP } from "../endpoints.js";
-import { hashPassword, generateToken } from "../util-auth.js";
+import { hashPassword, genRefreshToken } from "../util-auth.js";
 import { db, secretKey } from "../global-store.js";
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
@@ -84,12 +84,16 @@ export async function handleAuthGoogleCallback(req, res) {
       req.session.user = { id: userInDB.id, email: userInDB.email };
     }
 
-    // Genera el token JWT
-    const jwtToken = await generateToken({ user: req.session.user }, secretKey);
-    res.cookie("jwtToken", jwtToken, {
+    const refreshToken = await genRefreshToken(
+      { user: req.session.user },
+      secretKey
+    );
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     //TODO: acá (en en el de GH debería tirar error si no hay returnTo, o enviar a una pagina de error)

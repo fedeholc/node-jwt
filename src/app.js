@@ -46,16 +46,7 @@ import { db, secretKey } from "./global-store.js";
 import { jwtVerify } from "jose";
 import { genAccessToken } from "./util-auth.js";
 import { handleLoginART } from "./routes/handle-login-ART.js";
-import { handleRegisterART } from "./route-handlers/registerART.js";
-import { handleUserInfoART } from "./route-handlers/user-infoART.js";
-import {
-  handleAuthGitHubART,
-  handleAuthGitHubCallbackART,
-} from "./route-handlers/auth-githubART.js";
-import {
-  handleAuthGoogleART,
-  handleAuthGoogleCallbackART,
-} from "./route-handlers/auth-googleART.js";
+import { handleUserInfoART } from "./route-handlers/user-info.js";
 
 checkEnvVariables();
 
@@ -63,21 +54,13 @@ db.createTables();
 
 const app = configServer();
 
-//db.createTables();
-//app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
-//app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
+app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
+app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
-app.get(apiEP.AUTH_GITHUB, handleAuthGitHubART);
-app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallbackART);
+app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
+app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
-//app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
-//app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
-
-app.get(apiEP.AUTH_GOOGLE, handleAuthGoogleART);
-app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallbackART);
-
-//app.get(apiEP.USER_INFO, handleUserInfo);
-app.get(apiEP.USER_INFO, handleUserInfoART);
+app.get(apiEP.USER_INFO, handleUserInfo);
 
 //app.post(apiEP.LOGIN, handleLogin);
 app.post(apiEP.LOGIN, handleLoginART);
@@ -140,8 +123,8 @@ app.post(apiEP.CHANGE_PASS, handleChangePass);
  * Si se registran con GitHub, el insert en la base de datos y el token, se
  * generan en handleAuthGitHubCallback.
  */
-//app.post(apiEP.REGISTER, handleRegister);
-app.post(apiEP.REGISTER, handleRegisterART);
+
+app.post(apiEP.REGISTER, handleRegister);
 
 // Ruta protegida (requiere token)
 // Otra opción sería hacer la verificación trabajando con sesiones y pasando

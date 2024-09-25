@@ -3,7 +3,7 @@ export { handleAuthGitHub, handleAuthGitHubCallback };
 import crypto from "crypto";
 import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
-import { hashPassword, generateToken } from "../util-auth.js";
+import { hashPassword, genRefreshToken } from "../util-auth.js";
 import { db } from "../global-store.js";
 import { secretKey } from "../global-store.js";
 
@@ -88,12 +88,16 @@ async function handleAuthGitHubCallback(req, res) {
       req.session.user = { id: userInDB.id, email: userInDB.email };
     }
 
-    // Genera el token JWT
-    const jwtToken = await generateToken({ user: req.session.user }, secretKey);
-    res.cookie("jwtToken", jwtToken, {
+    const refreshToken = await genRefreshToken(
+      { user: req.session.user },
+      secretKey
+    );
+
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
-      sameSite: "lax", // Use 'lax' to provide additional protection against CSRF
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.redirect(req.session.returnTo || "/");

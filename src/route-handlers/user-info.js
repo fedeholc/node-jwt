@@ -1,20 +1,30 @@
 import { jwtVerify } from "jose";
-export { handleUserInfo };
+export { handleUserInfoART };
 
 import { secretKey } from "../global-store.js";
 
 async function handleUserInfo(req, res) {
   try {
-    console.log("Cookies: ", req.cookies);
-    if (req.cookies && req.cookies.jwtToken) {
+    console.log("--req auth: ", req.headers.authorization);
+    //TODO: revisar aca, salta al error si el token es invalido, y no llega al refresh.
+    let token = null;
+
+    if (req.headers && req.headers.authorization) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    console.log("--token: ", token);
+    if (token) {
+      console.log("---token nll? ", token, token === "null");
       try {
-        let userJWT = await jwtVerify(req.cookies.jwtToken, secretKey);
+        let userJWT = await jwtVerify(token, secretKey);
+        console.log("--userJWT: ", userJWT);
         if (userJWT) {
-          //TODO: ojo devuelve la info del token pero no checkea si el usuario existe en la BD
+          //TODO: traer data extra del usuario desde la BD?
+          //TODO: tal vez acá sí, pero tendría que tener una función y o endpoint solo para validar el token, tal vez uno como middleware
           return res.status(200).json({ user: userJWT.payload.user });
         }
       } catch (error) {
-        console.error("Invalid Token", error);
+        console.error("--Invalid Token--", error);
         return res.status(401).json({ error: "Invalid JWT token." });
       }
     }
