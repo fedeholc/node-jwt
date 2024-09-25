@@ -1,6 +1,5 @@
 import {
   hashPassword,
-  generateToken,
   genAccessToken,
   genRefreshToken,
 } from "../util-auth.js";
@@ -24,7 +23,7 @@ export async function handleLogin(req, res) {
         secretKey
       );
 
-      //TODO: acá estoy generando el refresh cada vez que se loguea, ¿debería hacerlo solo si está por expirar?
+      //se genera el refresh cada vez que se loguea pues, si ya tuviera uno, se hubiera logueado automaticamente
       const refreshToken = await genRefreshToken(
         { user: { id: userInDB.id, email: userInDB.email } },
         secretKey

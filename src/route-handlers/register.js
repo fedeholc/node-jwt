@@ -10,9 +10,9 @@ export async function handleRegister(req, res) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    let existingUser = await db.getUserByEmail(email);
+    let userInDb = await db.getUserByEmail(email);
 
-    if (existingUser) {
+    if (userInDb) {
       return res.status(409).json({ error: "User or email already exist." });
     }
 

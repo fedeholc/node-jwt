@@ -33,6 +33,7 @@ async function genAccessToken(payload, secretKey) {
     .sign(secretKey);
 }
 
+//TODO: quitar las secret keys y hacer que sean parte de un objeto global? (deberìa tener keys para acess y refresh)
 async function genRefreshToken(payload, secretKey) {
   let newRefreshToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
