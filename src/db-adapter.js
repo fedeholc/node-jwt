@@ -110,7 +110,34 @@ export class dbSqlite3 extends DBInterface {
       });
     });
   }
+  // Middleware para verificar si un refresh token está en la blacklist
+  async isDeniedToken(token) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        "SELECT token FROM denylist WHERE token = ?",
+        [token],
+        (error, row) => {
+          if (error) {
+            console.log("Error getting denied token", error);
+            reject(error);
+          }
+          console.log("denied token query, row: ", row);
+          if (row) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        }
+      );
+    });
 
+    /*  const result = await this.db.get(
+      "SELECT token FROM denylist WHERE token = ?",
+      [token]
+    );
+    console.log("isDeniedToken result", result);
+    return result !== undefined; */
+  }
   async addToDenyList(token, expiration) {
     return new Promise((resolve, reject) => {
       this.db.run(
@@ -126,16 +153,6 @@ export class dbSqlite3 extends DBInterface {
         }
       );
     });
-  }
-
-  // Middleware para verificar si un refresh token está en la blacklist
-  async isDeniedToken(token) {
-    const result = await this.db.get(
-      "SELECT token FROM denylist WHERE token = ?",
-      [token]
-    );
-    console.log("isDeniedToken result", result);
-    return result !== undefined;
   }
 
   // por no tener la funcion del promise como arrow fallaba el list.lastID ya que apuntaba a otro scope, o sea al de la propia callback y no al this de la base de datos!
