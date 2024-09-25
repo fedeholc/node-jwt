@@ -1,4 +1,6 @@
 //TODO: pendiente blacklist, expiracion, + remember me
+//VER respecto a la dnylist no me queda del todo claro cuando podrìa pasar que el token haya sido invalidado por ejemplo al logout pero que igual alguien lo pueda llegar a querer usar... revisar posibles casos.. el que SI se me ocurre es si el usuario se loguea desde varios dispositivos y quiere cerrar todas sus sessiones ahì si habrìa que ivalidar todos los refresh token del usuario
+//TODO: pero para eso también tengo que tener una lista de tokens generados por usuario, no solo de los denegados.. o hay otra forma?
 
 //TODO: sanitizar los innerhtml
 
