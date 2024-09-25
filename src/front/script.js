@@ -221,7 +221,7 @@ async function handleLogin(event) {
 
   let response = await fetch(apiURL.LOGIN, {
     method: "POST",
-    credentials: "omit",
+    credentials: "include", //para recibir la cookie también hay que ponerlo
     headers: {
       "Content-Type": "application/json",
     },
