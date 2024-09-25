@@ -38,14 +38,17 @@ function main() {
 
 //TODO: faltan trycatch en nuevas funciones
 async function renewToken() {
+  console.log("pido renew token");
   const response = await fetch(apiURL.REFRESH, {
     method: "POST",
     credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
   });
+  console.log("response renew token: ", response);
   const data = await response.json();
   if (data.accessToken) {
     // Almacenar el nuevo access token (en memoria o localStorage)
-    localStorage.setItem("accessToken", data.accessToken);
+    //console.log("--guardo nuevo token: ", data.accessToken);
+    //localStorage.setItem("accessToken", data.accessToken);
     return data.accessToken;
   } else {
     return null;
@@ -53,11 +56,14 @@ async function renewToken() {
 }
 
 function isTokenExpired(token) {
+  console.log("entro a istokenexpired");
   if (token) {
     try {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const currentTime = Math.floor(Date.now() / 1000);
-      return decodedToken.exp < currentTime;
+      let expired = decodedToken.exp < currentTime;
+      console.log("expired: ", expired);
+      return expired;
     } catch (error) {
       console.error("Error decoding token: ", error);
       return true;
@@ -66,11 +72,28 @@ function isTokenExpired(token) {
   return true;
 }
 
+async function getAccessToken() {
+  let accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  if (!accessToken || isTokenExpired(accessToken)) {
+    console.log("--Token expired or not found. Renewing token...");
+    accessToken = await renewToken();
+    console.log("--new token: ", accessToken);
+    if (accessToken) {
+      localStorage.setItem("accessToken", JSON.stringify(accessToken));
+      return accessToken;
+    } else {
+      return null;
+    }
+  }
+  return accessToken;
+}
 async function fetchWithToken(url, options) {
   let accessToken = JSON.parse(localStorage.getItem("accessToken"));
 
   if (!accessToken || isTokenExpired(accessToken)) {
+    console.log("Token expired or not found. Renewing token...");
     accessToken = await renewToken();
+    console.log("new token: ", accessToken);
     if (accessToken) {
       localStorage.setItem("accessToken", JSON.stringify(accessToken));
     }
@@ -86,6 +109,7 @@ async function fetchWithToken(url, options) {
   };
 
   let response = await fetch(url, options);
+  console.log("response fetch with token: ", response);
 
   return response;
 }
@@ -121,10 +145,28 @@ async function fetchWithToken2(url, options) {
 async function loadUserData() {
   try {
     //TODO: ojo, revisar donde se estan enviando las credentials(cookies), porque no debería hacer falta salvo para renovar el token, sino vamos a estar mandando siempre el refresh tambien
-    let response = await fetchWithToken(apiURL.USER_INFO, {
+
+    let accessToken = await getAccessToken();
+
+    if (!accessToken) {
+      console.log("no token");
+      displayLoggedOutUI();
+      return;
+    }
+
+    console.log("hago fetch with token");
+    /*  let response = await fetchWithToken(apiURL.USER_INFO, {
       method: "GET",
       credentials: "omit",
+    }); */
+    let response = await fetch(apiURL.USER_INFO, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
+    console.log("rta fetch with token: ", response);
 
     if (!response.ok) {
       console.log(
@@ -150,6 +192,8 @@ async function loadUserData() {
       return;
     }
   } catch (error) {
+    displayLoggedOutUI();
+
     console.error(`Error loading user data: ${error}`);
   }
 }

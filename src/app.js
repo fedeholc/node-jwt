@@ -55,6 +55,7 @@ import {
   handleAuthGoogleART,
   handleAuthGoogleCallbackART,
 } from "./route-handlers/auth-googleART.js";
+import { error } from "console";
 
 checkEnvVariables();
 
@@ -82,6 +83,7 @@ app.get(apiEP.USER_INFO, handleUserInfoART);
 app.post(apiEP.LOGIN, handleLoginART);
 
 app.post("/refresh-token", async (req, res) => {
+  console.log("--------refresh-token");
   const refreshToken = req.cookies.refreshToken;
 
   //TODO: ojo testear bien esto
@@ -90,11 +92,12 @@ app.post("/refresh-token", async (req, res) => {
   let isDenied = await db.isDeniedToken(refreshToken);
   //isDenied = true;
   if (isDenied) {
-    return res.status(403).json({ message: "Refresh token denegado" });
+    console.log("---------isDenied", isDenied);
+    return res.status(403).json({ error: "Refresh token denegado" });
   }
 
   if (!refreshToken) {
-    return res.status(403).json({ message: "Refresh token no proporcionado" });
+    return res.status(403).json({ error: "Refresh token no proporcionado" });
   }
 
   // Verificar el refresh token
@@ -103,7 +106,7 @@ app.post("/refresh-token", async (req, res) => {
     console.log("response jwt verify: ", response);
 
     if (!response) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+      return res.status(403).json({ error: "Invalid refresh token" });
     }
 
     // Generar un nuevo access token
@@ -120,7 +123,7 @@ app.post("/refresh-token", async (req, res) => {
     // Enviar el nuevo access token al cliente
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
-    return res.status(403).json({ message: `Invalid refresh token. ${error}` });
+    return res.status(403).json({ error: `Invalid refresh token. ${error}` });
   }
 });
 
