@@ -1,5 +1,7 @@
 import { hashPassword } from "../util-auth.js";
 import { db } from "../global-store.js";
+import { jwtVerify } from "jose";
+import { secretKey } from "../global-store.js";
 
 export async function handleDeleteUser(req, res) {
   try {
@@ -24,6 +26,10 @@ export async function handleDeleteUser(req, res) {
       return res.status(500).json({ error: "Error deleting user." });
     }
 
+    // añañdir el token a la lista de denegados
+     const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
+     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
+
     //hacer logout y borrar sesion
     Object.keys(req.cookies).forEach((cookie) => {
       res.clearCookie(cookie);
@@ -36,6 +42,8 @@ export async function handleDeleteUser(req, res) {
       }
     });
 
+      
+ 
     return res.status(204).end();
   } catch (error) {
     return res.status(500).json({ error: `Error deleting user: ${error}` });

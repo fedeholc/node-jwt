@@ -2,6 +2,7 @@
 
 import { apiURL } from "./endpoints-front.js";
 
+//TODO: que no sean globales, declararlas en main y pasarlas por parámetro
 let userData = null;
 let accessToken = null;
 
@@ -385,7 +386,7 @@ async function handleDeleteUser(event) {
 
   let response = await fetch(apiURL.DELETE_USER, {
     method: "DELETE",
-    credentials: "omit",
+    credentials: "include", //hay que mandar el refreshtoken para poder denegarlo
     headers: {
       "Content-Type": "application/json",
     },
@@ -404,6 +405,7 @@ async function handleDeleteUser(event) {
     deleteInfo.style.fontWeight = "bold";
 
     userData = null;
+    localStorage.removeItem("accessToken");
 
     setTimeout(() => {
       dialogDelete.close();
