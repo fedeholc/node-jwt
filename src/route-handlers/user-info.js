@@ -1,26 +1,26 @@
 import { jwtVerify } from "jose";
-export { handleUserInfoART };
+export { handleUserInfo };
 
 import { secretKey } from "../global-store.js";
 
+//TODO: esta tendría que llamarse algo así como handleGetUser y solo validar el token para devolver al front.
+//TODO: Por lo tanto no checkiar acá con la base de datos.
+//TODO: el checkeo con la base de datos tendría que hacerse al generar el refresh token.
+//TODO: ahora que lo pienso acá podría pasar también por el middleware de verificar el token y que me llegue en el req.
+ 
 async function handleUserInfo(req, res) {
   try {
-    console.log("--req auth: ", req.headers.authorization);
-    //TODO: revisar aca, salta al error si el token es invalido, y no llega al refresh.
     let token = null;
 
     if (req.headers && req.headers.authorization) {
       token = req.headers.authorization.split(" ")[1];
     }
-    console.log("--token: ", token);
     if (token) {
-      console.log("---token nll? ", token, token === "null");
       try {
         let userJWT = await jwtVerify(token, secretKey);
-        console.log("--userJWT: ", userJWT);
         if (userJWT) {
           //TODO: traer data extra del usuario desde la BD?
-          //TODO: tal vez acá sí, pero tendría que tener una función y o endpoint solo para validar el token, tal vez uno como middleware
+
           return res.status(200).json({ user: userJWT.payload.user });
         }
       } catch (error) {
