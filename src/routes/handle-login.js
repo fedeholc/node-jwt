@@ -1,4 +1,9 @@
-import { hashPassword, generateToken } from "../util-auth.js";
+import {
+  hashPassword,
+  generateToken,
+  genAccessToken,
+  genRefreshToken,
+} from "../util-auth.js";
 import process from "process";
 import { db } from "../global-store.js";
 import { secretKey } from "../global-store.js";
@@ -12,19 +17,29 @@ export async function handleLogin(req, res) {
       email === userInDB.email &&
       hashPassword(pass) === userInDB.pass
     ) {
-      const jwtToken = await generateToken(
+      //TODO: tener dos secretkey distintas para el access y el refresh token
+      //y ver que esto se repite en register (también en los auth), pasar a una función
+      const accessToken = await genAccessToken(
         { user: { id: userInDB.id, email: userInDB.email } },
         secretKey
       );
-      res.cookie("jwtToken", jwtToken, {
+
+      //TODO: acá estoy generando el refresh cada vez que se loguea, ¿debería hacerlo solo si está por expirar?
+      const refreshToken = await genRefreshToken(
+        { user: { id: userInDB.id, email: userInDB.email } },
+        secretKey
+      );
+
+      res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       return res.status(200).json({
         user: { email: userInDB.email, id: userInDB.id },
-        token: jwtToken, //TODO: esto está mal, no debería devolver el token
+        accessToken: accessToken,
       });
     } else {
       res.status(401).json({ error: "Invalid credentials" });

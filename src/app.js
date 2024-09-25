@@ -45,8 +45,7 @@ import { handleChangePass } from "./route-handlers/change-pass.js";
 import { db, secretKey } from "./global-store.js";
 import { jwtVerify } from "jose";
 import { genAccessToken } from "./util-auth.js";
-import { handleLoginART } from "./routes/handle-login-ART.js";
-import { handleUserInfoART } from "./route-handlers/user-info.js";
+import { handleLoginART } from "./routes/handle-login.js";
 
 checkEnvVariables();
 

@@ -1,13 +1,7 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import express from "express";
 import request from "supertest";
-
-import { handleLogin} from "./handle-login.js";
-/* import { getSecretKey } from "../secret-key.js";
-import { getDbInstance } from "../db.js";
-
-export const secretKey = getSecretKey();
-export const db = await getDbInstance(); */
+import { handleLogin } from "./handle-login.js";
 
 const app = express();
 app.use(express.json());

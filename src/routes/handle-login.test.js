@@ -1,13 +1,14 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import express from "express";
 import request from "supertest";
-import { hashPassword, generateToken } from "../util-auth.js";
-import { handleLogin } from "./handle-login";
+import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
+import { handleLogin } from "./handle-login.js";
 import { db, secretKey } from "../global-store.js";
 
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
-  generateToken: vi.fn(),
+  genAccessToken: vi.fn(),
+  genRefreshToken: vi.fn(),
 }));
 
 vi.mock("../global-store", () => ({
@@ -30,29 +31,37 @@ describe("Login Endpoint (mocked)", () => {
   test("should return 200 and token for valid credentials", async () => {
     const mockUser = {
       id: 1,
-      user: "testuser",
       email: "test@example.com",
       pass: "hashedpassword",
     };
 
     db.getUserByEmail.mockResolvedValue(mockUser);
     hashPassword.mockReturnValue("hashedpassword");
-    generateToken.mockResolvedValue("mocked-token");
+    genAccessToken.mockResolvedValue("mocked-token");
+    genRefreshToken.mockResolvedValue("mocked-token");
 
     const response = await request(app).post("/login").send({
-      user: "testuser",
       pass: "password123",
       email: "test@example.com",
     });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      token: "mocked-token",
+      accessToken: "mocked-token",
       user: { id: mockUser.id, email: mockUser.email },
     });
     expect(db.getUserByEmail).toHaveBeenCalledWith("test@example.com");
     expect(hashPassword).toHaveBeenCalledWith("password123");
-    expect(generateToken).toHaveBeenCalledWith(
+    expect(genAccessToken).toHaveBeenCalledWith(
+      {
+        user: {
+          id: mockUser.id,
+          email: mockUser.email,
+        },
+      },
+      secretKey
+    );
+    expect(genRefreshToken).toHaveBeenCalledWith(
       {
         user: {
           id: mockUser.id,
