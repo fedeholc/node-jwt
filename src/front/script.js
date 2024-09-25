@@ -3,6 +3,7 @@
 import { apiURL } from "./endpoints-front.js";
 
 let userData = null;
+let accessToken = null;
 
 const dialogSignup = document.getElementById("dialog-signup");
 const btnOpenDialog = document.getElementById("btn-signup-open");
@@ -30,10 +31,16 @@ const userInfoDisplay = document.getElementById("user-info-display");
 
 document.addEventListener("DOMContentLoaded", main);
 
-function main() {
+//TODO: implementar un getAccessToken global para no tener que hacerlo en cada función
+async function main() {
   setEventListeners();
-  displayLoggedOutUI();
-  loadUserData();
+
+  accessToken = await getAccessToken();
+
+  userData = await getUserData();
+  //loadUserData();
+
+  renderUI();
 }
 
 //TODO: faltan trycatch en nuevas funciones
@@ -56,7 +63,7 @@ async function renewToken() {
 }
 
 function isTokenExpired(token) {
-  console.log("entro a istokenexpired");
+  console.log("entro a istokenexpired", token);
   if (token) {
     try {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
@@ -74,6 +81,7 @@ function isTokenExpired(token) {
 
 async function getAccessToken() {
   let accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  console.log("get access token: ", accessToken);
   if (!accessToken || isTokenExpired(accessToken)) {
     console.log("--Token expired or not found. Renewing token...");
     accessToken = await renewToken();
@@ -86,6 +94,48 @@ async function getAccessToken() {
     }
   }
   return accessToken;
+}
+
+async function getUserData() {
+  try {
+    if (!accessToken) {
+      console.log("no token");
+      return null;
+    }
+    console.log("hago fetch with token");
+
+    let response = await fetch(apiURL.USER_INFO, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    console.log("rta fetch with token: ", response);
+
+    if (!response.ok) {
+      console.log(
+        `No user authenticated: ${response.status} ${response.statusText}`
+      );
+      return null;
+    }
+
+    if (response.ok) {
+      let data = await response.json();
+      if (!data.user) {
+        console.log(`No user data. ${response.status} ${response.statusText}`);
+        return null;
+      }
+      userInfoDisplay.innerHTML = `
+      <p>Id: ${data.user.id}</p>
+      <p>Email: ${data.user.email}</p>`;
+
+      return data.user;
+    }
+  } catch (error) {
+    console.error(`Error loading user data: ${error}`);
+    return null;
+  }
 }
 
 async function loadUserData() {
@@ -101,10 +151,7 @@ async function loadUserData() {
     }
 
     console.log("hago fetch with token");
-    /*  let response = await fetchWithToken(apiURL.USER_INFO, {
-      method: "GET",
-      credentials: "omit",
-    }); */
+
     let response = await fetch(apiURL.USER_INFO, {
       method: "GET",
       credentials: "omit",
@@ -195,7 +242,7 @@ async function handleLogin(event) {
     userInfoDisplay.innerHTML = `
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
-    displayLoggedInUI();
+    renderUI();
 
     console.log("response data: ", data);
 
@@ -244,8 +291,8 @@ async function handleLogOut() {
   }
   if (response.ok) {
     localStorage.removeItem("accessToken");
-    displayLoggedOutUI();
-    loadUserData();
+    userData = null;
+    renderUI();
     return;
   }
 }
@@ -312,9 +359,10 @@ async function handleSignUp(event) {
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
 
+      accessToken = data.accessToken;
       localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
 
-      displayLoggedInUI();
+      renderUI();
 
       // Según el tipo de web, aquí puede cambiar la interfaz o puede
       // redirigir a otra página:
@@ -358,7 +406,7 @@ async function handleDeleteUser(event) {
 
     setTimeout(() => {
       dialogDelete.close();
-      displayLoggedOutUI();
+      renderUI();
     }, 2000);
     //window.location.reload();
     //hideLogin();
@@ -465,62 +513,19 @@ async function handleSendCode(e) {
   }
 }
 
-async function displayLoggedInUI() {
-  /* 
-  btnLogout.style.display = "block";
-  btnLoginGH.style.display = "none";
-  btnOpenDelete.style.display = "block";
-  formLogin.style.display = "none";
-  btnOpenDialog.style.display = "none";
- */
+function renderUI() {
+  if (userData) {
+    displayLoggedInUI();
+  } else {
+    displayLoggedOutUI();
+  }
+}
+function displayLoggedInUI() {
   document.getElementById("login-section").style.display = "none";
   document.getElementById("user-section").style.display = "flex";
-
-  logUserProfile();
-}
-
-async function logUserProfile() {
-  let accessToken = await getAccessToken();
-  if (!accessToken) {
-    console.log("--- UP no token");
-    return;
-  }
-  try {
-    let user = await fetch(apiURL.PROFILE, {
-      method: "GET",
-      credentials: "omit",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (!user.ok) {
-      console.error(
-        `Error fetching user profile: ${user.status} ${user.statusText}`
-      );
-      return;
-    }
-    user = await user.json();
-    if (!user) {
-      console.log("**** user profile");
-      return;
-    }
-    console.log("**** user profile: ", user);
-  } catch (error) {
-    console.error("Error fetching user profile: ", error);
-    return;
-  }
 }
 
 function displayLoggedOutUI() {
-  logUserProfile();
-
-  /*   btnLogout.style.display = "none";
-  btnLoginGH.style.display = "block";
-  btnOpenDelete.style.display = "none";
-  formLogin.style.display = "flex";
-  btnOpenDialog.style.display = "block"; */
-
   document.getElementById("login-section").style.display = "flex";
   document.getElementById("user-section").style.display = "none";
 
@@ -562,7 +567,7 @@ function setEventListeners() {
     if (!userData) {
       // Nunca debería entrar acá, no debería mostrarse el botón de delete account si no está logueado el usuario.
       alert("User not logged in.");
-      displayLoggedOutUI();
+      renderUI();
       return;
     }
 

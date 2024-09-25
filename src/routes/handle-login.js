@@ -30,6 +30,8 @@ export async function handleLogin(req, res) {
         secretKey
       );
 
+      console.log("mando cookie refreshToken", refreshToken);
+
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
