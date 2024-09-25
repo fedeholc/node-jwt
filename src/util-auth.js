@@ -57,6 +57,7 @@ function hashPassword(password) {
  * @param {string} secretKey
  * @returns
  */
+//TODO: mover a middleware
 function verifyToken(secretKey) {
   return async function (req, res, next) {
     const token = req.token;

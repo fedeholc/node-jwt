@@ -1,3 +1,6 @@
+//TODO: este archivo ya ser podrìa borrar
+//VER
+
 import { jwtVerify } from "jose";
 export { handleUserInfo };
 

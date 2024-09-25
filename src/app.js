@@ -6,7 +6,7 @@
 //TODO: pero para eso también tengo que tener una lista de tokens generados por usuario, no solo de los denegados.. o hay otra forma?
 
 //TODO: sanitizar los innerhtml
-
+//Todo: blanquear campos inputs de los dialogs cuando se cierran
 //TODO: la cookie del refresh la estoy mandando firmada? hace falta si ya está firmado el token?
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
@@ -56,7 +56,7 @@ app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
 app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
-app.get(apiEP.GET_USER, handleGetUser);
+app.get(apiEP.GET_USER, extractToken, verifyToken(secretKey), handleGetUser);
 app.post(apiEP.LOGIN, handleLogin);
 
 app.post("/refresh-token", async (req, res) => {

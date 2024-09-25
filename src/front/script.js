@@ -328,7 +328,7 @@ async function handleSignUp(event) {
   try {
     let response = await fetch(apiURL.REGISTER, {
       method: "POST",
-      credentials: "omit",
+      credentials: "include", //para recibir el refresh token
       headers: {
         "Content-Type": "application/json",
       },
