@@ -104,7 +104,8 @@ async function getUserData() {
     }
     console.log("hago fetch with token");
 
-    let response = await fetch(apiURL.USER_INFO, {
+    //let response = await fetch(apiURL.USER_INFO, {
+    let response = await fetch(apiURL.GET_USER, {
       method: "GET",
       credentials: "omit",
       headers: {

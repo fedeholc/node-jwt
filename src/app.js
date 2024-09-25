@@ -33,6 +33,7 @@ import {
 import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
+import { handleGetUser } from "./route-handlers/get-user.js";
 import { apiEP, dbURI } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
@@ -55,6 +56,7 @@ app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
 app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
+app.get(apiEP.GET_USER, handleGetUser);
 app.post(apiEP.LOGIN, handleLogin);
 
 app.post("/refresh-token", async (req, res) => {

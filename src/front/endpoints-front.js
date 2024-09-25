@@ -27,6 +27,7 @@ const apiEP = {
   RESET_PASS: "/reset-password",
   ROOT: "/",
   USER_INFO: "/user-info",
+  GET_USER: "/get-user",
 };
 const apiURL = {
   BASE: apiBase[ENV],
@@ -44,4 +45,5 @@ const apiURL = {
   RESET_PASS: apiBase[ENV] + apiEP.RESET_PASS,
   ROOT: apiBase[ENV] + apiEP.ROOT,
   USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
+  GET_USER: apiBase[ENV] + apiEP.GET_USER,
 };
