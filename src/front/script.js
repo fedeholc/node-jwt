@@ -36,17 +36,87 @@ function main() {
   loadUserData();
 }
 
+//TODO: faltan trycatch en nuevas funciones
+async function renewToken() {
+  console.log("pido renew token");
+  const response = await fetch(apiURL.REFRESH, {
+    method: "POST",
+    credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
+  });
+  console.log("response renew token: ", response);
+  const data = await response.json();
+  if (data.accessToken) {
+    // Almacenar el nuevo access token (en memoria o localStorage)
+    //console.log("--guardo nuevo token: ", data.accessToken);
+    //localStorage.setItem("accessToken", data.accessToken);
+    return data.accessToken;
+  } else {
+    return null;
+  }
+}
+
+function isTokenExpired(token) {
+  console.log("entro a istokenexpired");
+  if (token) {
+    try {
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      let expired = decodedToken.exp < currentTime;
+      console.log("expired: ", expired);
+      return expired;
+    } catch (error) {
+      console.error("Error decoding token: ", error);
+      return true;
+    }
+  }
+  return true;
+}
+
+async function getAccessToken() {
+  let accessToken = JSON.parse(localStorage.getItem("accessToken"));
+  if (!accessToken || isTokenExpired(accessToken)) {
+    console.log("--Token expired or not found. Renewing token...");
+    accessToken = await renewToken();
+    console.log("--new token: ", accessToken);
+    if (accessToken) {
+      localStorage.setItem("accessToken", JSON.stringify(accessToken));
+      return accessToken;
+    } else {
+      return null;
+    }
+  }
+  return accessToken;
+}
+
 async function loadUserData() {
   try {
+    //TODO: ojo, revisar donde se estan enviando las credentials(cookies), porque no debería hacer falta salvo para renovar el token, sino vamos a estar mandando siempre el refresh tambien
+
+    let accessToken = await getAccessToken();
+
+    if (!accessToken) {
+      console.log("no token");
+      displayLoggedOutUI();
+      return;
+    }
+
+    console.log("hago fetch with token");
+    /*  let response = await fetchWithToken(apiURL.USER_INFO, {
+      method: "GET",
+      credentials: "omit",
+    }); */
     let response = await fetch(apiURL.USER_INFO, {
       method: "GET",
-      credentials: "include",
+      credentials: "omit",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
+    console.log("rta fetch with token: ", response);
 
     if (!response.ok) {
-      let data = await response.json();
       console.log(
-        `No user authenticated: ${response.status} ${response.statusText} - ${data.error}`
+        `No user authenticated: ${response.status} ${response.statusText}`
       );
       displayLoggedOutUI();
       return;
@@ -68,6 +138,8 @@ async function loadUserData() {
       return;
     }
   } catch (error) {
+    displayLoggedOutUI();
+
     console.error(`Error loading user data: ${error}`);
   }
 }
@@ -102,7 +174,7 @@ async function handleLogin(event) {
 
   let response = await fetch(apiURL.LOGIN, {
     method: "POST",
-    credentials: "include",
+    credentials: "omit",
     headers: {
       "Content-Type": "application/json",
     },
@@ -124,6 +196,11 @@ async function handleLogin(event) {
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
     displayLoggedInUI();
+
+    console.log("response data: ", data);
+
+    localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
+
     return;
   }
 }
@@ -132,7 +209,7 @@ async function handleLoginGH(event) {
   event.preventDefault();
   let response = await fetch(apiURL.AUTH_GITHUB, {
     method: "GET",
-    credentials: "include",
+    credentials: "include", //estás credentials sí son necesarias, para el envío de la cookie de session y el returnTo
     headers: {
       "Content-Type": "application/json",
     },
@@ -141,7 +218,6 @@ async function handleLoginGH(event) {
 
   window.location.href = data.ghauth;
 }
-
 
 async function handleLoginGG(event) {
   event.preventDefault();
@@ -160,13 +236,14 @@ async function handleLoginGG(event) {
 async function handleLogOut() {
   let response = await fetch(apiURL.LOGOUT, {
     method: "GET",
-    credentials: "include",
+    credentials: "include", //acá también hacen falta manter las credentials para enviar la cookie de session
   });
   if (!response.ok) {
     console.log(`Error logging out. ${response.status} ${response.statusText}`);
     return;
   }
   if (response.ok) {
+    localStorage.removeItem("accessToken");
     displayLoggedOutUI();
     loadUserData();
     return;
@@ -203,7 +280,7 @@ async function handleSignUp(event) {
   try {
     let response = await fetch(apiURL.REGISTER, {
       method: "POST",
-      credentials: "include",
+      credentials: "omit",
       headers: {
         "Content-Type": "application/json",
       },
@@ -235,6 +312,8 @@ async function handleSignUp(event) {
       <p>Id: ${userData.id}</p>
       <p>Email: ${userData.email}</p>`;
 
+      localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
+
       displayLoggedInUI();
 
       // Según el tipo de web, aquí puede cambiar la interfaz o puede
@@ -257,7 +336,7 @@ async function handleDeleteUser(event) {
 
   let response = await fetch(apiURL.DELETE_USER, {
     method: "DELETE",
-    credentials: "include",
+    credentials: "omit",
     headers: {
       "Content-Type": "application/json",
     },
@@ -315,7 +394,7 @@ async function handleChangePass(event) {
 
     let response = await fetch(apiURL.CHANGE_PASS, {
       method: "POST",
-      credentials: "include",
+      credentials: "omit",
       headers: {
         "Content-Type": "application/json",
       },
@@ -360,13 +439,12 @@ async function handleSendCode(e) {
 
     let response = await fetch(apiURL.RESET_PASS, {
       method: "POST",
-      credentials: "include",
+      credentials: "include", //no quitar las credentials, porque se necesita enviar la cookie de session
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email: email }),
     });
-    console.log("Reset Response: ", response);
 
     if (!response.ok) {
       let data = await response.json();
@@ -387,7 +465,7 @@ async function handleSendCode(e) {
   }
 }
 
-function displayLoggedInUI() {
+async function displayLoggedInUI() {
   /* 
   btnLogout.style.display = "block";
   btnLoginGH.style.display = "none";
@@ -397,9 +475,46 @@ function displayLoggedInUI() {
  */
   document.getElementById("login-section").style.display = "none";
   document.getElementById("user-section").style.display = "flex";
+
+  logUserProfile();
+}
+
+async function logUserProfile() {
+  let accessToken = await getAccessToken();
+  if (!accessToken) {
+    console.log("--- UP no token");
+    return;
+  }
+  try {
+    let user = await fetch(apiURL.PROFILE, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    if (!user.ok) {
+      console.error(
+        `Error fetching user profile: ${user.status} ${user.statusText}`
+      );
+      return;
+    }
+    user = await user.json();
+    if (!user) {
+      console.log("**** user profile");
+      return;
+    }
+    console.log("**** user profile: ", user);
+  } catch (error) {
+    console.error("Error fetching user profile: ", error);
+    return;
+  }
 }
 
 function displayLoggedOutUI() {
+  logUserProfile();
+
   /*   btnLogout.style.display = "none";
   btnLoginGH.style.display = "block";
   btnOpenDelete.style.display = "none";
