@@ -1,4 +1,4 @@
-// TODO: implementar fresh tokens. leer la conversacion con gpt, para ver el tema de cuando expira, cuando renovar, etc.
+//TODO: borrar todos los inputs de los forms luego de cerrarlos, tambien limpiar los mensaje de info, que sino quedan.
 
 import { apiURL } from "./endpoints-front.js";
 

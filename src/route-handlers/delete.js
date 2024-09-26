@@ -27,8 +27,9 @@ export async function handleDeleteUser(req, res) {
     }
 
     // añañdir el token a la lista de denegados
-     const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
-     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
+    console.log("req.cookies.refreshToken", req.cookies.refreshToken);
+    const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
+    db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
 
     //hacer logout y borrar sesion
     Object.keys(req.cookies).forEach((cookie) => {
@@ -42,8 +43,6 @@ export async function handleDeleteUser(req, res) {
       }
     });
 
-      
- 
     return res.status(204).end();
   } catch (error) {
     return res.status(500).json({ error: `Error deleting user: ${error}` });

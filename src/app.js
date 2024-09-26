@@ -1,5 +1,5 @@
 //TODO: pendiente blacklist en otros lugares aparte del logout, expiracion, + remember me.
-//TODO: blacklist postlogout ya está, otra sería cuando se cambia de refresh, pero si se cambia cuando expira... no tendrìa sentido, en reset password tampoco porque queda deslogueado, eliminacion de cuenta, token robado o comprometido (esto es màs probabilistico tipo si se detecta que entra de otra ip y agente, o sea que no lo voy a implementar ahora), cierre de sesion en otro dispositivo
+//TODO: blacklist postlogout ya está, otra sería cuando se cambia de refresh, pero si se cambia cuando expira... no tendrìa sentido, en reset password tampoco porque queda deslogueado, eliminacion de cuenta (ya està), token robado o comprometido (esto es màs probabilistico tipo si se detecta que entra de otra ip y agente, o sea que no lo voy a implementar ahora), cierre de sesion en otro dispositivo [pasar en limpio a mis notas que hice esto]
 
 // trade of: seguridad, performance, experiencia usuario
 
