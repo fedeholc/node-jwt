@@ -1,5 +1,7 @@
 //TODO: borrar todos los inputs de los forms luego de cerrarlos, tambien limpiar los mensaje de info, que sino quedan.
 
+//TODO: implementar vibrate en el signup y otros
+
 import { apiURL } from "./endpoints-front.js";
 
 //TODO: que no sean globales, declararlas en main y pasarlas por parámetro
@@ -7,19 +9,23 @@ let userData = null;
 let accessToken = null;
 
 const dialogSignup = document.getElementById("dialog-signup");
-const btnOpenDialog = document.getElementById("btn-signup-open");
-const btnCloseDialog = document.getElementById("close-signup");
+const btnOpenSignup = document.getElementById("btn-signup-open");
+const btnCloseSignup = document.getElementById("close-signup");
+const signupInfo = document.querySelector("#signup-info");
 
 const dialogDelete = document.getElementById("dialog-delete");
 const btnOpenDelete = document.getElementById("btn-delete-open");
 const btnCloseDelete = document.getElementById("close-delete");
 const btnDelete = document.getElementById("btn-delete");
+const deleteInfo = document.querySelector("#delete-info");
 
 const dialogReset = document.getElementById("dialog-reset");
 const btnOpenReset = document.getElementById("btn-reset-open");
 const btnCloseReset = document.getElementById("close-reset");
 const btnChangePass = document.getElementById("btn-change-password");
 const btnSendCode = document.getElementById("btn-send-code");
+const codeInfo = document.querySelector("#code-info");
+const changeInfo = document.querySelector("#change-info");
 
 const btnLogout = document.getElementById("btn-logout");
 const btnLoginGH = document.getElementById("btn-login-gh");
@@ -46,19 +52,21 @@ async function main() {
   renderUI();
 }
 
+function cleanInputs(parent) {
+  let inputs = parent.querySelectorAll("input");
+  inputs.forEach((input) => {
+    input.value = "";
+  });
+}
+
 //TODO: faltan trycatch en nuevas funciones
-async function renewToken() {
-  console.log("pido renew token");
+async function getNewAccessToken() {
   const response = await fetch(apiURL.REFRESH, {
     method: "POST",
     credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
   });
-  console.log("response renew token: ", response);
   const data = await response.json();
   if (data.accessToken) {
-    // Almacenar el nuevo access token (en memoria o localStorage)
-    //console.log("--guardo nuevo token: ", data.accessToken);
-    //localStorage.setItem("accessToken", data.accessToken);
     return data.accessToken;
   } else {
     return null;
@@ -66,13 +74,11 @@ async function renewToken() {
 }
 
 function isTokenExpired(token) {
-  console.log("entro a istokenexpired", token);
   if (token) {
     try {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const currentTime = Math.floor(Date.now() / 1000);
       let expired = decodedToken.exp < currentTime;
-      console.log("expired: ", expired);
       return expired;
     } catch (error) {
       console.error("Error decoding token: ", error);
@@ -84,19 +90,17 @@ function isTokenExpired(token) {
 
 async function getAccessToken() {
   let accessToken = JSON.parse(localStorage.getItem("accessToken"));
-  console.log("get access token: ", accessToken);
   if (!accessToken || isTokenExpired(accessToken)) {
-    console.log("--Token expired or not found. Renewing token...");
-    accessToken = await renewToken();
-    console.log("--new token: ", accessToken);
-    if (accessToken) {
-      localStorage.setItem("accessToken", JSON.stringify(accessToken));
-      return accessToken;
+    let newAccessToken = await getNewAccessToken();
+    if (newAccessToken) {
+      localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
+      return newAccessToken;
     } else {
       return null;
     }
+  } else {
+    return accessToken;
   }
-  return accessToken;
 }
 
 async function getUserData() {
@@ -147,6 +151,7 @@ function vibrate(element) {
     element.classList.remove("vibrate");
   }, 300);
 }
+
 async function handleLogin(event) {
   event.preventDefault();
 
@@ -254,23 +259,24 @@ async function handleSignUp(event) {
   let password = document.querySelector("#su-password").value;
   let confirmPassword = document.querySelector("#su-confirm-password").value;
 
-  const signupInfo = document.querySelector("#signup-info");
-
   if (email === "" || password === "" || confirmPassword === "") {
-    signupInfo.textContent = `
-        Please fill in all fields.`;
+    signupInfo.textContent = `Please fill in all fields.`;
+    vibrate(signupInfo);
+    vibrate(btnSignUp);
     return;
   }
 
   if (password !== confirmPassword) {
-    signupInfo.textContent = `
-        Passwords don't match.`;
+    signupInfo.textContent = `Passwords don't match.`;
+    vibrate(signupInfo);
+    vibrate(btnSignUp);
     return;
   }
 
   if (!inputEmail.validity.valid) {
-    signupInfo.textContent = `
-        Enter a valid email.`;
+    signupInfo.textContent = `Enter a valid email.`;
+    vibrate(signupInfo);
+    vibrate(btnSignUp);
     return;
   }
 
@@ -290,6 +296,9 @@ async function handleSignUp(event) {
       console.log(
         `Error signing up. ${response.status} ${response.statusText}`
       );
+      vibrate(signupInfo);
+      vibrate(btnSignUp);
+      return;
     }
 
     if (response.ok) {
@@ -300,6 +309,8 @@ async function handleSignUp(event) {
         console.log(
           `Error signing up. ${response.status} ${response.statusText}`
         );
+        vibrate(signupInfo);
+        vibrate(btnSignUp);
         return;
       }
 
@@ -321,13 +332,14 @@ async function handleSignUp(event) {
   } catch (error) {
     signupInfo.textContent = `Error signing up user: ${error}`;
     console.error("Error signing up: ", error);
+    vibrate(signupInfo);
+    vibrate(btnSignUp);
   }
 }
 
 async function handleDeleteUser(event) {
   event.preventDefault();
 
-  let deleteInfo = document.querySelector("#delete-info");
   let email = userData.email;
   let password = document.querySelector("#delete-password").value;
 
@@ -365,7 +377,6 @@ async function handleDeleteUser(event) {
 
 async function handleChangePass(event) {
   event.preventDefault();
-  let changeInfo = document.querySelector("#change-info");
 
   let codeInput = document.querySelector("#reset-code");
 
@@ -424,7 +435,6 @@ async function handleChangePass(event) {
 
 async function handleSendCode(e) {
   e.preventDefault();
-  const codeInfo = document.querySelector("#code-info");
 
   try {
     let inputEmail = document.querySelector("#reset-email");
@@ -464,6 +474,7 @@ async function handleSendCode(e) {
 }
 
 function renderUI() {
+  cleanInputs(document);
   if (userData) {
     displayLoggedInUI();
   } else {
@@ -473,44 +484,38 @@ function renderUI() {
 function displayLoggedInUI() {
   document.getElementById("login-section").style.display = "none";
   document.getElementById("user-section").style.display = "flex";
+
+  cleanInputs(document);
 }
 
 function displayLoggedOutUI() {
   document.getElementById("login-section").style.display = "flex";
   document.getElementById("user-section").style.display = "none";
-
-  document.querySelector("#email").value = "";
-  document.querySelector("#password").value = "";
-  document.querySelector("#su-email").value = "";
-  document.querySelector("#su-password").value = "";
-  document.querySelector("#su-confirm-password").value = "";
-  document.querySelector("#delete-password").value = "";
 }
 
 function setEventListeners() {
   btnLogout.addEventListener("click", handleLogOut);
-
   btnLoginGH.addEventListener("click", handleLoginGH);
-
   btnLoginGG.addEventListener("click", handleLoginGG);
-
   btnLogin.addEventListener("click", handleLogin);
-
   btnSignUp.addEventListener("click", handleSignUp);
-
   btnDelete.addEventListener("click", handleDeleteUser);
+  btnSendCode.addEventListener("click", handleSendCode);
+  btnChangePass.addEventListener("click", handleChangePass);
 
-  btnOpenDialog.addEventListener("click", (e) => {
-    document.querySelector("#email").removeAttribute("required");
-    document.querySelector("#password").removeAttribute("required");
+  btnOpenSignup.addEventListener("click", (e) => {
+    /*     document.querySelector("#email").removeAttribute("required");
+    document.querySelector("#password").removeAttribute("required"); */
     e.preventDefault();
     dialogSignup.showModal();
   });
 
-  btnCloseDialog.addEventListener("click", () => {
+  btnCloseSignup.addEventListener("click", () => {
     dialogSignup.close();
-    document.querySelector("#email").setAttribute("required", "");
-    document.querySelector("#password").setAttribute("required", "");
+    cleanInputs(dialogSignup);
+    signupInfo.textContent = "";
+    /*     document.querySelector("#email").setAttribute("required", "");
+    document.querySelector("#password").setAttribute("required", ""); */
   });
 
   btnOpenDelete.addEventListener("click", () => {
@@ -530,6 +535,8 @@ function setEventListeners() {
 
   btnCloseDelete.addEventListener("click", () => {
     dialogDelete.close();
+    cleanInputs(dialogDelete);
+    deleteInfo.textContent = "";
   });
 
   btnOpenReset.addEventListener("click", async () => {
@@ -538,20 +545,27 @@ function setEventListeners() {
 
   btnCloseReset.addEventListener("click", () => {
     dialogReset.close();
+    cleanInputs(dialogReset);
+    codeInfo.textContent = "";
+    changeInfo.textContent = "";
   });
-
-  btnSendCode.addEventListener("click", handleSendCode);
-  btnChangePass.addEventListener("click", handleChangePass);
 
   window.addEventListener("click", (event) => {
     if (event.target === dialogSignup) {
       dialogSignup.close();
+      cleanInputs(dialogSignup);
+      signupInfo.textContent = "";
     }
     if (event.target === dialogDelete) {
       dialogDelete.close();
+      cleanInputs(dialogDelete);
+      deleteInfo.textContent = "";
     }
     if (event.target === dialogReset) {
       dialogReset.close();
+      cleanInputs(dialogReset);
+      codeInfo.textContent = "";
+      changeInfo.textContent = "";
     }
   });
 }
