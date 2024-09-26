@@ -29,6 +29,8 @@ const btnLogin = document.getElementById("btn-login");
 const btnSignUp = document.getElementById("btn-signup");
 
 const userInfoDisplay = document.getElementById("user-info-display");
+const userInfoId = document.getElementById("user-info-id");
+const userInfoEmail = document.getElementById("user-info-email");
 
 document.addEventListener("DOMContentLoaded", main);
 
@@ -128,68 +130,14 @@ async function getUserData() {
         console.log(`No user data. ${response.status} ${response.statusText}`);
         return null;
       }
-      userInfoDisplay.innerHTML = `
-      <p>Id: ${data.user.id}</p>
-      <p>Email: ${data.user.email}</p>`;
+      userInfoId.textContent = `Id: ${data.user.id}`;
+      userInfoEmail.textContent = `Email: ${data.user.email}`;
 
       return data.user;
     }
   } catch (error) {
     console.error(`Error loading user data: ${error}`);
     return null;
-  }
-}
-
-async function loadUserData() {
-  try {
-    //TODO: ojo, revisar donde se estan enviando las credentials(cookies), porque no debería hacer falta salvo para renovar el token, sino vamos a estar mandando siempre el refresh tambien
-
-    let accessToken = await getAccessToken();
-
-    if (!accessToken) {
-      console.log("no token");
-      displayLoggedOutUI();
-      return;
-    }
-
-    console.log("hago fetch with token");
-
-    let response = await fetch(apiURL.USER_INFO, {
-      method: "GET",
-      credentials: "omit",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    console.log("rta fetch with token: ", response);
-
-    if (!response.ok) {
-      console.log(
-        `No user authenticated: ${response.status} ${response.statusText}`
-      );
-      displayLoggedOutUI();
-      return;
-    }
-
-    if (response.ok) {
-      let data = await response.json();
-      if (!data.user) {
-        console.log(`No user data. ${response.status} ${response.statusText}`);
-        displayLoggedOutUI();
-        return;
-      }
-      userData = data.user;
-      userInfoDisplay.innerHTML = `
-      <p>Id: ${userData.id}</p>
-      <p>Email: ${userData.email}</p>`;
-
-      displayLoggedInUI();
-      return;
-    }
-  } catch (error) {
-    displayLoggedOutUI();
-
-    console.error(`Error loading user data: ${error}`);
   }
 }
 
@@ -215,7 +163,7 @@ async function handleLogin(event) {
     email === "" ||
     password === ""
   ) {
-    divLoginInfo.innerHTML = `Enter a valid email and password.`;
+    divLoginInfo.textContent = `Enter a valid email and password.`;
     vibrate(divLoginInfo);
     vibrate(btnLogin);
     return;
@@ -231,7 +179,7 @@ async function handleLogin(event) {
   });
 
   if (!response.ok) {
-    divLoginInfo.innerHTML = `Your email or password is incorrect. Please try again.`;
+    divLoginInfo.textContent = `Your email or password is incorrect. Please try again.`;
     divLoginInfo.classList.add("vibrate");
     vibrate(divLoginInfo);
     vibrate(btnLogin);
@@ -241,9 +189,9 @@ async function handleLogin(event) {
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    userInfoDisplay.innerHTML = `
-      <p>Id: ${userData.id}</p>
-      <p>Email: ${userData.email}</p>`;
+    userInfoId.textContent = `Id: ${data.user.id}`;
+    userInfoEmail.textContent = `Email: ${data.user.email}`;
+
     renderUI();
 
     console.log("response data: ", data);
@@ -309,19 +257,19 @@ async function handleSignUp(event) {
   const signupInfo = document.querySelector("#signup-info");
 
   if (email === "" || password === "" || confirmPassword === "") {
-    signupInfo.innerHTML = `
+    signupInfo.textContent = `
         Please fill in all fields.`;
     return;
   }
 
   if (password !== confirmPassword) {
-    signupInfo.innerHTML = `
+    signupInfo.textContent = `
         Passwords don't match.`;
     return;
   }
 
   if (!inputEmail.validity.valid) {
-    signupInfo.innerHTML = `
+    signupInfo.textContent = `
         Enter a valid email.`;
     return;
   }
@@ -338,7 +286,7 @@ async function handleSignUp(event) {
 
     if (!response.ok) {
       let data = await response.json();
-      signupInfo.innerHTML = `Error signing up user: ${data.error}`;
+      signupInfo.textContent = `Error signing up user: ${data.error}`;
       console.log(
         `Error signing up. ${response.status} ${response.statusText}`
       );
@@ -348,7 +296,7 @@ async function handleSignUp(event) {
       let data = await response.json();
 
       if (!data.user) {
-        signupInfo.innerHTML = `Error signing up user: ${data.error}`;
+        signupInfo.textContent = `Error signing up user: ${data.error}`;
         console.log(
           `Error signing up. ${response.status} ${response.statusText}`
         );
@@ -356,10 +304,9 @@ async function handleSignUp(event) {
       }
 
       userData = data.user;
-      userInfoDisplay.innerHTML = `
-      <p>User successfully registered.</p>
-      <p>Id: ${userData.id}</p>
-      <p>Email: ${userData.email}</p>`;
+      userInfoDisplay.textContent = `User successfully registered.`;
+      userInfoId.textContent = `Id: ${data.user.id}`;
+      userInfoEmail.textContent = `Email: ${data.user.email}`;
 
       accessToken = data.accessToken;
       localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
@@ -372,7 +319,7 @@ async function handleSignUp(event) {
       dialogSignup.close();
     }
   } catch (error) {
-    signupInfo.innerHTML = `Error signing up user: ${error}`;
+    signupInfo.textContent = `Error signing up user: ${error}`;
     console.error("Error signing up: ", error);
   }
 }
@@ -395,12 +342,12 @@ async function handleDeleteUser(event) {
 
   if (!response.ok) {
     let data = await response.json();
-    deleteInfo.innerHTML = `Error deleting user: ${data.error}`;
+    deleteInfo.textContent = `Error deleting user: ${data.error}`;
     return;
   }
 
   if (response.ok) {
-    deleteInfo.innerHTML = `User successfully deleted.`;
+    deleteInfo.textContent = `User successfully deleted.`;
     deleteInfo.style.color = "green";
     deleteInfo.style.fontWeight = "bold";
 
@@ -429,17 +376,17 @@ async function handleChangePass(event) {
 
   try {
     if (!codeInput.validity.valid) {
-      changeInfo.innerHTML = `Enter a code with six characters.`;
+      changeInfo.textContent = `Enter a code with six characters.`;
       return;
     }
 
     if (pass === "" || confirmPass === "" || email === "") {
-      changeInfo.innerHTML = `Please fill in all fields.`;
+      changeInfo.textContent = `Please fill in all fields.`;
       return;
     }
 
     if (pass !== confirmPass) {
-      changeInfo.innerHTML = `Passwords don't match.`;
+      changeInfo.textContent = `Passwords don't match.`;
       return;
     }
 
@@ -454,7 +401,7 @@ async function handleChangePass(event) {
 
     if (!response.ok) {
       let data = await response.json();
-      changeInfo.innerHTML = `Error changing password. ${data.error}`;
+      changeInfo.textContent = `Error changing password. ${data.error}`;
       return false;
     }
 
@@ -462,7 +409,7 @@ async function handleChangePass(event) {
       changeInfo.style.color = "green";
       changeInfo.style.fontWeight = "bold";
 
-      changeInfo.innerHTML = `Password successfully changed.`;
+      changeInfo.textContent = `Password successfully changed.`;
 
       setTimeout(() => {
         dialogReset.close();
@@ -471,7 +418,7 @@ async function handleChangePass(event) {
     }
   } catch (error) {
     console.error("Error changing password: ", error);
-    changeInfo.innerHTML = `Error changing password. Try again later.`;
+    changeInfo.textContent = `Error changing password. Try again later.`;
   }
 }
 
@@ -484,7 +431,7 @@ async function handleSendCode(e) {
     let email = inputEmail.value;
 
     if (!inputEmail.validity.valid) {
-      codeInfo.innerHTML = `Enter a valid email.`;
+      codeInfo.textContent = `Enter a valid email.`;
       return;
     }
 
@@ -499,12 +446,12 @@ async function handleSendCode(e) {
 
     if (!response.ok) {
       let data = await response.json();
-      codeInfo.innerHTML = `Error sending code. ${data.error}`;
+      codeInfo.textContent = `Error sending code. ${data.error}`;
       return false;
     }
 
     if (response.ok) {
-      codeInfo.innerHTML = `The secuirity code was sent to your email. 
+      codeInfo.textContent = `The secuirity code was sent to your email. 
       Check your inbox.`;
       codeInfo.style.color = "green";
       codeInfo.style.fontWeight = "bold";
@@ -512,7 +459,7 @@ async function handleSendCode(e) {
     }
   } catch (error) {
     console.error("Error sending code: ", error);
-    codeInfo.innerHTML = `Error sending code. Try again later.`;
+    codeInfo.textContent = `Error sending code. Try again later.`;
   }
 }
 
@@ -576,7 +523,7 @@ function setEventListeners() {
 
     document.getElementById(
       "delete-user"
-    ).innerHTML = `User: ${userData.email}`;
+    ).textContent = `User: ${userData.email}`;
 
     dialogDelete.showModal();
   });

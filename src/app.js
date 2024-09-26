@@ -1,10 +1,13 @@
-//TODO: sanitizar los innerhtml
 //Todo: blanquear campos inputs de los dialogs cuando se cierran, idem los mensajes.
 //TODO: la cookie del refresh la estoy mandando firmada? hace falta si ya está firmado el token?
 
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
+//TODO: limpiar base de tokens expirados
+// DELETE FROM blacklist WHERE expiration < strftime('%s','now') * 1000;
+
 //TODO: convendría crear la BD (con algunos datos) en caso de que no exista??
+//TODO: sí, y en particular para testing
 
 //TODO: tema environment para testing, ver si tener otra base para eso y definirla en el endpoint.
 
