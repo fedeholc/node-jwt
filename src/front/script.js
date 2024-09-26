@@ -1,6 +1,5 @@
 import { apiURL } from "./endpoints-front.js";
 
-//TODO: que no sean globales, declararlas en main y pasarlas por parámetro
 let userData = null;
 let accessToken = null;
 
@@ -36,16 +35,28 @@ const userInfoEmail = document.getElementById("user-info-email");
 
 document.addEventListener("DOMContentLoaded", main);
 
-//TODO: implementar un getAccessToken global para no tener que hacerlo en cada función
 async function main() {
   setEventListeners();
-
   accessToken = await getAccessToken();
-
   userData = await getUserData();
-  //loadUserData();
-
   renderUI();
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - -
+//- Funciones: UI - - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - -
+
+function renderUI() {
+  cleanInputs(document);
+  if (userData) {
+    //logged in UI
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("user-section").style.display = "flex";
+  } else {
+    //logged out UI
+    document.getElementById("login-section").style.display = "flex";
+    document.getElementById("user-section").style.display = "none";
+  }
 }
 
 function cleanInputs(parent) {
@@ -55,38 +66,55 @@ function cleanInputs(parent) {
   });
 }
 
-//TODO: faltan trycatch en nuevas funciones
+function vibrate(element) {
+  element.classList.add("vibrate");
+  setTimeout(() => {
+    element.classList.remove("vibrate");
+  }, 300);
+}
+
+//- - - - - - - - - - - - - - - - - - - - - - - -
+//- Funciones: autenticación. - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - -
+
 async function getNewAccessToken() {
-  const response = await fetch(apiURL.REFRESH, {
-    method: "POST",
-    credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
-  });
-  const data = await response.json();
-  if (data.accessToken) {
-    return data.accessToken;
-  } else {
+  try {
+    const response = await fetch(apiURL.REFRESH, {
+      method: "POST",
+      credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
+    });
+    const data = await response.json();
+    if (data.accessToken) {
+      return data.accessToken;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching new access token: ${error}`);
     return null;
   }
 }
 
 function isTokenExpired(token) {
-  if (token) {
-    try {
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      let expired = decodedToken.exp < currentTime;
-      return expired;
-    } catch (error) {
-      console.error("Error decoding token: ", error);
-      return true;
-    }
+  try {
+    if (!token) return true;
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decodedToken.exp < currentTime;
+  } catch (error) {
+    console.error("Error decoding token: ", error);
+    return true;
   }
-  return true;
 }
 
 async function getAccessToken() {
-  let accessToken = JSON.parse(localStorage.getItem("accessToken"));
-  if (!accessToken || isTokenExpired(accessToken)) {
+  try {
+    let accessToken = JSON.parse(localStorage.getItem("accessToken"));
+
+    if (accessToken && isTokenExpired(accessToken) === false) {
+      return accessToken;
+    }
+
     let newAccessToken = await getNewAccessToken();
     if (newAccessToken) {
       localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
@@ -94,8 +122,9 @@ async function getAccessToken() {
     } else {
       return null;
     }
-  } else {
-    return accessToken;
+  } catch (error) {
+    console.error(`Error getting access token: ${error}`);
+    return null;
   }
 }
 
@@ -107,7 +136,6 @@ async function getUserData() {
     }
     console.log("hago fetch with token");
 
-    //let response = await fetch(apiURL.USER_INFO, {
     let response = await fetch(apiURL.GET_USER, {
       method: "GET",
       credentials: "omit",
@@ -115,7 +143,6 @@ async function getUserData() {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("rta fetch with token: ", response);
 
     if (!response.ok) {
       console.log(
@@ -141,12 +168,9 @@ async function getUserData() {
   }
 }
 
-function vibrate(element) {
-  element.classList.add("vibrate");
-  setTimeout(() => {
-    element.classList.remove("vibrate");
-  }, 300);
-}
+//- - - - - - - - - - - - - - - - - - - - - - - -
+//- Funciones: handlers - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - -
 
 async function handleLogin(event) {
   event.preventDefault();
@@ -489,18 +513,9 @@ async function handleSendCode(e) {
   }
 }
 
-function renderUI() {
-  cleanInputs(document);
-  if (userData) {
-    //logged in UI
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("user-section").style.display = "flex";
-  } else {
-    //logged out UI
-    document.getElementById("login-section").style.display = "flex";
-    document.getElementById("user-section").style.display = "none";
-  }
-}
+//- - - - - - - - - - - - - - - - - - - - - - - -
+//- Event listeners - - - - - - - - - - - - - - -
+//- - - - - - - - - - - - - - - - - - - - - - - -
 
 function setEventListeners() {
   btnLogout.addEventListener("click", handleLogOut);
