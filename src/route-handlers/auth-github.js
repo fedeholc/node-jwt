@@ -4,19 +4,20 @@ import crypto from "crypto";
 import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
-import { db } from "../global-store.js";
-import { secretKey } from "../global-store.js";
+import { db, secretKey } from "../global-store.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 
 function handleAuthGitHub(req, res) {
-  req.session.returnTo = req.query.returnTo || req.get("Referer") || "/";
+  if (!req.query.returnTo) {
+    console.error("No returnTo URL provided");
+    return res.status(400).json({ error: "No returnTo URL provided" });
+  }
+  req.session.returnTo = req.query.returnTo;
 
   const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&scope=user:email&redirect_uri=${redirectURI}`;
-
-  //TODO: al pedir el permiso dice que es solo para el mail pero despues trae un poco mas de info, tal vez es todo el profile que es el minimo, checkiar
 
   res.status(200).json({ ghauth: githubAuthURL });
 }
@@ -74,8 +75,6 @@ async function handleAuthGitHubCallback(req, res) {
         );
     }
 
-    console.log("ghUserData", ghUserData);
-
     // Verifica si el usuario existe en la base de datos
     let userInDB = await db.getUserByEmail(ghUserData.email);
     if (!userInDB) {
@@ -100,7 +99,7 @@ async function handleAuthGitHubCallback(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.redirect(req.session.returnTo || "/");
+    res.redirect(req.session.returnTo);
     delete req.session.returnTo;
   } catch (error) {
     console.error("Error during GitHub authentication", error);

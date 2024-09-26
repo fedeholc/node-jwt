@@ -9,7 +9,11 @@ const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const redirectURI = apiURL.AUTH_GOOGLE_CALLBACK;
 
 export function handleAuthGoogle(req, res) {
-  req.session.returnTo = req.query.returnTo || req.get("Referer") || "/";
+  if (!req.query.returnTo) {
+    console.error("No returnTo URL provided");
+    return res.status(400).json({ error: "No returnTo URL provided" });
+  }
+  req.session.returnTo = req.query.returnTo;
   const googleAuthURL = `${googleEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=email profile`;
   res.status(200).json({ gauth: googleAuthURL });
 }

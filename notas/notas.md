@@ -20,6 +20,7 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 ## sobre lo hecho
 
 - denylist de tokens: está implementado cuando el usuario hace logout, tambien cuando borra la cuenta. Al renovar el refresh no tiene sentido porque la renovacion se hace cuando se vence, no antes (sino habrìa que sumarlo a la lista en ese momento). Al reset de password tampoco hace falta porque el reset se hace estanddo deslogueado (salvo que haga reset desde otra pc, u otro navegador, pero en ese caso creo que no tendria sentido invalidar la de las otras pcs o sesiones -igual si se quisiera hacer habrìa que implementar registro de tokens por usuario). Tampoco implemente ahora el tema de posibles tokens comprometidos y su posible detección (ej. cambios de IP o agentes).
+- no uso cookies firmadas (se hace pasandole una clave a cookie parser), porque no tienen sentido con JWT que ya están firmados, y la de session también está firmada por express-session.
 
 ## Aprendizajes / Ideas
 

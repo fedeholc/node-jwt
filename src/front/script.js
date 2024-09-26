@@ -131,10 +131,9 @@ async function getAccessToken() {
 async function getUserData() {
   try {
     if (!accessToken) {
-      console.log("no token");
+      console.log("No token found.");
       return null;
     }
-    console.log("hago fetch with token");
 
     let response = await fetch(apiURL.GET_USER, {
       method: "GET",
@@ -229,7 +228,8 @@ async function handleLogin(event) {
 
 async function handleLoginGH(event) {
   event.preventDefault();
-  let response = await fetch(apiURL.AUTH_GITHUB, {
+  let returnTo = window.location.href;
+  let response = await fetch(apiURL.AUTH_GITHUB + `?returnTo=${returnTo}`, {
     method: "GET",
     credentials: "include", //estás credentials sí son necesarias, para el envío de la cookie de session y el returnTo
     headers: {
@@ -243,7 +243,8 @@ async function handleLoginGH(event) {
 
 async function handleLoginGG(event) {
   event.preventDefault();
-  let response = await fetch(apiURL.AUTH_GOOGLE, {
+  let returnTo = window.location.href;
+  let response = await fetch(apiURL.AUTH_GOOGLE + `?returnTo=${returnTo}`, {
     method: "GET",
     credentials: "include",
     headers: {

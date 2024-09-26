@@ -1,21 +1,19 @@
-export { dbURI, apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP };
+export { dbURI, apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP, googleEP };
 
 import process from "process";
 
-const ENV = process.env.NODE_ENV || "development";
-
-console.log("ENV", process.env.NODE_ENV);
+const ENV = process.env.NODE_ENV;
 
 const dbURIs = {
-  production: process.env.DB_PROD_URI || "mydb.sqlite",
-  development: process.env.DB_DEV_URI || "mydb.sqlite",
-  test: process.env.DB_TEST_URI || "mydb.sqlite",
+  production: process.env.DB_PROD_URI,
+  development: process.env.DB_DEV_URI,
+  test: process.env.DB_TEST_URI,
 };
 const dbURI = dbURIs[ENV];
 
 const apiBase = {
-  development: `http://127.0.0.1:${process.env.PORT || 3000}`,
-  test: `http://127.0.0.1:${process.env.PORT || 3000}`,
+  development: `http://127.0.0.1:${process.env.PORT}`,
+  test: `http://127.0.0.1:${process.env.PORT}`,
   production: "https://api.example.com",
 };
 
@@ -33,7 +31,7 @@ const apiEP = {
   RESET_PASS: "/reset-password",
   ROOT: "/",
   USER_INFO: "/user-info",
-  GET_USER: "/get-user"
+  GET_USER: "/get-user",
 };
 
 const apiURL = {
@@ -51,7 +49,7 @@ const apiURL = {
   RESET_PASS: apiBase[ENV] + apiEP.RESET_PASS,
   ROOT: apiBase[ENV] + apiEP.ROOT,
   USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
-  GET_USER: apiBase[ENV] + apiEP.GET_USER
+  GET_USER: apiBase[ENV] + apiEP.GET_USER,
 };
 
 const ALLOWED_ORIGINS = [
@@ -67,9 +65,8 @@ const gitHubEP = {
   USER: "https://api.github.com/user",
 };
 
-export const googleEP = {
+const googleEP = {
   AUTHORIZE: "https://accounts.google.com/o/oauth2/auth",
   ACCESS_TOKEN: "https://oauth2.googleapis.com/token",
   USER: "https://www.googleapis.com/oauth2/v3/userinfo",
-}; //TODO: probar la otra url
-//TODO: definir el scope en la url de github, que lo habia quitado
+};

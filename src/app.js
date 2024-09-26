@@ -1,6 +1,3 @@
-//Todo: blanquear campos inputs de los dialogs cuando se cierran, idem los mensajes.
-//TODO: la cookie del refresh la estoy mandando firmada? hace falta si ya está firmado el token?
-
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: limpiar base de tokens expirados
@@ -14,8 +11,6 @@
 //TODO: ver el tema port, que en algún lado está puesto que si no hay env use 3000, pero ojo porque ahora la auth de google lo tiene hardcodeado en la uri
 
 //TODO: habría que probar implementarlo en alguna app para ver que funcione todo bien en producción
-
-//TODO: eleccion de base de datos con .env
 
 import { extractToken, verifyToken } from "./util-auth.js";
 import {
@@ -104,26 +99,7 @@ app.post(apiEP.CHANGE_PASS, handleChangePass);
  */
 
 app.post(apiEP.REGISTER, handleRegister);
-
-// Ruta protegida (requiere token)
-// Otra opción sería hacer la verificación trabajando con sesiones y pasando
-// el usuario a través de la sesión (tiene sus ventajas y desventajas).
-app.get(apiEP.PROFILE, extractToken, verifyToken(secretKey), (req, res) => {
-  //let user = db.getUserByEmail(req.payload.user.email);
-  let user = req.payload.user;
-  console.log("Profile user: ", user);
-  // dada la info que viene en el token esta validación
-  // podría no ser necesaria.
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
-  } else {
-    return res.status(200).json({
-      mensaje: "Access granted",
-      usuario: user,
-      usuarioToken: req.payload,
-    });
-  }
-});
+ 
 
 app.get(apiEP.ROOT, (req, res) => {
   console.log(req.session.id);
@@ -136,9 +112,9 @@ app.get(apiEP.ROOT, (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.status(404).send("¡Hola! Página no encontrada");
+  res.status(404).send("¡Hola! 404 Página no encontrada");
 });
-console.log("env", process.env.PORT);
+
 app.listen(process.env.PORT || 3000, () =>
   console.log(`Server running on port ${process.env.PORT || 3000}`)
 );
