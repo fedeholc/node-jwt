@@ -5,6 +5,7 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 ## a futuro
 
 - [ ] uuid como identificador en BD? (creo que no, mejor index email)
+- [ ] implementar cerrar sesion de dispositivos (implica registro o versionado de tokens).
 - [ ] PWA y service workers (validación token, actualización info al conectar, etc.), guardar config en local storage, etc.
 - [ ] validación de mails y passwords en los inputs, con colores, etc.
 - [ ] cambiar alerts por textos en la misma web
@@ -16,10 +17,15 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 - [ ] leer web.dev sobre cookiesauth
 - [ ] cuando escriba la explicacion del codigo, dar cuenta de los tradeoffs, explicar por qué cada eleccion. Ej: access token con o sin refresh, cuando renovar, etc.
 
+## sobre lo hecho
+
+- denylist de tokens: está implementado cuando el usuario hace logout, tambien cuando borra la cuenta. Al renovar el refresh no tiene sentido porque la renovacion se hace cuando se vence, no antes (sino habrìa que sumarlo a la lista en ese momento). Al reset de password tampoco hace falta porque el reset se hace estanddo deslogueado (salvo que haga reset desde otra pc, u otro navegador, pero en ese caso creo que no tendria sentido invalidar la de las otras pcs o sesiones -igual si se quisiera hacer habrìa que implementar registro de tokens por usuario). Tampoco implemente ahora el tema de posibles tokens comprometidos y su posible detección (ej. cambios de IP o agentes).
+
 ## Aprendizajes / Ideas
 
 ### estrategias y tradeoffs
 
+- los principales tradeoffs son entre experiencia de usuario (ej. si se tiene que loguear muy seguido o no), seguridad, y performance (ej. si se tiene que consultar la base de datos en cada request o no).
 - access token con o sin refresh
 - cuando renovar el access token, si antes de que expire o cuando ya expiró
 - si guardar el refresh token en una cookie o en el local storage
