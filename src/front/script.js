@@ -1,7 +1,3 @@
-//TODO: borrar todos los inputs de los forms luego de cerrarlos, tambien limpiar los mensaje de info, que sino quedan.
-
-//TODO: implementar vibrate en el signup y otros
-
 import { apiURL } from "./endpoints-front.js";
 
 //TODO: que no sean globales, declararlas en main y pasarlas por parámetro
@@ -355,6 +351,8 @@ async function handleDeleteUser(event) {
   if (!response.ok) {
     let data = await response.json();
     deleteInfo.textContent = `Error deleting user: ${data.error}`;
+    vibrate(deleteInfo);
+    vibrate(btnDelete);
     return;
   }
 
@@ -388,16 +386,22 @@ async function handleChangePass(event) {
   try {
     if (!codeInput.validity.valid) {
       changeInfo.textContent = `Enter a code with six characters.`;
+      vibrate(changeInfo);
+      vibrate(btnChangePass);
       return;
     }
 
     if (pass === "" || confirmPass === "" || email === "") {
       changeInfo.textContent = `Please fill in all fields.`;
+      vibrate(changeInfo);
+      vibrate(btnChangePass);
       return;
     }
 
     if (pass !== confirmPass) {
       changeInfo.textContent = `Passwords don't match.`;
+      vibrate(changeInfo);
+      vibrate(btnChangePass);
       return;
     }
 
@@ -413,7 +417,9 @@ async function handleChangePass(event) {
     if (!response.ok) {
       let data = await response.json();
       changeInfo.textContent = `Error changing password. ${data.error}`;
-      return false;
+      vibrate(changeInfo);
+      vibrate(btnChangePass);
+      return;
     }
 
     if (response.ok) {
@@ -424,12 +430,14 @@ async function handleChangePass(event) {
 
       setTimeout(() => {
         dialogReset.close();
-        return true;
+        return;
       }, 2000);
     }
   } catch (error) {
     console.error("Error changing password: ", error);
     changeInfo.textContent = `Error changing password. Try again later.`;
+    vibrate(changeInfo);
+    vibrate(btnChangePass);
   }
 }
 
@@ -442,6 +450,8 @@ async function handleSendCode(e) {
 
     if (!inputEmail.validity.valid) {
       codeInfo.textContent = `Enter a valid email.`;
+      vibrate(codeInfo);
+      vibrate(btnSendCode);
       return;
     }
 
@@ -457,7 +467,9 @@ async function handleSendCode(e) {
     if (!response.ok) {
       let data = await response.json();
       codeInfo.textContent = `Error sending code. ${data.error}`;
-      return false;
+      vibrate(codeInfo);
+      vibrate(btnSendCode);
+      return;
     }
 
     if (response.ok) {
@@ -465,32 +477,29 @@ async function handleSendCode(e) {
       Check your inbox.`;
       codeInfo.style.color = "green";
       codeInfo.style.fontWeight = "bold";
-      return true;
+      vibrate(codeInfo);
+      vibrate(btnSendCode);
+      return;
     }
   } catch (error) {
     console.error("Error sending code: ", error);
     codeInfo.textContent = `Error sending code. Try again later.`;
+    vibrate(codeInfo);
+    vibrate(btnSendCode);
   }
 }
 
 function renderUI() {
   cleanInputs(document);
   if (userData) {
-    displayLoggedInUI();
+    //logged in UI
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("user-section").style.display = "flex";
   } else {
-    displayLoggedOutUI();
+    //logged out UI
+    document.getElementById("login-section").style.display = "flex";
+    document.getElementById("user-section").style.display = "none";
   }
-}
-function displayLoggedInUI() {
-  document.getElementById("login-section").style.display = "none";
-  document.getElementById("user-section").style.display = "flex";
-
-  cleanInputs(document);
-}
-
-function displayLoggedOutUI() {
-  document.getElementById("login-section").style.display = "flex";
-  document.getElementById("user-section").style.display = "none";
 }
 
 function setEventListeners() {
