@@ -81,9 +81,9 @@ function verifyToken(secretKey) {
  * @param {{}} res
  * @param {Function} next
  */
+//TODO: poner try catch
 function extractToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  console.log("-- extract token: ", authHeader);
   if (authHeader && authHeader.startsWith("Bearer ")) {
     req.token = authHeader.split(" ")[1].trim();
     if (!req.token || req.token.trim() === "") {

@@ -24,14 +24,15 @@ const apiEP = {
   AUTH_GOOGLE_CALLBACK: "/auth/google/callback",
   CHANGE_PASS: "/change-pass",
   DELETE_USER: "/delete",
+  GET_USER: "/get-user",
   LOGIN: "/login",
   LOGOUT: "/logout",
   PROFILE: "/profile",
   REGISTER: "/register",
+  REFRESH: "/refresh-token",
   RESET_PASS: "/reset-password",
   ROOT: "/",
   USER_INFO: "/user-info",
-  GET_USER: "/get-user",
 };
 
 const apiURL = {
@@ -42,14 +43,15 @@ const apiURL = {
   AUTH_GOOGLE_CALLBACK: apiBase[ENV] + apiEP.AUTH_GOOGLE_CALLBACK,
   CHANGE_PASS: apiBase[ENV] + apiEP.CHANGE_PASS,
   DELETE_USER: apiBase[ENV] + apiEP.DELETE_USER,
+  GET_USER: apiBase[ENV] + apiEP.GET_USER,
   LOGIN: apiBase[ENV] + apiEP.LOGIN,
   LOGOUT: apiBase[ENV] + apiEP.LOGOUT,
   PROFILE: apiBase[ENV] + apiEP.PROFILE,
   REGISTER: apiBase[ENV] + apiEP.REGISTER,
+  REFRESH: apiBase[ENV] + apiEP.REFRESH,
   RESET_PASS: apiBase[ENV] + apiEP.RESET_PASS,
   ROOT: apiBase[ENV] + apiEP.ROOT,
   USER_INFO: apiBase[ENV] + apiEP.USER_INFO,
-  GET_USER: apiBase[ENV] + apiEP.GET_USER,
 };
 
 const ALLOWED_ORIGINS = [

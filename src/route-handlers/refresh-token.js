@@ -1,0 +1,38 @@
+import { genAccessToken } from "../util-auth.js";
+import { db, secretKey } from "../global-store.js";
+import { jwtVerify } from "jose";
+
+export async function handleRefreshToken(req, res) {
+  console.log("---refresh-token---");
+  const refreshToken = req.cookies.refreshToken;
+
+  let isDenied = await db.isDeniedToken(refreshToken);
+  if (isDenied) {
+    return res.status(403).json({ error: "Refresh token denegado" });
+  }
+
+  if (!refreshToken) {
+    return res.status(403).json({ error: "Refresh token no proporcionado" });
+  }
+
+  try {
+    let response = await jwtVerify(refreshToken, secretKey);
+    if (!response) {
+      return res.status(403).json({ error: "Invalid refresh token" });
+    }
+
+    const newAccessToken = await genAccessToken(
+      {
+        user: {
+          id: response.payload.user.id,
+          email: response.payload.user.email,
+        },
+      },
+      secretKey
+    );
+
+    res.status(200).json({ accessToken: newAccessToken });
+  } catch (error) {
+    return res.status(403).json({ error: `Invalid refresh token. ${error}` });
+  }
+}

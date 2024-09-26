@@ -79,6 +79,7 @@ function vibrate(element) {
 
 async function getNewAccessToken() {
   try {
+    console.log("pido nuevo token");
     const response = await fetch(apiURL.REFRESH, {
       method: "POST",
       credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud
@@ -111,7 +112,7 @@ async function getAccessToken() {
   try {
     let accessToken = JSON.parse(localStorage.getItem("accessToken"));
 
-    if (accessToken && isTokenExpired(accessToken) === false) {
+    if (accessToken && !isTokenExpired(accessToken)) {
       return accessToken;
     }
 

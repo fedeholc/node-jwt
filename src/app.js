@@ -8,8 +8,6 @@
 
 //TODO: tema environment para testing, ver si tener otra base para eso y definirla en el endpoint.
 
-//TODO: ver el tema port, que en algún lado está puesto que si no hay env use 3000, pero ojo porque ahora la auth de google lo tiene hardcodeado en la uri
-
 //TODO: habría que probar implementarlo en alguna app para ver que funcione todo bien en producción
 
 import { extractToken, verifyToken } from "./util-auth.js";
@@ -25,16 +23,16 @@ import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
 import { handleGetUser } from "./route-handlers/get-user.js";
-import { apiEP, dbURI } from "./endpoints.js";
+import { apiEP } from "./endpoints.js";
 import process from "process";
 import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 import { db, secretKey } from "./global-store.js";
-import { jwtVerify } from "jose";
-import { genAccessToken } from "./util-auth.js";
+
 import { handleLogin } from "./routes/handle-login.js";
+import { handleRefreshToken } from "./route-handlers/refresh-token.js";
 
 checkEnvVariables();
 db.createTables();
@@ -50,39 +48,7 @@ app.get(apiEP.USER_INFO, handleUserInfo);
 app.get(apiEP.GET_USER, extractToken, verifyToken(secretKey), handleGetUser);
 app.post(apiEP.LOGIN, handleLogin);
 
-app.post("/refresh-token", async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  let isDenied = await db.isDeniedToken(refreshToken);
-  if (isDenied) {
-    return res.status(403).json({ error: "Refresh token denegado" });
-  }
-
-  if (!refreshToken) {
-    return res.status(403).json({ error: "Refresh token no proporcionado" });
-  }
-
-  try {
-    let response = await jwtVerify(refreshToken, secretKey);
-    if (!response) {
-      return res.status(403).json({ error: "Invalid refresh token" });
-    }
-
-    const newAccessToken = await genAccessToken(
-      {
-        user: {
-          id: response.payload.user.id,
-          email: response.payload.user.email,
-        },
-      },
-      secretKey
-    );
-
-    res.status(200).json({ accessToken: newAccessToken });
-  } catch (error) {
-    return res.status(403).json({ error: `Invalid refresh token. ${error}` });
-  }
-});
+app.post(apiEP.REFRESH, handleRefreshToken);
 
 app.get(apiEP.LOGOUT, handleLogOut);
 
@@ -99,7 +65,6 @@ app.post(apiEP.CHANGE_PASS, handleChangePass);
  */
 
 app.post(apiEP.REGISTER, handleRegister);
- 
 
 app.get(apiEP.ROOT, (req, res) => {
   console.log(req.session.id);
