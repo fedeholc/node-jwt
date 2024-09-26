@@ -1,13 +1,6 @@
-export {
-  extractToken,
-  genAccessToken,
-  genRefreshToken,
-  generateToken,
-  hashPassword,
-  verifyToken,
-};
+export { genAccessToken, genRefreshToken, generateToken, hashPassword };
 
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT } from "jose";
 import crypto from "crypto";
 
 /**
@@ -51,46 +44,4 @@ async function genRefreshToken(payload, secretKey) {
  */
 function hashPassword(password) {
   return crypto.createHash("sha256").update(password).digest("hex");
-}
-
-/**
- * Middleware to verify the token
- * @param {string} secretKey
- * @returns
- */
-//TODO: mover a middleware
-function verifyToken(secretKey) {
-  return async function (req, res, next) {
-    const token = req.token;
-    if (!token) {
-      return res.status(403).json({ error: "Token not found." });
-    }
-    try {
-      let response = await jwtVerify(token, secretKey);
-      req.payload = response.payload;
-      next();
-    } catch (error) {
-      return res.status(401).json({ error: `Invalid Token: ${error}` }); //TODO: debería ser 403?
-    }
-  };
-}
-
-/**
- * Middleware to extract the token from the Authorization header
- * @param {{}} req
- * @param {{}} res
- * @param {Function} next
- */
-//TODO: poner try catch
-function extractToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    req.token = authHeader.split(" ")[1].trim();
-    if (!req.token || req.token.trim() === "") {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-  } else {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
 }

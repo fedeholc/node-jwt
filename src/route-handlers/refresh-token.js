@@ -8,17 +8,17 @@ export async function handleRefreshToken(req, res) {
 
   let isDenied = await db.isDeniedToken(refreshToken);
   if (isDenied) {
-    return res.status(403).json({ error: "Refresh token denegado" });
+    return res.status(401).json({ error: "Refresh token denegado" });
   }
 
   if (!refreshToken) {
-    return res.status(403).json({ error: "Refresh token no proporcionado" });
+    return res.status(401).json({ error: "Refresh token no proporcionado" });
   }
 
   try {
     let response = await jwtVerify(refreshToken, secretKey);
     if (!response) {
-      return res.status(403).json({ error: "Invalid refresh token" });
+      return res.status(401).json({ error: "Invalid refresh token" });
     }
 
     const newAccessToken = await genAccessToken(
@@ -33,6 +33,6 @@ export async function handleRefreshToken(req, res) {
 
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
-    return res.status(403).json({ error: `Invalid refresh token. ${error}` });
+    return res.status(401).json({ error: `Invalid refresh token. ${error}` });
   }
 }

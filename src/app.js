@@ -10,7 +10,7 @@
 
 //TODO: habría que probar implementarlo en alguna app para ver que funcione todo bien en producción
 
-import { extractToken, verifyToken } from "./util-auth.js";
+import { extractToken, verifyAccessToken } from "./middleware.js";
 import {
   handleAuthGitHub,
   handleAuthGitHubCallback,
@@ -45,7 +45,12 @@ app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
 app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
 app.get(apiEP.USER_INFO, handleUserInfo);
-app.get(apiEP.GET_USER, extractToken, verifyToken(secretKey), handleGetUser);
+app.get(
+  apiEP.GET_USER,
+  extractToken,
+  verifyAccessToken(secretKey),
+  handleGetUser
+);
 app.post(apiEP.LOGIN, handleLogin);
 
 app.post(apiEP.REFRESH, handleRefreshToken);
