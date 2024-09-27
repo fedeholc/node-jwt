@@ -9,7 +9,9 @@ Prueba de auth con node y jwt
 ```bash
 NODE_ENV=development
 MY_SECRET_KEY=xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx
-MY_SESSION_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+MY_SESSION_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ACCESS_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+REFRESH_SECRET_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Ubicación de la base de datos
 DB_DEV_URI=/home/fede/dev-repos/playground-node/node-jwt/mydb.sqlite
@@ -29,8 +31,8 @@ GMAIL_USER=xxxxxxxxxxx@gmail.com
 GMAIL_PASS='xxxx xxxx xxxx xxxx'
 
 # Turso
-TURSO_DATABASE_URL=xxxxxxxxxxxxxxx
-TURSO_AUTH_TOKEN=xxxxxxxxxxxxxxxxx
+TURSO_DATABASE_URL=libsql://xxxxxxxxxxxxxxxxxxx.turso.io
+TURSO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Puerto
 PORT=xxxx
