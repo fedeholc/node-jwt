@@ -11,19 +11,27 @@ import crypto from "crypto";
  */
 
 async function genAccessToken(payload, accessSecretKey) {
+  let expirationTime = "1h";
+  if (!payload.rememberMe) {
+    expirationTime = "10m";
+  }
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("1h") //TODO: ¿ponerlo como variable de config?
+    .setExpirationTime(expirationTime) //TODO: ¿ponerlo como variable de config?
     .sign(accessSecretKey);
 }
 
 //TODO: quitar las secret keys y hacer que sean parte de un objeto global? (deberìa tener keys para acess y refresh)
 async function genRefreshToken(payload, refreshSecretKey) {
+  let expirationTime = "30d";
+  if (!payload.rememberMe) {
+    expirationTime = "1h";
+  }
   let newRefreshToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(expirationTime)
     .sign(refreshSecretKey);
 
   return newRefreshToken;

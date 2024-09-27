@@ -4,7 +4,7 @@ import process from "process";
 
 export async function handleLogin(req, res) {
   try {
-    const { pass, email } = req.body;
+    const { pass, email, rememberMe } = req.body;
     const userInDB = await db.getUserByEmail(email);
     if (
       userInDB &&
@@ -13,13 +13,13 @@ export async function handleLogin(req, res) {
     ) {
       //TODO:  ver que esto se repite en register (también en los auth), pasar a una función?
       const accessToken = await genAccessToken(
-        { user: { id: userInDB.id, email: userInDB.email } },
+        { user: { id: userInDB.id, email: userInDB.email }, rememberMe: rememberMe },
         accessSecretKey
       );
 
       //se genera el refresh cada vez que se loguea pues, si ya tuviera uno, se hubiera logueado automaticamente
       const refreshToken = await genRefreshToken(
-        { user: { id: userInDB.id, email: userInDB.email } },
+        { user: { id: userInDB.id, email: userInDB.email }, rememberMe: rememberMe },
         refreshSecretKey
       );
 

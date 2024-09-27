@@ -70,3 +70,9 @@ Ten en cuenta estos aspectos de seguridad:
 3. **Consideraciones de seguridad**: Usa `httpOnly`, `secure` en las cookies, y valida bien el token en cada solicitud.
 
 ¿Te gustaría profundizar en algún punto o necesitas un ejemplo más detallado?
+
+---
+
+tengo un sistema de auth en express, en el cual utilizo un access token que guardo en localstorage y un refresh token que guardo en una cookie segura. Quiero implementar la funcionalidad de "Remember Me" para que los usuarios puedan elegir si desean ser recordados o no. Actualmente siempre los recuerda. Para hacer que no los recuerde, deberìa hacer que el refresh token sea de corta duraciòn? o directamente no deberìa haber refresh y que el access token sea de corta duraciòn?
+
+ o es mejor manejarlo con express-session?

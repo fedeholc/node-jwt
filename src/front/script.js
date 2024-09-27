@@ -178,8 +178,10 @@ async function handleLogin(event) {
 
   let inputEmail = document.querySelector("#email");
   let inputPassword = document.querySelector("#password");
+  let inputRememberMe = document.querySelector("#remember-me");
   let email = inputEmail.value;
   let password = inputPassword.value;
+  let rememberMe = inputRememberMe.checked;
 
   if (
     !inputEmail.validity.valid ||
@@ -199,7 +201,11 @@ async function handleLogin(event) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email: email, pass: password }),
+    body: JSON.stringify({
+      email: email,
+      pass: password,
+      rememberMe: rememberMe,
+    }),
   });
 
   if (!response.ok) {
