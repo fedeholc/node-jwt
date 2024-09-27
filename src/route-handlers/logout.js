@@ -1,8 +1,8 @@
 import { jwtVerify } from "jose";
-import { db, secretKey } from "../global-store.js";
+import { db, refreshSecretKey } from "../global-store.js";
 export async function handleLogOut(req, res) {
   try {
-    const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
+    const decoded = await jwtVerify(req.cookies.refreshToken, refreshSecretKey);
 
     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
 

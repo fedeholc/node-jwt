@@ -3,7 +3,7 @@ import express from "express";
 import request from "supertest";
 import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
 import { handleLogin } from "./handle-login.js";
-import { db, secretKey } from "../global-store.js";
+import { accessSecretKey, db, refreshSecretKey } from "../global-store.js";
 
 vi.mock("../util-auth", () => ({
   hashPassword: vi.fn(),
@@ -15,7 +15,8 @@ vi.mock("../global-store", () => ({
   db: {
     getUserByEmail: vi.fn(),
   },
-  secretKey: vi.fn(),
+  refreshSecretKey: vi.fn(),
+  accessSecretKey: vi.fn(),
 }));
 
 const app = express();
@@ -59,7 +60,7 @@ describe("Login Endpoint (mocked)", () => {
           email: mockUser.email,
         },
       },
-      secretKey
+      accessSecretKey
     );
     expect(genRefreshToken).toHaveBeenCalledWith(
       {
@@ -68,7 +69,7 @@ describe("Login Endpoint (mocked)", () => {
           email: mockUser.email,
         },
       },
-      secretKey
+      refreshSecretKey
     );
   });
 

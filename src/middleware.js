@@ -29,17 +29,17 @@ function extractToken(req, res, next) {
 
 /**
  * Middleware to verify the token
- * @param {string} secretKey
+ * @param {string} accessSecretKey
  * @returns
  */
-function verifyAccessToken(secretKey) {
+function verifyAccessToken(accessSecretKey) {
   return async function (req, res, next) {
     const token = req.token;
     if (!token) {
       return res.status(401).json({ error: "Token not found." });
     }
     try {
-      let response = await jwtVerify(token, secretKey);
+      let response = await jwtVerify(token, accessSecretKey);
       req.payload = response.payload;
       next();
     } catch (error) {

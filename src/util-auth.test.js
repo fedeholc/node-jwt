@@ -1,6 +1,6 @@
 // extractToken.test.js
 import { describe, expect, test, vi, beforeEach } from "vitest";
-import { extractToken } from "./util-auth";
+import { extractToken } from "./middleware.js";
 import httpMocks from "node-mocks-http";
 
 describe("extractToken middleware", () => {

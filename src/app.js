@@ -21,7 +21,6 @@ import {
   handleAuthGoogle,
   handleAuthGoogleCallback,
 } from "./route-handlers/auth-google.js";
-import { handleUserInfo } from "./route-handlers/user-info.js";
 import { handleLogOut } from "./route-handlers/logout.js";
 import { handleRegister } from "./route-handlers/register.js";
 import { handleGetUser } from "./route-handlers/get-user.js";
@@ -31,7 +30,7 @@ import { configServer } from "./server.js";
 import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
-import { db, secretKey } from "./global-store.js";
+import { accessSecretKey, db } from "./global-store.js";
 
 import { handleLogin } from "./routes/handle-login.js";
 import { handleRefreshToken } from "./route-handlers/refresh-token.js";
@@ -46,11 +45,10 @@ app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 app.get(apiEP.AUTH_GOOGLE, handleAuthGoogle);
 app.get(apiEP.AUTH_GOOGLE_CALLBACK, handleAuthGoogleCallback);
 
-app.get(apiEP.USER_INFO, handleUserInfo);
 app.get(
   apiEP.GET_USER,
   extractToken,
-  verifyAccessToken(secretKey),
+  verifyAccessToken(accessSecretKey),
   handleGetUser
 );
 app.post(apiEP.LOGIN, handleLogin);

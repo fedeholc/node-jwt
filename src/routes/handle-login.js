@@ -1,11 +1,6 @@
-import {
-  hashPassword,
-  genAccessToken,
-  genRefreshToken,
-} from "../util-auth.js";
+import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
+import { accessSecretKey, refreshSecretKey, db } from "../global-store.js";
 import process from "process";
-import { db } from "../global-store.js";
-import { secretKey } from "../global-store.js";
 
 export async function handleLogin(req, res) {
   try {
@@ -16,20 +11,17 @@ export async function handleLogin(req, res) {
       email === userInDB.email &&
       hashPassword(pass) === userInDB.pass
     ) {
-      //TODO: tener dos secretkey distintas para el access y el refresh token
-      //y ver que esto se repite en register (también en los auth), pasar a una función
+      //TODO:  ver que esto se repite en register (también en los auth), pasar a una función?
       const accessToken = await genAccessToken(
         { user: { id: userInDB.id, email: userInDB.email } },
-        secretKey
+        accessSecretKey
       );
 
       //se genera el refresh cada vez que se loguea pues, si ya tuviera uno, se hubiera logueado automaticamente
       const refreshToken = await genRefreshToken(
         { user: { id: userInDB.id, email: userInDB.email } },
-        secretKey
+        refreshSecretKey
       );
-
-      console.log("mando cookie refreshToken", refreshToken);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,

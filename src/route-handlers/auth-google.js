@@ -2,7 +2,7 @@ import crypto from "crypto";
 import process from "process";
 import { apiURL, googleEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
-import { db, secretKey } from "../global-store.js";
+import { db, refreshSecretKey } from "../global-store.js";
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -90,7 +90,7 @@ export async function handleAuthGoogleCallback(req, res) {
 
     const refreshToken = await genRefreshToken(
       { user: req.session.user },
-      secretKey
+      refreshSecretKey
     );
 
     res.cookie("refreshToken", refreshToken, {

@@ -1,5 +1,5 @@
 import { genAccessToken } from "../util-auth.js";
-import { db, secretKey } from "../global-store.js";
+import { accessSecretKey, db, refreshSecretKey } from "../global-store.js";
 import { jwtVerify } from "jose";
 
 export async function handleRefreshToken(req, res) {
@@ -15,7 +15,7 @@ export async function handleRefreshToken(req, res) {
   }
 
   try {
-    let response = await jwtVerify(refreshToken, secretKey);
+    let response = await jwtVerify(refreshToken, refreshSecretKey);
     if (!response) {
       return res.status(401).json({ error: "Invalid refresh token" });
     }
@@ -27,7 +27,7 @@ export async function handleRefreshToken(req, res) {
           email: response.payload.user.email,
         },
       },
-      secretKey
+      accessSecretKey
     );
 
     res.status(200).json({ accessToken: newAccessToken });

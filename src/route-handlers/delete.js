@@ -1,7 +1,6 @@
 import { hashPassword } from "../util-auth.js";
-import { db } from "../global-store.js";
+import { db, refreshSecretKey } from "../global-store.js";
 import { jwtVerify } from "jose";
-import { secretKey } from "../global-store.js";
 
 export async function handleDeleteUser(req, res) {
   try {
@@ -28,7 +27,7 @@ export async function handleDeleteUser(req, res) {
 
     // añañdir el token a la lista de denegados
     console.log("req.cookies.refreshToken", req.cookies.refreshToken);
-    const decoded = await jwtVerify(req.cookies.refreshToken, secretKey);
+    const decoded = await jwtVerify(req.cookies.refreshToken, refreshSecretKey);
     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
 
     //hacer logout y borrar sesion

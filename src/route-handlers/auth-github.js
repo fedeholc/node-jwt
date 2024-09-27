@@ -4,7 +4,7 @@ import crypto from "crypto";
 import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
-import { db, secretKey } from "../global-store.js";
+import { db, refreshSecretKey,  } from "../global-store.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -89,7 +89,7 @@ async function handleAuthGitHubCallback(req, res) {
 
     const refreshToken = await genRefreshToken(
       { user: req.session.user },
-      secretKey
+      refreshSecretKey
     );
 
     res.cookie("refreshToken", refreshToken, {
