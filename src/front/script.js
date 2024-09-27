@@ -79,7 +79,6 @@ function vibrate(element) {
 
 async function getNewAccessToken() {
   try {
-    console.log("pido nuevo token");
     const response = await fetch(apiURL.REFRESH, {
       method: "POST",
       credentials: "include", // Esto asegura que la cookie HTTP-only se envíe con la solicitud

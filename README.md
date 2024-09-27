@@ -28,6 +28,11 @@ GOOGLE_CLIENT_SECRET=XXXXXXXXXXXXX
 GMAIL_USER=xxxxxxxxxxx@gmail.com
 GMAIL_PASS='xxxx xxxx xxxx xxxx'
 
-# opcional
+# Turso
+TURSO_DATABASE_URL=xxxxxxxxxxxxxxx
+TURSO_AUTH_TOKEN=xxxxxxxxxxxxxxxxx
+
+# Puerto
 PORT=xxxx
+
 ```

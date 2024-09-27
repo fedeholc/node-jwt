@@ -82,11 +82,11 @@ app.get(apiEP.ROOT, (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.status(404).send("¡Hola! 404 Página no encontrada");
+  res.status(404).send("¡Hola! 404 Page not found");
 });
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`Server running on port ${process.env.PORT || 3000}`)
+app.listen(process.env.PORT, () =>
+  console.log(`Server running on port ${process.env.PORT}`)
 );
 
 function checkEnvVariables() {

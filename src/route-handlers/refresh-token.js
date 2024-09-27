@@ -3,7 +3,6 @@ import { db, secretKey } from "../global-store.js";
 import { jwtVerify } from "jose";
 
 export async function handleRefreshToken(req, res) {
-  console.log("---refresh-token---");
   const refreshToken = req.cookies.refreshToken;
 
   let isDenied = await db.isDeniedToken(refreshToken);
