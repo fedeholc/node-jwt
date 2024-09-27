@@ -14,7 +14,7 @@ async function genAccessToken(payload, accessSecretKey) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("10s")
+    .setExpirationTime("1h") //TODO: ¿ponerlo como variable de config?
     .sign(accessSecretKey);
 }
 

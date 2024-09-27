@@ -2,7 +2,7 @@ import { expect, test, describe, vi, beforeEach } from "vitest";
 import express from "express";
 import request from "supertest";
 import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
-import { handleLogin } from "./handle-login.js";
+import { handleLogin } from "./login.js";
 import { accessSecretKey, db, refreshSecretKey } from "../global-store.js";
 
 vi.mock("../util-auth", () => ({

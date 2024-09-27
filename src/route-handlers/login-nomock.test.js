@@ -1,7 +1,7 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
 import express from "express";
 import request from "supertest";
-import { handleLogin } from "./handle-login.js";
+import { handleLogin } from "./login.js";
 
 const app = express();
 app.use(express.json());

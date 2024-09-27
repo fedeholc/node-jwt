@@ -31,8 +31,7 @@ import { handleDeleteUser } from "./route-handlers/delete.js";
 import { handleResetPass } from "./route-handlers/reset-pass.js";
 import { handleChangePass } from "./route-handlers/change-pass.js";
 import { accessSecretKey, db } from "./global-store.js";
-
-import { handleLogin } from "./routes/handle-login.js";
+import { handleLogin } from "./route-handlers/login.js";
 import { handleRefreshToken } from "./route-handlers/refresh-token.js";
 
 checkEnvVariables();
@@ -92,7 +91,6 @@ app.listen(process.env.PORT, () =>
 function checkEnvVariables() {
   const requiredEnvVars = [
     "NODE_ENV",
-    "MY_SECRET_KEY",
     "MY_SESSION_KEY",
     "DB_DEV_URI",
     "DB_TEST_URI",
