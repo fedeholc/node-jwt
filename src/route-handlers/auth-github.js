@@ -4,11 +4,13 @@ import crypto from "crypto";
 import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
-import { db, refreshSecretKey,  } from "../global-store.js";
+import { db, refreshCookieOptions, refreshSecretKey } from "../global-store.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
+
+//TODO: OJO, ver tambièn en google, acà no hay opcion de rememberme, ni si quiera es enviada por el cliente
 
 function handleAuthGitHub(req, res) {
   if (!req.query.returnTo) {
@@ -92,12 +94,7 @@ async function handleAuthGitHubCallback(req, res) {
       refreshSecretKey
     );
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions.remember);
 
     res.redirect(req.session.returnTo);
     delete req.session.returnTo;

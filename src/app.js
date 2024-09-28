@@ -1,5 +1,3 @@
-//TODO: BOTON REMEMBER
-
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: limpiar base de tokens expirados

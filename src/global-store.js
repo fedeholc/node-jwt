@@ -12,3 +12,28 @@ export const db = new dbSqlite3(dbURI);
   process.env.TURSO_DATABASE_URL,
   process.env.TURSO_AUTH_TOKEN
 ); */
+
+export const accessJWTExpiration = {
+  remember: "1h",
+  noRemember: "10m",
+};
+
+export const refreshJWTExpiration = {
+  remember: "30d",
+  noRemember: "1h",
+};
+
+export const refreshCookieOptions = {
+  remember: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000, //30d
+  },
+  noRemember: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 60 * 60 * 1000, //1h,
+  },
+};

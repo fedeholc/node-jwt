@@ -2,7 +2,7 @@ import crypto from "crypto";
 import process from "process";
 import { apiURL, googleEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
-import { db, refreshSecretKey } from "../global-store.js";
+import { db, refreshCookieOptions, refreshSecretKey } from "../global-store.js";
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -93,15 +93,9 @@ export async function handleAuthGoogleCallback(req, res) {
       refreshSecretKey
     );
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions.remember);
 
-    //TODO: acá (en en el de GH debería tirar error si no hay returnTo, o enviar a una pagina de error)
-    res.redirect(req.session.returnTo || "/");
+    res.redirect(req.session.returnTo);
     delete req.session.returnTo;
   } catch (error) {
     console.error("Error during Google authentication", error);

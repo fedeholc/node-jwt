@@ -1,5 +1,10 @@
 import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
-import { accessSecretKey, refreshSecretKey, db } from "../global-store.js";
+import {
+  accessSecretKey,
+  refreshSecretKey,
+  db,
+  refreshCookieOptions,
+} from "../global-store.js";
 import process from "process";
 
 export async function handleLogin(req, res) {
@@ -13,22 +18,29 @@ export async function handleLogin(req, res) {
     ) {
       //TODO:  ver que esto se repite en register (también en los auth), pasar a una función?
       const accessToken = await genAccessToken(
-        { user: { id: userInDB.id, email: userInDB.email }, rememberMe: rememberMe },
+        {
+          user: { id: userInDB.id, email: userInDB.email },
+          rememberMe: rememberMe,
+        },
         accessSecretKey
       );
 
       //se genera el refresh cada vez que se loguea pues, si ya tuviera uno, se hubiera logueado automaticamente
       const refreshToken = await genRefreshToken(
-        { user: { id: userInDB.id, email: userInDB.email }, rememberMe: rememberMe },
+        {
+          user: { id: userInDB.id, email: userInDB.email },
+          rememberMe: rememberMe,
+        },
         refreshSecretKey
       );
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      res.cookie(
+        "refreshToken",
+        refreshToken,
+        rememberMe
+          ? refreshCookieOptions.remember
+          : refreshCookieOptions.noRemember
+      );
 
       return res.status(200).json({
         user: { email: userInDB.email, id: userInDB.id },

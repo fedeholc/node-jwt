@@ -2,6 +2,7 @@ export { genAccessToken, genRefreshToken, hashPassword };
 
 import { SignJWT } from "jose";
 import crypto from "crypto";
+import { accessJWTExpiration, refreshJWTExpiration } from "./global-store.js";
 
 /**
  * Function to generate a token
@@ -11,29 +12,28 @@ import crypto from "crypto";
  */
 
 async function genAccessToken(payload, accessSecretKey) {
-  let expirationTime = "1h";
-  if (!payload.rememberMe) {
-    expirationTime = "10m";
-  }
-  return new SignJWT(payload)
+  const newAccessToken = new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(expirationTime) //TODO: ¿ponerlo como variable de config?
+    .setExpirationTime(
+      payload.rememberMe
+        ? accessJWTExpiration.remember
+        : accessJWTExpiration.noRemember
+    )
     .sign(accessSecretKey);
+  return newAccessToken;
 }
 
-//TODO: quitar las secret keys y hacer que sean parte de un objeto global? (deberìa tener keys para acess y refresh)
 async function genRefreshToken(payload, refreshSecretKey) {
-  let expirationTime = "30d";
-  if (!payload.rememberMe) {
-    expirationTime = "1h";
-  }
-  let newRefreshToken = await new SignJWT(payload)
+  const newRefreshToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(expirationTime)
+    .setExpirationTime(
+      payload.rememberMe
+        ? refreshJWTExpiration.remember
+        : refreshJWTExpiration.noRemember
+    )
     .sign(refreshSecretKey);
-
   return newRefreshToken;
 }
 

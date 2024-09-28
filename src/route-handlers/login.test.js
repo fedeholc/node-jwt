@@ -11,13 +11,18 @@ vi.mock("../util-auth", () => ({
   genRefreshToken: vi.fn(),
 }));
 
-vi.mock("../global-store", () => ({
-  db: {
-    getUserByEmail: vi.fn(),
-  },
-  refreshSecretKey: vi.fn(),
-  accessSecretKey: vi.fn(),
-}));
+vi.mock("../global-store", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+
+    db: {
+      getUserByEmail: vi.fn(),
+    },
+    refreshSecretKey: vi.fn(),
+    accessSecretKey: vi.fn(),
+  };
+});
 
 const app = express();
 app.use(express.json());
