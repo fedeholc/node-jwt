@@ -1,4 +1,5 @@
 import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
+// eslint-disable-next-line no-unused-vars
 import process from "process";
 import {
   accessSecretKey,
@@ -7,6 +8,13 @@ import {
   refreshSecretKey,
 } from "../global-store.js";
 
+// eslint-disable-next-line no-unused-vars
+import * as types from "../types.js";
+
+/**
+ * @param {import('express').Request  } req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleRegister(req, res) {
   try {
     const { pass, email } = req.body;
@@ -16,31 +24,25 @@ export async function handleRegister(req, res) {
     }
 
     let userInDb = await db.getUserByEmail(email);
-
     if (userInDb) {
       return res.status(409).json({ error: "User or email already exist." });
     }
 
     const id = await db.insertUser(email, hashPassword(pass));
 
-    const accessToken = await genAccessToken(
-      { user: { id: id, email: email }, rememberMe: false },
-      accessSecretKey
-    );
-    const refreshToken = await genRefreshToken(
-      { user: { id: id, email: email, rememberMe: false } },
-      refreshSecretKey
-    );
+    /** @type {types.UserPayload} */
+    const user = { id: id, email: email };
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: refreshCookieOptions.noRemember,
-    });
+    /** @type {types.TokenPayload} */
+    const payload = { user: user, rememberMe: false };
+
+    const accessToken = await genAccessToken(payload, accessSecretKey);
+    const refreshToken = await genRefreshToken(payload, refreshSecretKey);
+
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions.noRemember);
 
     return res.status(200).json({
-      user: { email: email, id: id },
+      user: user,
       accessToken: accessToken,
     });
   } catch (error) {

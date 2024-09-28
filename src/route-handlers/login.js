@@ -6,6 +6,10 @@ import {
   refreshCookieOptions,
 } from "../global-store.js";
 
+/**
+ * @param {import('express').Request} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleLogin(req, res) {
   try {
     const { pass, email, rememberMe } = req.body;
@@ -32,13 +36,11 @@ export async function handleLogin(req, res) {
         refreshSecretKey
       );
 
-      res.cookie(
-        "refreshToken",
-        refreshToken,
-        rememberMe
-          ? refreshCookieOptions.remember
-          : refreshCookieOptions.noRemember
-      );
+      let cookieOptions = rememberMe
+        ? refreshCookieOptions.remember
+        : refreshCookieOptions.noRemember;
+
+      res.cookie("refreshToken", refreshToken, cookieOptions);
 
       return res.status(200).json({
         user: { email: userInDB.email, id: userInDB.id },

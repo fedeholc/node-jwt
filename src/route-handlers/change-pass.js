@@ -1,6 +1,11 @@
 import { hashPassword } from "../util-auth.js";
 import { db } from "../global-store.js";
-
+// eslint-disable-next-line no-unused-vars
+import * as types from "../types.js";
+/**
+ * @param {import('express').Request & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { resetCode?: string, resetCodeExpires?: number }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleChangePass(req, res) {
   try {
     if (!req.body.code) {

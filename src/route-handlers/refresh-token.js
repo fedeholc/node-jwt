@@ -1,7 +1,14 @@
 import { genAccessToken } from "../util-auth.js";
 import { accessSecretKey, db, refreshSecretKey } from "../global-store.js";
 import { jwtVerify } from "jose";
+// eslint-disable-next-line no-unused-vars
+import * as types from "../types.js";
 
+/**
+ *
+ * @param {import('express').Request} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleRefreshToken(req, res) {
   const refreshToken = req.cookies.refreshToken;
 
@@ -21,13 +28,7 @@ export async function handleRefreshToken(req, res) {
     }
 
     const newAccessToken = await genAccessToken(
-      {
-        user: {
-          id: response.payload.user.id,
-          email: response.payload.user.email,
-        },
-        rememberMe: response.payload.rememberMe,
-      },
+      /**@type {types.TokenPayload} */ (response.payload),
       accessSecretKey
     );
 

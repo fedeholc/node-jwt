@@ -2,10 +2,19 @@ export { getAccessSecretKey, getSessionKey, getRefreshSecretKey };
 
 import process from "process";
 
-let sessionKey = null;
-let accessSecretKey = null;
-let refreshSecretKey = null;
+/** @type {string}*/
+let sessionKey;
 
+/** @type {Uint8Array} */
+let accessSecretKey;
+
+/** @type {Uint8Array} */
+let refreshSecretKey;
+
+/**
+ * Get the access secret key
+ * @returns {Uint8Array}
+ */
 function getAccessSecretKey() {
   if (!accessSecretKey) {
     if (!process.env.ACCESS_SECRET_KEY) {
@@ -28,6 +37,10 @@ function getAccessSecretKey() {
   return accessSecretKey;
 }
 
+/**
+ * Get the refresh secret key
+ * @returns {Uint8Array}
+ */
 function getRefreshSecretKey() {
   if (!refreshSecretKey) {
     if (!process.env.REFRESH_SECRET_KEY) {
@@ -51,6 +64,10 @@ function getRefreshSecretKey() {
   return refreshSecretKey;
 }
 
+/**
+ * Get the session key
+ * @returns {string}
+ */
 function getSessionKey() {
   if (!sessionKey) {
     if (!process.env.MY_SESSION_KEY) {

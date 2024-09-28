@@ -3,25 +3,34 @@ import process from "process";
 import { apiURL, googleEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
 import { db, refreshCookieOptions, refreshSecretKey } from "../global-store.js";
+// eslint-disable-next-line no-unused-vars
+import * as types from "../types.js";
 
 const clientID = process.env.GOOGLE_CLIENT_ID;
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const redirectURI = apiURL.AUTH_GOOGLE_CALLBACK;
 
+/**
+ * @param {import('express').Request & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { returnTo?: string }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export function handleAuthGoogle(req, res) {
   if (!req.query.returnTo) {
     console.error("No returnTo URL provided");
     return res.status(400).json({ error: "No returnTo URL provided" });
   }
-  req.session.returnTo = req.query.returnTo;
+  req.session.returnTo = /**@type {string} */ (req.query.returnTo);
   const googleAuthURL = `${googleEP.AUTHORIZE}?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=email profile`;
   res.status(200).json({ gauth: googleAuthURL });
 }
 
+/**
+ * @param {import('express').Request & {query: {code: string}} & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { user?: types.UserPayload, returnTo?: string }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleAuthGoogleCallback(req, res) {
   try {
     const googleCode = req.query.code;
-    console.log("googleCode", googleCode);
     if (!googleCode) {
       return res.status(500).send("No authorization code received");
     }
@@ -40,8 +49,6 @@ export async function handleAuthGoogleCallback(req, res) {
         grant_type: "authorization_code",
       }),
     });
-
-    console.log("gResponse", gResponse);
 
     if (!gResponse.ok) {
       return res
@@ -77,6 +84,7 @@ export async function handleAuthGoogleCallback(req, res) {
     }
 
     // Verifica si el usuario existe en la base de datos
+    /**@type {types.UserPayload} */
     let userInDB = await db.getUserByEmail(gUserData.email);
     if (!userInDB) {
       const id = await db.insertUser(
@@ -85,7 +93,7 @@ export async function handleAuthGoogleCallback(req, res) {
       );
       req.session.user = { id: id, email: gUserData.email };
     } else {
-      req.session.user = { id: userInDB.id, email: userInDB.email };
+      req.session.user = userInDB;
     }
 
     const refreshToken = await genRefreshToken(

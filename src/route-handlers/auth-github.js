@@ -5,6 +5,8 @@ import process from "process";
 import { apiURL, gitHubEP } from "../endpoints.js";
 import { hashPassword, genRefreshToken } from "../util-auth.js";
 import { db, refreshCookieOptions, refreshSecretKey } from "../global-store.js";
+// eslint-disable-next-line no-unused-vars
+import * as types from "../types.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
 const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -12,19 +14,26 @@ const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 
 //TODO: OJO, ver tambièn en google, acà no hay opcion de rememberme, ni si quiera es enviada por el cliente
 
+/**
+ * @param {import('express').Request & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { returnTo?: string }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 function handleAuthGitHub(req, res) {
-  console.log("---holi");
   if (!req.query.returnTo) {
     console.error("No returnTo URL provided");
     return res.status(400).json({ error: "No returnTo URL provided" });
   }
-  req.session.returnTo = req.query.returnTo;
+  req.session.returnTo = /**@type {string} */ (req.query.returnTo);
 
   const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&scope=user:email&redirect_uri=${redirectURI}`;
 
   res.status(200).json({ ghauth: githubAuthURL });
 }
 
+/**
+ * @param {import('express').Request & {query: {code: string}} & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { user?: types.UserPayload, returnTo?: string }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 async function handleAuthGitHubCallback(req, res) {
   try {
     const gitHubCode = req.query.code;
@@ -32,7 +41,6 @@ async function handleAuthGitHubCallback(req, res) {
       return res.status(500).send("No authorization code received");
     }
 
-    console.log("---holi code", gitHubCode);
     // Request access token from GitHub
     const ghResponse = await fetch(gitHubEP.ACCESS_TOKEN, {
       method: "POST",
@@ -48,7 +56,6 @@ async function handleAuthGitHubCallback(req, res) {
       }),
     });
 
-    console.log("---holi response", ghResponse.status);
     if (!ghResponse.ok) {
       return res
         .status(500)
@@ -58,8 +65,6 @@ async function handleAuthGitHubCallback(req, res) {
     }
 
     const { access_token: ghAccessToken } = await ghResponse.json();
-
-    console.log("---holi token", ghAccessToken);
 
     if (!ghAccessToken) {
       return res.status(500).send("No access token received from GitHub");
@@ -83,6 +88,7 @@ async function handleAuthGitHubCallback(req, res) {
     }
 
     // Verifica si el usuario existe en la base de datos
+    /**@type {types.UserPayload} */
     let userInDB = await db.getUserByEmail(ghUserData.email);
     if (!userInDB) {
       const id = await db.insertUser(
@@ -91,7 +97,7 @@ async function handleAuthGitHubCallback(req, res) {
       );
       req.session.user = { id: id, email: ghUserData.email };
     } else {
-      req.session.user = { id: userInDB.id, email: userInDB.email };
+      req.session.user = userInDB;
     }
 
     const refreshToken = await genRefreshToken(

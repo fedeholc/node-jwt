@@ -1,8 +1,12 @@
 import nodemailer from "nodemailer";
 import process from "process";
 import crypto from "crypto";
-import { db } from "../global-store.js";
+import { db, resetExpirationTime } from "../global-store.js";
 
+/**
+ * @param {import('express').Request & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { resetCode?: string, resetCodeExpires?: number }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleResetPass(req, res) {
   try {
     if (!req.body.email) {
@@ -42,10 +46,10 @@ export async function handleResetPass(req, res) {
     });
 
     if (!req.session) {
-      req.session = {};
+      return res.status(500).json({ error: "Session error." });
     }
     req.session.resetCode = resetCode;
-    req.session.resetCodeExpires = Date.now() + 15 * 60 * 1000; // Expires in 15 minutes
+    req.session.resetCodeExpires = Date.now() + resetExpirationTime;
 
     return res.status(200).json({ message: "Email sent." });
   } catch (error) {

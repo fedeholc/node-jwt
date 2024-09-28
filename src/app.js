@@ -1,7 +1,3 @@
-// TODO: resolver problema del refresh en el payload. ver util-auth
-//FIXME: creo que la clave es poner el rememberme en el access token, de modo que cuando el usuario vuelve a la pagina y se lee el access token, se pueda saber si cuando se logueo lo hizo con remember o no.
-//VER Creo que ya esta solucionado, hay que probarlo, idealmente hacer un test.
-
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: limpiar base de tokens expirados
@@ -72,7 +68,13 @@ app.post(apiEP.CHANGE_PASS, handleChangePass);
 
 app.post(apiEP.REGISTER, handleRegister);
 
-app.get(apiEP.ROOT, (req, res) => {
+/**
+ * Handles the root API endpoint.
+ *
+ * @param {import('express').Request & {session: import('express-session').Session & Partial<import('express-session').SessionData> & { views?: number }}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
+function handleRoot(req, res) {
   console.log(req.session.id);
   if (req.session.views) {
     req.session.views++;
@@ -80,7 +82,9 @@ app.get(apiEP.ROOT, (req, res) => {
     req.session.views = 1;
   }
   res.status(200).send("Hello World! views:" + req.session.views);
-});
+}
+
+app.get(apiEP.ROOT, handleRoot);
 
 app.get("*", (req, res) => {
   res.status(404).send("¡Hola! 404 Page not found");

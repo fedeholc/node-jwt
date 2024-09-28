@@ -1,5 +1,10 @@
 import { jwtVerify } from "jose";
 import { db, refreshSecretKey } from "../global-store.js";
+
+/**
+ * @param {import('express').Request} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleLogOut(req, res) {
   try {
     const decoded = await jwtVerify(req.cookies.refreshToken, refreshSecretKey);

@@ -2,6 +2,10 @@ import { hashPassword } from "../util-auth.js";
 import { db, refreshSecretKey } from "../global-store.js";
 import { jwtVerify } from "jose";
 
+/**
+ * @param {import('express').Request } req - The request object.
+ * @param {import('express').Response} res - The response object.
+ */
 export async function handleDeleteUser(req, res) {
   try {
     const { email, pass } = req.body;
@@ -26,7 +30,6 @@ export async function handleDeleteUser(req, res) {
     }
 
     // añañdir el token a la lista de denegados
-    console.log("req.cookies.refreshToken", req.cookies.refreshToken);
     const decoded = await jwtVerify(req.cookies.refreshToken, refreshSecretKey);
     db.addToDenyList(req.cookies.refreshToken, decoded.payload.exp * 1000);
 

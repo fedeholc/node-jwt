@@ -1,26 +1,45 @@
 import { apiURL } from "./endpoints-front.js";
+// eslint-disable-next-line no-unused-vars
+import * as types from "./types.js";
 
+/** @type {types.UserPayload | null} */
 let userData = null;
+
+/** @type {string | null} */
 let accessToken = null;
 
-const dialogSignup = document.getElementById("dialog-signup");
+const dialogSignup = /** @type {HTMLDialogElement} */ (
+  document.getElementById("dialog-signup")
+);
 const btnOpenSignup = document.getElementById("btn-signup-open");
 const btnCloseSignup = document.getElementById("close-signup");
-const signupInfo = document.querySelector("#signup-info");
+const signupInfo = /** @type {HTMLDivElement} */ (
+  document.querySelector("#signup-info")
+);
 
-const dialogDelete = document.getElementById("dialog-delete");
+const dialogDelete = /** @type {HTMLDialogElement} */ (
+  document.getElementById("dialog-delete")
+);
 const btnOpenDelete = document.getElementById("btn-delete-open");
 const btnCloseDelete = document.getElementById("close-delete");
 const btnDelete = document.getElementById("btn-delete");
-const deleteInfo = document.querySelector("#delete-info");
+const deleteInfo = /** @type {HTMLDivElement} */ (
+  document.querySelector("#delete-info")
+);
 
-const dialogReset = document.getElementById("dialog-reset");
+const dialogReset = /** @type {HTMLDialogElement} */ (
+  document.getElementById("dialog-reset")
+);
 const btnOpenReset = document.getElementById("btn-reset-open");
 const btnCloseReset = document.getElementById("close-reset");
 const btnChangePass = document.getElementById("btn-change-password");
 const btnSendCode = document.getElementById("btn-send-code");
-const codeInfo = document.querySelector("#code-info");
-const changeInfo = document.querySelector("#change-info");
+const codeInfo = /** @type {HTMLDivElement} */ (
+  document.querySelector("#code-info")
+);
+const changeInfo = /** @type {HTMLDivElement} */ (
+  document.querySelector("#change-info")
+);
 
 const btnLogout = document.getElementById("btn-logout");
 const btnLoginGH = document.getElementById("btn-login-gh");
@@ -59,6 +78,10 @@ function renderUI() {
   }
 }
 
+/**
+ *
+ * @param {HTMLElement | Document} parent
+ */
 function cleanInputs(parent) {
   let inputs = parent.querySelectorAll("input");
   inputs.forEach((input) => {
@@ -66,6 +89,9 @@ function cleanInputs(parent) {
   });
 }
 
+/**
+ * @param {HTMLElement} element
+ */
 function vibrate(element) {
   element.classList.add("vibrate");
   setTimeout(() => {
@@ -77,6 +103,9 @@ function vibrate(element) {
 //- Funciones: autenticación. - - - - - - - - - -
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
+/**
+ * @returns {Promise<string | null>} - Access token or null
+ */
 async function getNewAccessToken() {
   try {
     const response = await fetch(apiURL.REFRESH, {
@@ -95,6 +124,11 @@ async function getNewAccessToken() {
   }
 }
 
+/**
+ *
+ * @param {string} token - Access token
+ * @returns {boolean} - True if token is expired
+ */
 function isTokenExpired(token) {
   try {
     if (!token) return true;
@@ -107,6 +141,9 @@ function isTokenExpired(token) {
   }
 }
 
+/**
+ * @returns {Promise<string | null>} - User data or null
+ */
 async function getAccessToken() {
   try {
     let accessToken = JSON.parse(localStorage.getItem("accessToken"));
@@ -152,14 +189,17 @@ async function getUserData() {
 
     if (response.ok) {
       let data = await response.json();
-      if (!data.user) {
+
+      /** @type {types.UserPayload} */
+      let user = data.user;
+      if (!user) {
         console.log(`No user data. ${response.status} ${response.statusText}`);
         return null;
       }
-      userInfoId.textContent = `Id: ${data.user.id}`;
-      userInfoEmail.textContent = `Email: ${data.user.email}`;
+      userInfoId.textContent = `Id: ${user.id}`;
+      userInfoEmail.textContent = `Email: ${user.email}`;
 
-      return data.user;
+      return user;
     }
   } catch (error) {
     console.error(`Error loading user data: ${error}`);
@@ -176,9 +216,15 @@ async function handleLogin(event) {
 
   const divLoginInfo = document.getElementById("login-info");
 
+  /** @type {HTMLInputElement} */
   let inputEmail = document.querySelector("#email");
+
+  /** @type {HTMLInputElement} */
   let inputPassword = document.querySelector("#password");
+
+  /** @type {HTMLInputElement} */
   let inputRememberMe = document.querySelector("#remember-me");
+
   let email = inputEmail.value;
   let password = inputPassword.value;
   let rememberMe = inputRememberMe.checked;
@@ -219,8 +265,8 @@ async function handleLogin(event) {
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    userInfoId.textContent = `Id: ${data.user.id}`;
-    userInfoEmail.textContent = `Email: ${data.user.email}`;
+    userInfoId.textContent = `Id: ${userData.id}`;
+    userInfoEmail.textContent = `Email: ${userData.email}`;
 
     renderUI();
 
@@ -230,6 +276,10 @@ async function handleLogin(event) {
   }
 }
 
+/**
+ *
+ * @param {Event} event
+ */
 async function handleLoginGH(event) {
   event.preventDefault();
   let returnTo = window.location.href;
@@ -245,6 +295,10 @@ async function handleLoginGH(event) {
   window.location.href = data.ghauth;
 }
 
+/**
+ *
+ * @param {Event} event
+ */
 async function handleLoginGG(event) {
   event.preventDefault();
   let returnTo = window.location.href;
@@ -277,28 +331,41 @@ async function handleLogOut() {
   }
 }
 
+/**
+ *
+ * @param {Event} event
+ */
 async function handleSignUp(event) {
   event.preventDefault();
-  let inputEmail = document.querySelector("#su-email");
-  let email = document.querySelector("#su-email").value;
-  let password = document.querySelector("#su-password").value;
-  let confirmPassword = document.querySelector("#su-confirm-password").value;
 
-  if (email === "" || password === "" || confirmPassword === "") {
+  /**@type {HTMLInputElement} */
+  let inEmail = document.querySelector("#su-email");
+
+  /**@type {HTMLInputElement} */
+  let inPass = document.querySelector("#su-password");
+
+  /**@type {HTMLInputElement} */
+  let inConfirmPass = document.querySelector("#su-confirm-password");
+
+  if (
+    inEmail.value === "" ||
+    inPass.value === "" ||
+    inConfirmPass.value === ""
+  ) {
     signupInfo.textContent = `Please fill in all fields.`;
     vibrate(signupInfo);
     vibrate(btnSignUp);
     return;
   }
 
-  if (password !== confirmPassword) {
+  if (inPass.value !== inConfirmPass.value) {
     signupInfo.textContent = `Passwords don't match.`;
     vibrate(signupInfo);
     vibrate(btnSignUp);
     return;
   }
 
-  if (!inputEmail.validity.valid) {
+  if (!inEmail.validity.valid) {
     signupInfo.textContent = `Enter a valid email.`;
     vibrate(signupInfo);
     vibrate(btnSignUp);
@@ -312,7 +379,10 @@ async function handleSignUp(event) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: email, pass: password }),
+      body: JSON.stringify({
+        email: inEmail.value,
+        pass: inPass.value,
+      }),
     });
 
     if (!response.ok) {
@@ -341,8 +411,8 @@ async function handleSignUp(event) {
 
       userData = data.user;
       userInfoDisplay.textContent = `User successfully registered.`;
-      userInfoId.textContent = `Id: ${data.user.id}`;
-      userInfoEmail.textContent = `Email: ${data.user.email}`;
+      userInfoId.textContent = `Id: ${userData.id}`;
+      userInfoEmail.textContent = `Email: ${userData.email}`;
 
       accessToken = data.accessToken;
       localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
@@ -362,11 +432,18 @@ async function handleSignUp(event) {
   }
 }
 
+/**
+ *
+ * @param {Event} event
+ */
 async function handleDeleteUser(event) {
   event.preventDefault();
 
   let email = userData.email;
-  let password = document.querySelector("#delete-password").value;
+
+  let inPass = /** @type {HTMLInputElement} */ (
+    document.getElementById("#delete-password")
+  );
 
   let response = await fetch(apiURL.DELETE_USER, {
     method: "DELETE",
@@ -374,7 +451,7 @@ async function handleDeleteUser(event) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email: email, pass: password }),
+    body: JSON.stringify({ email: email, pass: inPass.value }),
   });
 
   if (!response.ok) {
@@ -402,32 +479,48 @@ async function handleDeleteUser(event) {
   }
 }
 
+/**
+ *
+ * @param {Event} event
+ * @returns
+ */
 async function handleChangePass(event) {
   event.preventDefault();
 
-  let codeInput = document.querySelector("#reset-code");
+  let inCode = /** @type {HTMLInputElement} */ (
+    document.querySelector("#reset-code")
+  );
 
-  let code = document.querySelector("#reset-code").value;
-  let pass = document.querySelector("#reset-password").value;
-  let confirmPass = document.querySelector("#reset-confirm-password").value;
-  let email = document.querySelector("#reset-email").value;
+  let inPass = /** @type {HTMLInputElement} */ (
+    document.querySelector("#reset-password")
+  );
+  let inConfirmPass = /** @type {HTMLInputElement} */ (
+    document.querySelector("#reset-confirm-password")
+  );
+  let inEmail = /** @type {HTMLInputElement} */ (
+    document.querySelector("#reset-email")
+  );
 
   try {
-    if (!codeInput.validity.valid) {
+    if (!inCode.validity.valid) {
       changeInfo.textContent = `Enter a code with six characters.`;
       vibrate(changeInfo);
       vibrate(btnChangePass);
       return;
     }
 
-    if (pass === "" || confirmPass === "" || email === "") {
+    if (
+      inPass.value === "" ||
+      inConfirmPass.value === "" ||
+      inEmail.value === ""
+    ) {
       changeInfo.textContent = `Please fill in all fields.`;
       vibrate(changeInfo);
       vibrate(btnChangePass);
       return;
     }
 
-    if (pass !== confirmPass) {
+    if (inPass.value !== inConfirmPass.value) {
       changeInfo.textContent = `Passwords don't match.`;
       vibrate(changeInfo);
       vibrate(btnChangePass);
@@ -440,7 +533,11 @@ async function handleChangePass(event) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: email, pass: pass, code: code }),
+      body: JSON.stringify({
+        email: inEmail.value,
+        pass: inPass.value,
+        code: inCode.value,
+      }),
     });
 
     if (!response.ok) {
@@ -470,14 +567,20 @@ async function handleChangePass(event) {
   }
 }
 
+/**
+ *
+ * @param {Event} e
+ * @returns
+ */
 async function handleSendCode(e) {
   e.preventDefault();
 
   try {
-    let inputEmail = document.querySelector("#reset-email");
-    let email = inputEmail.value;
+    let inEmail = /** @type {HTMLInputElement} */ (
+      document.querySelector("#reset-email")
+    );
 
-    if (!inputEmail.validity.valid) {
+    if (!inEmail.validity.valid) {
       codeInfo.textContent = `Enter a valid email.`;
       vibrate(codeInfo);
       vibrate(btnSendCode);
@@ -490,7 +593,7 @@ async function handleSendCode(e) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email: email }),
+      body: JSON.stringify({ email: inEmail.value }),
     });
 
     if (!response.ok) {
@@ -533,8 +636,6 @@ function setEventListeners() {
   btnChangePass.addEventListener("click", handleChangePass);
 
   btnOpenSignup.addEventListener("click", (e) => {
-    /*     document.querySelector("#email").removeAttribute("required");
-    document.querySelector("#password").removeAttribute("required"); */
     e.preventDefault();
     dialogSignup.showModal();
   });
@@ -543,8 +644,6 @@ function setEventListeners() {
     dialogSignup.close();
     cleanInputs(dialogSignup);
     signupInfo.textContent = "";
-    /*     document.querySelector("#email").setAttribute("required", "");
-    document.querySelector("#password").setAttribute("required", ""); */
   });
 
   btnOpenDelete.addEventListener("click", () => {

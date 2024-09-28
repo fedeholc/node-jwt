@@ -1,12 +1,12 @@
 export { extractToken, verifyAccessToken, sessionCounter };
 
 import { jwtVerify } from "jose";
-
+import * as types from "./types.js";
 /**
- * Middleware to extract the token from the Authorization header
- * @param {{}} req
- * @param {{}} res
- * @param {Function} next
+ *
+ * @param {import('express').Request & {token?: string}} req - The request object.
+ * @param {import('express').Response} res - The response object.
+ * @param {import('express').NextFunction} next - The next function
  */
 function extractToken(req, res, next) {
   try {
@@ -29,25 +29,33 @@ function extractToken(req, res, next) {
 
 /**
  * Middleware to verify the token
- * @param {string} accessSecretKey
- * @returns
+ * @param {Uint8Array} accessSecretKey
+ * @returns {import('express').RequestHandler}
  */
 function verifyAccessToken(accessSecretKey) {
-  return async function (req, res, next) {
+  /**
+   * @param {import('express').Request & {token?: string} & {payload: {}}} req - The request object.
+   * @param {import('express').Response} res - The response object.
+   * @param {import('express').NextFunction} next - The next function
+   */
+  async function veryfy(req, res, next) {
     const token = req.token;
     if (!token) {
       return res.status(401).json({ error: "Token not found." });
     }
     try {
       let response = await jwtVerify(token, accessSecretKey);
-      req.payload = response.payload;
+      req.payload = /** @type {types.TokenPayload} */ (response.payload);
       next();
     } catch (error) {
       return res.status(401).json({ error: `Invalid Token: ${error}` }); //
     }
-  };
+  }
+
+  return veryfy;
 }
 
+//TODO: decidir si lo borro o lo dejo
 function sessionCounter(req, res, next) {
   if (req.session.count) {
     req.session.count++;
