@@ -1,58 +1,51 @@
+//TODO: probar todo esto con el test runner de node
 import { expect, test, describe, vi, beforeEach } from "vitest";
-import express from "express";
 import request from "supertest";
-import { apiEP, apiURL, gitHubEP } from "../endpoints.js";
+import { apiEP, gitHubEP, apiBase } from "../endpoints.js";
 import { handleAuthGitHub, handleAuthGitHubCallback } from "./auth-github.js";
 import process from "process";
 import { configServer } from "../server.js";
+import { genRefreshToken } from "../util-auth.js";
+import { MockAgent, setGlobalDispatcher } from "undici";
+import { db } from "../global-store.js";
 
-import { it, afterEach } from "vitest";
-import supertest from "supertest";
-import * as endpointsModule from "../endpoints.js";
-import * as utilAuthModule from "../util-auth.js";
-import * as globalStoreModule from "../global-store.js";
+vi.mock("../util-auth", () => ({
+  hashPassword: vi.fn(),
+  genAccessToken: vi.fn(),
+  genRefreshToken: vi.fn(),
+}));
+
+vi.mock("../global-store.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    db: {
+      getUserByEmail: vi.fn(),
+      insertUser: vi.fn(),
+    },
+    refreshSecretKey: "test-refresh-secret",
+    accessSecretKey: "test-access-secret",
+  };
+});
+
+let apiURL = {
+  AUTH_GITHUB: apiBase.test + "/auth/github",
+  AUTH_GITHUB_CALLBACK: apiBase.test + "/auth/github/callback",
+};
 
 const clientID = process.env.GITHUB_CLIENT_ID;
-const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
 const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&scope=user:email&redirect_uri=${redirectURI}`;
 
-vi.mock("../endpoints.js");
-vi.mock("../util-auth.js");
-vi.mock("../global-store.js");
-vi.mock("node:crypto");
-vi.mock("node:process");
+const app = configServer();
 
-/* const app = configServer();
- */
-const app = express();
-
-/* app.use(express.json());
- */
 app.get(apiEP.AUTH_GITHUB, handleAuthGitHub);
 app.get(apiEP.AUTH_GITHUB_CALLBACK, handleAuthGitHubCallback);
 
 describe("Auth Github EP no mock", () => {
   beforeEach(() => {
-    //vi.clearAllMocks();
-    vi.resetAllMocks();
-    process.env.GITHUB_CLIENT_ID = "test-client-id";
-    process.env.GITHUB_CLIENT_SECRET = "test-client-secret";
-    endpointsModule.apiURL = {
-      AUTH_GITHUB_CALLBACK: "http://localhost:3000/auth/github/callback",
-    };
-    endpointsModule.gitHubEP = {
-      AUTHORIZE: "https://github.com/login/oauth/authorize",
-      ACCESS_TOKEN: "https://github.com/login/oauth/access_token",
-      USER: "https://api.github.com/user",
-    };
-    globalStoreModule.db = {
-      getUserByEmail: vi.fn(),
-      insertUser: vi.fn(),
-    };
-    globalStoreModule.refreshCookieOptions = { remember: {} };
-    globalStoreModule.refreshSecretKey = "test-secret-key";
+    vi.clearAllMocks();
   });
 
   test("should return 200 and GH auth URL", async () => {
@@ -71,7 +64,53 @@ describe("Auth Github EP no mock", () => {
 });
 
 describe("Auth Github Callback EP no mock", () => {
+  let mockAgent;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAgent = new MockAgent();
+    mockAgent.disableNetConnect();
+    setGlobalDispatcher(mockAgent);
+  });
+
+  const mockCode = "test-code";
+  const mockEmail = "test@example.com";
+
+  test("should return 500 if no code is provided", async () => {
+    const res = await request(app).get(apiEP.AUTH_GITHUB_CALLBACK).send();
+    expect(res.status).toBe(500);
+    expect(res.text).toBe("No authorization code received");
+  });
+
+  test("should redirect (302) and set a refresh token cookie", async () => {
+    const githubMock = mockAgent.get("https://github.com");
+    githubMock
+      .intercept({
+        path: "/login/oauth/access_token",
+        method: "POST",
+      })
+      .reply(200, { access_token: "test-token" });
+
+    const apiMock = mockAgent.get("https://api.github.com");
+    apiMock
+      .intercept({
+        path: "/user",
+        method: "GET",
+      })
+      .reply(200, { email: mockEmail });
+
+    db.getUserByEmail.mockResolvedValue({ id: 1, email: mockEmail });
+    db.insertUser.mockResolvedValue(1);
+    genRefreshToken.mockReturnValue("test-refresh-token");
+
+    let response = await request(app)
+      .get(apiEP.AUTH_GITHUB_CALLBACK)
+      .query({ code: mockCode });
+
+    expect(response.status).toBe(302);
+
+    expect(response.headers["set-cookie"][0]).toContain(
+      "refreshToken=test-refresh-token"
+    );
   });
 });

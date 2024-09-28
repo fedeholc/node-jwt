@@ -13,6 +13,7 @@ const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 //TODO: OJO, ver tambièn en google, acà no hay opcion de rememberme, ni si quiera es enviada por el cliente
 
 function handleAuthGitHub(req, res) {
+  console.log("---holi");
   if (!req.query.returnTo) {
     console.error("No returnTo URL provided");
     return res.status(400).json({ error: "No returnTo URL provided" });
@@ -31,6 +32,7 @@ async function handleAuthGitHubCallback(req, res) {
       return res.status(500).send("No authorization code received");
     }
 
+    console.log("---holi code", gitHubCode);
     // Request access token from GitHub
     const ghResponse = await fetch(gitHubEP.ACCESS_TOKEN, {
       method: "POST",
@@ -46,6 +48,7 @@ async function handleAuthGitHubCallback(req, res) {
       }),
     });
 
+    console.log("---holi response", ghResponse.status);
     if (!ghResponse.ok) {
       return res
         .status(500)
@@ -55,6 +58,8 @@ async function handleAuthGitHubCallback(req, res) {
     }
 
     const { access_token: ghAccessToken } = await ghResponse.json();
+
+    console.log("---holi token", ghAccessToken);
 
     if (!ghAccessToken) {
       return res.status(500).send("No access token received from GitHub");
@@ -95,7 +100,6 @@ async function handleAuthGitHubCallback(req, res) {
     );
 
     res.cookie("refreshToken", refreshToken, refreshCookieOptions.remember);
-
     res.redirect(req.session.returnTo);
     delete req.session.returnTo;
   } catch (error) {

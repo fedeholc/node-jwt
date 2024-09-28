@@ -58,7 +58,7 @@ describe("Auth Github Callback EP no mock", () => {
     expect(response.text).toEqual("No access token received from GitHub");
   });
 
- /*  test("should return 200 if access token received from GitHub", async () => {
+  /*  test("should return 200 if access token received from GitHub", async () => {
     const response = await request(app)
       .get(apiEP.AUTH_GITHUB_CALLBACK + "?code=123")
       .send();
