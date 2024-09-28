@@ -90,7 +90,7 @@ async function handleAuthGitHubCallback(req, res) {
     }
 
     const refreshToken = await genRefreshToken(
-      { user: req.session.user },
+      { user: req.session.user, rememberMe: true },
       refreshSecretKey
     );
 
