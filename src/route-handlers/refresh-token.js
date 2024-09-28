@@ -26,6 +26,7 @@ export async function handleRefreshToken(req, res) {
           id: response.payload.user.id,
           email: response.payload.user.email,
         },
+        rememberMe: response.payload.rememberMe,
       },
       accessSecretKey
     );

@@ -6,10 +6,12 @@ import { accessJWTExpiration, refreshJWTExpiration } from "./global-store.js";
 
 /**
  * Function to generate a token
- * @param {{}} payload - Information to be included in the token
+ * @param {{user: { id: number, pass: string}, rememberMe: boolean}} payload - Information to be included in the token
  * @param {Uint8Array} accessSecretKey - Secret key to sign the token
  * @returns string - token
  */
+
+//TODO: ojo, hay un problema acà estoy dando por hecho que siempre va a llegar un rememberme. Pero creo que no...por ejemplo cuando se pide el refresh token, no se envía rememberMe. Tendrìa que revisar en el front y en el back todos los pedidos para enviarlo siempre.
 
 async function genAccessToken(payload, accessSecretKey) {
   const newAccessToken = new SignJWT(payload)
@@ -24,6 +26,12 @@ async function genAccessToken(payload, accessSecretKey) {
   return newAccessToken;
 }
 
+/**
+ * Function to generate a token
+ * @param {{user: { id: number, pass: string}, rememberMe: boolean}} payload - Information to be included in the token
+ * @param {Uint8Array} refreshSecretKey - Secret key to sign the token
+ * @returns string - token
+ */
 async function genRefreshToken(payload, refreshSecretKey) {
   const newRefreshToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })

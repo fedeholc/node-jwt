@@ -1,6 +1,11 @@
 import { hashPassword, genAccessToken, genRefreshToken } from "../util-auth.js";
 import process from "process";
-import { accessSecretKey, db, refreshSecretKey } from "../global-store.js";
+import {
+  accessSecretKey,
+  db,
+  refreshCookieOptions,
+  refreshSecretKey,
+} from "../global-store.js";
 
 export async function handleRegister(req, res) {
   try {
@@ -19,11 +24,11 @@ export async function handleRegister(req, res) {
     const id = await db.insertUser(email, hashPassword(pass));
 
     const accessToken = await genAccessToken(
-      { user: { id: id, email: email } },
+      { user: { id: id, email: email }, rememberMe: false },
       accessSecretKey
     );
     const refreshToken = await genRefreshToken(
-      { user: { id: id, email: email } },
+      { user: { id: id, email: email, rememberMe: false } },
       refreshSecretKey
     );
 
@@ -31,7 +36,7 @@ export async function handleRegister(req, res) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: refreshCookieOptions.noRemember,
     });
 
     return res.status(200).json({

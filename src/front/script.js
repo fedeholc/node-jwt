@@ -224,8 +224,6 @@ async function handleLogin(event) {
 
     renderUI();
 
-    console.log("response data: ", data);
-
     localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
 
     return;

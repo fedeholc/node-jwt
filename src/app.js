@@ -1,3 +1,7 @@
+// TODO: resolver problema del refresh en el payload. ver util-auth
+//FIXME: creo que la clave es poner el rememberme en el access token, de modo que cuando el usuario vuelve a la pagina y se lee el access token, se pueda saber si cuando se logueo lo hizo con remember o no.
+//VER Creo que ya esta solucionado, hay que probarlo, idealmente hacer un test.
+
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: limpiar base de tokens expirados
