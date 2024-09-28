@@ -5,7 +5,6 @@ import {
   db,
   refreshCookieOptions,
 } from "../global-store.js";
-import process from "process";
 
 export async function handleLogin(req, res) {
   try {
@@ -16,7 +15,6 @@ export async function handleLogin(req, res) {
       email === userInDB.email &&
       hashPassword(pass) === userInDB.pass
     ) {
-      //TODO:  ver que esto se repite en register (también en los auth), pasar a una función?
       const accessToken = await genAccessToken(
         {
           user: { id: userInDB.id, email: userInDB.email },
