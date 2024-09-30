@@ -16,6 +16,7 @@ vi.mock("../util-auth", () => ({
 }));
 
 vi.mock("../global-store.js", async (importOriginal) => {
+  /**@type {Object} */
   const actual = await importOriginal();
   return {
     ...actual,
@@ -99,8 +100,11 @@ describe("Auth Github Callback EP no mock", () => {
       })
       .reply(200, { email: mockEmail });
 
+    // @ts-ignore
     db.getUserByEmail.mockResolvedValue({ id: 1, email: mockEmail });
+    // @ts-ignore
     db.insertUser.mockResolvedValue(1);
+    // @ts-ignore
     genRefreshToken.mockReturnValue("test-refresh-token");
 
     let response = await request(app)
