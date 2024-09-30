@@ -1,12 +1,21 @@
 import { apiURL } from "./endpoints-front.js";
+import { cleanInputs, vibrate } from "./util.js";
 // eslint-disable-next-line no-unused-vars
 import * as types from "./types.js";
+
+// - - - - - - - - - - - - - - - - - - -
+// - Variables globales
+// - - - - - - - - - - - - - - - - - - -
 
 /** @type {types.UserPayload | null} */
 let userData = null;
 
 /** @type {string | null} */
 let accessToken = null;
+
+// - - - - - - - - - - - - - - - - - - -
+// - Elementos del DOM
+// - - - - - - - - - - - - - - - - - - -
 
 const dialogSignup = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-signup")
@@ -16,7 +25,6 @@ const btnCloseSignup = document.getElementById("close-signup");
 const signupInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#signup-info")
 );
-
 const dialogDelete = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-delete")
 );
@@ -26,7 +34,6 @@ const btnDelete = document.getElementById("btn-delete");
 const deleteInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#delete-info")
 );
-
 const dialogReset = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-reset")
 );
@@ -52,6 +59,10 @@ const userInfoDisplay = document.getElementById("user-info-display");
 const userInfoId = document.getElementById("user-info-id");
 const userInfoEmail = document.getElementById("user-info-email");
 
+//- - - - - - - - - - - - - - - - - - -
+//- MAIN
+//- - - - - - - - - - - - - - - - - - -
+
 document.addEventListener("DOMContentLoaded", main);
 
 async function main() {
@@ -62,7 +73,7 @@ async function main() {
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
-//- Funciones: UI - - - - - - - - - - - - - - - -
+//- Funciones: UI
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
 function renderUI() {
@@ -76,27 +87,6 @@ function renderUI() {
     document.getElementById("login-section").style.display = "flex";
     document.getElementById("user-section").style.display = "none";
   }
-}
-
-/**
- *
- * @param {HTMLElement | Document} parent
- */
-function cleanInputs(parent) {
-  let inputs = parent.querySelectorAll("input");
-  inputs.forEach((input) => {
-    input.value = "";
-  });
-}
-
-/**
- * @param {HTMLElement} element
- */
-function vibrate(element) {
-  element.classList.add("vibrate");
-  setTimeout(() => {
-    element.classList.remove("vibrate");
-  }, 300);
 }
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
