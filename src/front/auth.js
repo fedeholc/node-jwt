@@ -1,9 +1,31 @@
-import { apiURL } from "./endpoints-front";
-import { isTokenExpired } from "./istoken";
+import { apiURL } from "./endpoints-front.js";
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
 //- Funciones: autenticación. - - - - - - - - - -
 //- - - - - - - - - - - - - - - - - - - - - - - -
+
+export const auth = {
+  getAccessToken: getAccessToken,
+  getNewAccessToken: getNewAccessToken,
+  isTokenExpired: isTokenExpired,
+};
+/**
+ *
+ * @param {string} token - Access token
+ * @returns {boolean} - True if token is expired
+ */
+export function isTokenExpired(token) {
+  console.log("holi: ", token);
+  try {
+    if (!token) return true;
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decodedToken.exp < currentTime;
+  } catch (error) {
+    console.error("Error decoding token: ", error);
+    return true;
+  }
+}
 
 /**
  * @returns {Promise<string | null>} - User data or null
@@ -16,11 +38,11 @@ export async function getAccessToken() {
       "at en authjs:",
       JSON.parse(localStorage.getItem("accessToken"))
     );
-    if (accessToken && !isTokenExpired(accessToken)) {
+    if (accessToken && !this.isTokenExpired(accessToken)) {
       return accessToken;
     }
 
-    let newAccessToken = await getNewAccessToken();
+    let newAccessToken = await this.getNewAccessToken();
     if (newAccessToken) {
       localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
       return newAccessToken;
@@ -53,5 +75,3 @@ export async function getNewAccessToken() {
     return null;
   }
 }
-
-

@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { getNewAccessToken, isTokenExpired, getAccessToken } from "./auth.js";
-
-
-
+/* import { getNewAccessToken, isTokenExpired2, getAccessToken } from "./auth.js";
+ */ import { auth, getAccessToken } from "./auth.js";
 // Mock localStorage for Node environment
 const localStorageMock = (() => {
   let store = {};
@@ -151,18 +149,19 @@ describe.skip("isTokenExpired", () => {
 });
 
 describe("getAccessToken", () => {
-
   vi.mock("./auth.js", async (importOriginal) => {
     /**@type {Object} */
     const actual = await importOriginal();
     return {
-      ...actual,
-      isTokenExpired: vi.fn(),
-      getNewAccessToken: vi.fn(),
+      auth: {
+        isTokenExpired: vi.fn(),
+        getNewAccessToken: vi.fn(),
+        getAccessToken: actual.getAccessToken,
+      },
     };
   });
 
-  it.skip("should return access token if it exists and is not expired", async () => {
+  it("should return access token if it exists and is not expired", async () => {
     const mockToken = "mockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
     console.log(
@@ -170,38 +169,39 @@ describe("getAccessToken", () => {
       JSON.parse(localStorage.getItem("accessToken"))
     );
     // @ts-ignore
-    isTokenExpired.mockReturnValue(false); // Token is not expired
+    auth.isTokenExpired.mockReturnValue(false); // Token is not expired
     // @ts-ignore
-    getNewAccessToken.mockResolvedValue(mockToken); // No new token received
-    const result = await getAccessToken();
+    auth.getNewAccessToken.mockResolvedValue(mockToken); // No new token received
+    console.log("---gatoken", auth.getAccessToken);
+    const result = await auth.getAccessToken();
     expect(result).toBe(mockToken);
-    expect(isTokenExpired).toHaveBeenCalledWith(mockToken);
+    expect(auth.isTokenExpired).toHaveBeenCalledWith(mockToken);
   });
 
-  it.skip("should return new access token if the existing token is expired", async () => {
+  it("should return new access token if the existing token is expired", async () => {
     const mockToken = "mockToken";
     const newToken = "newMockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
-    mockIsTokenExpired.mockReturnValue(true); // Token is expired
-    mockGetNewAccessToken.mockResolvedValue(newToken); // Return a new token
+    auth.isTokenExpired.mockReturnValue(true); // Token is expired
+    auth.getNewAccessToken.mockResolvedValue(newToken); // Return a new token
 
-    const result = await getAccessToken();
+    const result = await auth.getAccessToken();
     expect(result).toBe(newToken);
     expect(localStorage.getItem("accessToken")).toBe(JSON.stringify(newToken));
-    expect(mockIsTokenExpired).toHaveBeenCalledWith(mockToken);
-    expect(mockGetNewAccessToken).toHaveBeenCalled();
+    expect(auth.isTokenExpired).toHaveBeenCalledWith(mockToken);
+    expect(auth.getNewAccessToken).toHaveBeenCalled();
   });
 
-  it.skip("should return null if no new access token is received", async () => {
+  it("should return null if no new access token is received", async () => {
     const mockToken = "mockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
-    mockIsTokenExpired.mockReturnValue(true); // Token is expired
-    mockGetNewAccessToken.mockResolvedValue(null); // No new token received
-
-    const result = await getAccessToken();
+    console.log("--auth:", auth);
+    auth.isTokenExpired.mockReturnValue(true); // Token is expired
+    auth.getNewAccessToken.mockResolvedValue(null); // No new token received
+    const result = await auth.getAccessToken();
     expect(result).toBeNull();
     expect(localStorage.getItem("accessToken")).toBe(JSON.stringify(mockToken)); // Old token is still there
-    expect(mockGetNewAccessToken).toHaveBeenCalled();
+    expect(auth.getNewAccessToken).toHaveBeenCalled();
   });
 
   it.skip("should return null if localStorage has no access token", async () => {
