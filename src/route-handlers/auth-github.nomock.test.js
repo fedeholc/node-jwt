@@ -7,7 +7,7 @@ import process from "process";
 import { configServer } from "../server.js";
 
 const clientID = process.env.GITHUB_CLIENT_ID;
-const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+//const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
 const redirectURI = apiURL.AUTH_GITHUB_CALLBACK;
 const githubAuthURL = `${gitHubEP.AUTHORIZE}?client_id=${clientID}&scope=user:email&redirect_uri=${redirectURI}`;

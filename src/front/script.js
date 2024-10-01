@@ -1,6 +1,6 @@
 import { apiURL } from "./endpoints-front.js";
 import { cleanInputs, vibrate } from "./util.js";
-import { auth ,getUserData} from "./auth.js";
+import { auth, getUserData } from "./auth.js";
 // eslint-disable-next-line no-unused-vars
 import * as types from "./types.js";
 
@@ -87,57 +87,12 @@ function renderUI() {
     document.getElementById("user-section").style.display = "flex";
   } else {
     //logged out UI
+    userInfoId.textContent = `Id: -`;
+    userInfoEmail.textContent = `Email: -`;
     document.getElementById("login-section").style.display = "flex";
     document.getElementById("user-section").style.display = "none";
   }
 }
-
-//- - - - - - - - - - - - - - - - - - - - - - - -
-//- Funciones: autenticación. - - - - - - - - - -
-//- - - - - - - - - - - - - - - - - - - - - - - -
-
-// /**
-//  * @param {string} accessToken
-//  */
-// async function getUserData(accessToken) {
-//   try {
-//     if (!accessToken) {
-//       console.log("No token found.");
-//       return null;
-//     }
-
-//     let response = await fetch(apiURL.GET_USER, {
-//       method: "GET",
-//       credentials: "omit",
-//       headers: {
-//         Authorization: `Bearer ${accessToken}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       console.log(
-//         `No user authenticated: ${response.status} ${response.statusText}`
-//       );
-//       return null;
-//     }
-
-//     if (response.ok) {
-//       let data = await response.json();
-
-//       /** @type {types.UserPayload} */
-//       let user = data.user;
-//       if (!user) {
-//         console.log(`No user data. ${response.status} ${response.statusText}`);
-//         return null;
-//       }
-
-//       return user;
-//     }
-//   } catch (error) {
-//     console.error(`Error loading user data: ${error}`);
-//     return null;
-//   }
-// }
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
 //- Funciones: handlers - - - - - - - - - - - - -
@@ -200,8 +155,6 @@ async function handleLogin(event) {
   if (response.ok) {
     let data = await response.json();
     userData = data.user;
-    userInfoId.textContent = `Id: ${userData.id}`;
-    userInfoEmail.textContent = `Email: ${userData.email}`;
 
     renderUI();
 

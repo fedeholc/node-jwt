@@ -1,3 +1,5 @@
+//TODO: falta testear los route handlers
+//TODO: EMPEZAR a escribir una explicacion antes de que sea demasiado tarde.
 //TODO: crear unit test y ver si también se puede hacer integracion con vitest y/o E2E con playwright
 
 //TODO: limpiar base de tokens expirados
