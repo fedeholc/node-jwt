@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", main);
 async function main() {
   setEventListeners();
   accessToken = await auth.getAccessToken();
-  userData = await getUserData();
+  userData = await getUserData(accessToken);
   renderUI();
 }
 
@@ -81,6 +81,8 @@ function renderUI() {
   cleanInputs(document);
   if (userData) {
     //logged in UI
+    userInfoId.textContent = `Id: ${userData.id}`;
+    userInfoEmail.textContent = `Email: ${userData.email}`;
     document.getElementById("login-section").style.display = "none";
     document.getElementById("user-section").style.display = "flex";
   } else {
@@ -94,7 +96,7 @@ function renderUI() {
 //- Funciones: autenticación. - - - - - - - - - -
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
-async function getUserData() {
+async function getUserData(accessToken) {
   try {
     if (!accessToken) {
       console.log("No token found.");
@@ -125,8 +127,6 @@ async function getUserData() {
         console.log(`No user data. ${response.status} ${response.statusText}`);
         return null;
       }
-      userInfoId.textContent = `Id: ${user.id}`;
-      userInfoEmail.textContent = `Email: ${user.email}`;
 
       return user;
     }
