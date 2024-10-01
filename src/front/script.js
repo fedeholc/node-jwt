@@ -1,6 +1,6 @@
 import { apiURL } from "./endpoints-front.js";
 import { cleanInputs, vibrate } from "./util.js";
-import { getNewAccessToken } from "./auth.js";  
+import { getNewAccessToken, isTokenExpired, getAccessToken } from "./auth.js";
 // eslint-disable-next-line no-unused-vars
 import * as types from "./types.js";
 
@@ -94,47 +94,6 @@ function renderUI() {
 //- Funciones: autenticación. - - - - - - - - - -
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
-/**
- *
- * @param {string} token - Access token
- * @returns {boolean} - True if token is expired
- */
-function isTokenExpired(token) {
-  try {
-    if (!token) return true;
-    const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decodedToken.exp < currentTime;
-  } catch (error) {
-    console.error("Error decoding token: ", error);
-    return true;
-  }
-}
-
-/**
- * @returns {Promise<string | null>} - User data or null
- */
-async function getAccessToken() {
-  try {
-    let accessToken = JSON.parse(localStorage.getItem("accessToken"));
-
-    if (accessToken && !isTokenExpired(accessToken)) {
-      return accessToken;
-    }
-
-    let newAccessToken = await getNewAccessToken();
-    if (newAccessToken) {
-      localStorage.setItem("accessToken", JSON.stringify(newAccessToken));
-      return newAccessToken;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error(`Error getting access token: ${error}`);
-    return null;
-  }
-}
-
 async function getUserData() {
   try {
     if (!accessToken) {
@@ -181,6 +140,9 @@ async function getUserData() {
 //- Funciones: handlers - - - - - - - - - - - - -
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
+/**
+ * @param {Event} event
+ */
 async function handleLogin(event) {
   event.preventDefault();
 
