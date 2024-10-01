@@ -1,6 +1,6 @@
 import { apiURL } from "./endpoints-front.js";
 // eslint-disable-next-line no-unused-vars
-import * as types  from "./types.js";
+import * as types from "./types.js";
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
 //- Funciones: autenticación. - - - - - - - - - -
@@ -77,7 +77,6 @@ async function getNewAccessToken() {
   }
 }
 
-
 /**
  * @param {string} accessToken
  * @returns {Promise<types.UserPayload | null>} - User data or null
@@ -96,7 +95,7 @@ export async function getUserData(accessToken) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-
+    console.log("--response: ", response);
     if (!response.ok) {
       console.log(
         `No user authenticated: ${response.status} ${response.statusText}`

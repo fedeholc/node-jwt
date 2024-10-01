@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { auth } from "./auth.js";
+import { getUserData } from "./auth.js";
 // Mock localStorage for Node environment
 const localStorageMock = (() => {
   let store = {};
@@ -205,5 +206,46 @@ describe("getAccessToken", () => {
     localStorage.setItem("accessToken", "{invalidJson");
     const result = await auth.getAccessToken();
     expect(result).toBeNull();
+  });
+});
+
+describe("getUserData", () => {
+  it("should return null if there is no token", async () => {
+    const result = await getUserData(null);
+    expect(result).toBeNull();
+  });
+
+  it("should call fetch with correct auth token", async () => {
+    const mockAccessToken = "mockToken123";
+
+    // @ts-ignore: Mocking fetch for testing purposes
+    globalThis.fetch = vi.fn(() => {
+      console.log("holi dentro mock");
+    });
+    await getUserData(mockAccessToken);
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: "GET",
+        credentials: "omit",
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${mockAccessToken}`,
+        }),
+      })
+    );
+  });
+  it("should return user data", async () => {
+    const mockAccessToken = "mockToken123";
+
+    //@ts-ignore
+    globalThis.fetch = vi.fn(() => {
+      return {
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ user: { id: 1, email: "email" } }),
+      };
+    });
+    const result = await getUserData(mockAccessToken);
+    expect(result).toEqual({ id: 1, email: "email" });
   });
 });
