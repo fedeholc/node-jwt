@@ -1,6 +1,6 @@
 import { apiURL } from "./endpoints-front.js";
 import { cleanInputs, vibrate } from "./util.js";
-import { getNewAccessToken, isTokenExpired, getAccessToken, auth } from "./auth.js";
+import { auth } from "./auth.js";
 // eslint-disable-next-line no-unused-vars
 import * as types from "./types.js";
 

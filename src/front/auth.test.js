@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-/* import { getNewAccessToken, isTokenExpired2, getAccessToken } from "./auth.js";
- */ import { auth, getAccessToken } from "./auth.js";
+import { auth } from "./auth.js";
 // Mock localStorage for Node environment
 const localStorageMock = (() => {
   let store = {};
@@ -32,7 +31,7 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-describe.skip("getNewAccessToken", () => {
+describe("getNewAccessToken", () => {
   it("should return the access token when the response is successful and contains accessToken", async () => {
     const mockAccessToken = "mockToken123";
 
@@ -46,7 +45,8 @@ describe.skip("getNewAccessToken", () => {
       })
     );
 
-    const result = await getNewAccessToken();
+    // @ts-ignore
+    const result = await auth.getNewAccessToken();
     expect(result).toBe(mockAccessToken); // Verify that the access token is as expected
   });
 
@@ -61,7 +61,8 @@ describe.skip("getNewAccessToken", () => {
       })
     );
 
-    const result = await getNewAccessToken();
+    // @ts-ignore
+    const result = await auth.getNewAccessToken();
     expect(result).toBeNull(); // Verify that the result is null
   });
 
@@ -69,7 +70,7 @@ describe.skip("getNewAccessToken", () => {
     // Mock fetch to simulate an error
     globalThis.fetch = vi.fn(() => Promise.reject(new Error("Fetch failed")));
 
-    const result = await getNewAccessToken();
+    const result = await auth.getNewAccessToken();
     expect(result).toBeNull(); // Verify that the result is null
   });
 
@@ -84,7 +85,7 @@ describe.skip("getNewAccessToken", () => {
       })
     );
 
-    await getNewAccessToken();
+    await auth.getNewAccessToken();
 
     // Verify that fetch was called with credentials: 'include'
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -97,7 +98,11 @@ describe.skip("getNewAccessToken", () => {
   });
 });
 
-describe.skip("isTokenExpired", () => {
+describe("isTokenExpired", () => {
+  beforeEach(() => {
+    // Clear mocks and localStorage before each test
+    vi.resetModules();
+  });
   // Helper function to generate a test token
   /**
    * @param {number} expirationTime
@@ -110,36 +115,36 @@ describe.skip("isTokenExpired", () => {
   }
 
   it("should return true for a null token", () => {
-    expect(isTokenExpired(null)).toBe(true);
+    expect(auth.isTokenExpired(null)).toBe(true);
   });
 
   it("should return true for an undefined token", () => {
-    expect(isTokenExpired(undefined)).toBe(true);
+    expect(auth.isTokenExpired(undefined)).toBe(true);
   });
 
   it("should return true for an empty string token", () => {
-    expect(isTokenExpired("")).toBe(true);
+    expect(auth.isTokenExpired("")).toBe(true);
   });
 
   it("should return true for an expired token", () => {
     const expiredToken = generateToken(Math.floor(Date.now() / 1000) - 3600); // Token expired 1 hour ago
-    expect(isTokenExpired(expiredToken)).toBe(true);
+    expect(auth.isTokenExpired(expiredToken)).toBe(true);
   });
 
   it("should return false for a valid token", () => {
     const validToken = generateToken(Math.floor(Date.now() / 1000) + 3600); // Token expires 1 hour from now
-    expect(isTokenExpired(validToken)).toBe(false);
+    expect(auth.isTokenExpired(validToken)).toBe(false);
   });
 
   it("should return true for a malformed token", () => {
     const malformedToken = "not.a.valid.token";
-    expect(isTokenExpired(malformedToken)).toBe(true);
+    expect(auth.isTokenExpired(malformedToken)).toBe(true);
   });
 
   it("should log an error for a malformed token", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const malformedToken = "not.a.valid.token";
-    isTokenExpired(malformedToken);
+    auth.isTokenExpired(malformedToken);
     expect(consoleSpy).toHaveBeenCalledWith(
       "Error decoding token: ",
       expect.any(Error)
@@ -149,30 +154,16 @@ describe.skip("isTokenExpired", () => {
 });
 
 describe("getAccessToken", () => {
-  vi.mock("./auth.js", async (importOriginal) => {
-    /**@type {Object} */
-    const actual = await importOriginal();
-    return {
-      auth: {
-        isTokenExpired: vi.fn(),
-        getNewAccessToken: vi.fn(),
-        getAccessToken: actual.getAccessToken,
-      },
-    };
+  beforeEach(() => {
+    // Clear mocks and localStorage before each test
+    vi.resetModules();
   });
 
   it("should return access token if it exists and is not expired", async () => {
     const mockToken = "mockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
-    console.log(
-      "at en local:",
-      JSON.parse(localStorage.getItem("accessToken"))
-    );
-    // @ts-ignore
-    auth.isTokenExpired.mockReturnValue(false); // Token is not expired
-    // @ts-ignore
-    auth.getNewAccessToken.mockResolvedValue(mockToken); // No new token received
-    console.log("---gatoken", auth.getAccessToken);
+    vi.spyOn(auth, "isTokenExpired").mockReturnValue(true);
+    vi.spyOn(auth, "getNewAccessToken").mockResolvedValue(mockToken);
     const result = await auth.getAccessToken();
     expect(result).toBe(mockToken);
     expect(auth.isTokenExpired).toHaveBeenCalledWith(mockToken);
@@ -182,9 +173,8 @@ describe("getAccessToken", () => {
     const mockToken = "mockToken";
     const newToken = "newMockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
-    auth.isTokenExpired.mockReturnValue(true); // Token is expired
-    auth.getNewAccessToken.mockResolvedValue(newToken); // Return a new token
-
+    vi.spyOn(auth, "isTokenExpired").mockReturnValue(true);
+    vi.spyOn(auth, "getNewAccessToken").mockResolvedValue(newToken);
     const result = await auth.getAccessToken();
     expect(result).toBe(newToken);
     expect(localStorage.getItem("accessToken")).toBe(JSON.stringify(newToken));
@@ -195,27 +185,25 @@ describe("getAccessToken", () => {
   it("should return null if no new access token is received", async () => {
     const mockToken = "mockToken";
     localStorage.setItem("accessToken", JSON.stringify(mockToken));
-    console.log("--auth:", auth);
-    auth.isTokenExpired.mockReturnValue(true); // Token is expired
-    auth.getNewAccessToken.mockResolvedValue(null); // No new token received
+    vi.spyOn(auth, "isTokenExpired").mockImplementation(() => true);
+    vi.spyOn(auth, "getNewAccessToken").mockResolvedValue(null);
     const result = await auth.getAccessToken();
     expect(result).toBeNull();
-    expect(localStorage.getItem("accessToken")).toBe(JSON.stringify(mockToken)); // Old token is still there
+    expect(localStorage.getItem("accessToken")).toBe(JSON.stringify(mockToken));
     expect(auth.getNewAccessToken).toHaveBeenCalled();
   });
 
-  it.skip("should return null if localStorage has no access token", async () => {
-    mockGetNewAccessToken.mockResolvedValue(null); // No new token received
-
-    const result = await getAccessToken();
+  it("should return null if localStorage has no access token", async () => {
+    vi.spyOn(auth, "getNewAccessToken").mockResolvedValue(null);
+    const result = await auth.getAccessToken();
     expect(result).toBeNull();
-    expect(mockGetNewAccessToken).toHaveBeenCalled();
+
+    expect(auth.getNewAccessToken).toHaveBeenCalled();
   });
 
-  it.skip("should handle errors gracefully and return null", async () => {
-    // Simulate an error in localStorage or JSON parsing
+  it("should handle errors gracefully and return null", async () => {
     localStorage.setItem("accessToken", "{invalidJson");
-    const result = await getAccessToken();
+    const result = await auth.getAccessToken();
     expect(result).toBeNull();
   });
 });

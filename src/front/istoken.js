@@ -4,7 +4,6 @@
  * @returns {boolean} - True if token is expired
  */
 export function isTokenExpired(token) {
-  console.log("holi: ", token);
   try {
     if (!token) return true;
     const decodedToken = JSON.parse(atob(token.split(".")[1]));

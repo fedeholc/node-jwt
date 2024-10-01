@@ -14,8 +14,7 @@ export const auth = {
  * @param {string} token - Access token
  * @returns {boolean} - True if token is expired
  */
-export function isTokenExpired(token) {
-  console.log("holi: ", token);
+function isTokenExpired(token) {
   try {
     if (!token) return true;
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
@@ -30,7 +29,7 @@ export function isTokenExpired(token) {
 /**
  * @returns {Promise<string | null>} - User data or null
  */
-export async function getAccessToken() {
+async function getAccessToken() {
   try {
     let accessToken = JSON.parse(localStorage.getItem("accessToken"));
 
@@ -58,7 +57,7 @@ export async function getAccessToken() {
 /**
  * @returns {Promise<string | null>} - Access token or null
  */
-export async function getNewAccessToken() {
+async function getNewAccessToken() {
   try {
     const response = await fetch(apiURL.REFRESH, {
       method: "POST",
