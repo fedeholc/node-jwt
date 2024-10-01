@@ -1,4 +1,6 @@
 import { apiURL } from "./endpoints-front.js";
+// eslint-disable-next-line no-unused-vars
+import * as types  from "./types.js";
 
 //- - - - - - - - - - - - - - - - - - - - - - - -
 //- Funciones: autenticación. - - - - - - - - - -
@@ -71,6 +73,51 @@ async function getNewAccessToken() {
     }
   } catch (error) {
     console.error(`Error fetching new access token: ${error}`);
+    return null;
+  }
+}
+
+
+/**
+ * @param {string} accessToken
+ * @returns {Promise<types.UserPayload | null>} - User data or null
+ */
+export async function getUserData(accessToken) {
+  try {
+    if (!accessToken) {
+      console.log("No token found.");
+      return null;
+    }
+
+    let response = await fetch(apiURL.GET_USER, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.log(
+        `No user authenticated: ${response.status} ${response.statusText}`
+      );
+      return null;
+    }
+
+    if (response.ok) {
+      let data = await response.json();
+
+      /** @type {types.UserPayload} */
+      let user = data.user;
+      if (!user) {
+        console.log(`No user data. ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      return user;
+    }
+  } catch (error) {
+    console.error(`Error loading user data: ${error}`);
     return null;
   }
 }
