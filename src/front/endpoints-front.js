@@ -6,7 +6,12 @@ const apiBase = {
 };
 
 let ENV;
-if (window.location.hostname === "127.0.0.1") {
+
+if (
+  typeof window !== "undefined" &&
+  window &&
+  window.location.hostname === "127.0.0.1"
+) {
   ENV = "development";
 } else {
   ENV = "production";
