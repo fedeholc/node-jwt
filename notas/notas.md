@@ -6,6 +6,7 @@ docs de jose <https://github.com/panva/jose/tree/1f8304f72760c3be8f5989b43029d00
 
 - [ ] uuid como identificador en BD? (creo que no, mejor index email)
 - [ ] implementar cerrar sesion de dispositivos (implica registro o versionado de tokens).
+- [ ] implementar email magic links, e email verification (sirve para evitar que te espameen el sitio)
 - [ ] PWA y service workers (validación token, actualización info al conectar, etc.), guardar config en local storage, etc.
 - [ ] validación de mails y passwords en los inputs, con colores, etc.
 - [ ] cambiar alerts por textos en la misma web
