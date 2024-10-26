@@ -9,7 +9,7 @@ export function cleanInputs(parent) {
 }
 
 /**
- * @param {HTMLElement} element
+ * @param {HTMLElement | Element} element
  */
 export function vibrate(element) {
   element.classList.add("vibrate");

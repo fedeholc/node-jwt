@@ -14,17 +14,28 @@ let userData = null;
 /** @type {string | null} */
 let accessToken = null;
 
+/**
+ * @param {HTMLElement | Document} element
+ */
+function getDomElementsRefs(element) {
+  const domElementsRefs = {
+    login: {
+      section: element.querySelector("[data-login-section]"),
+      githubButton: element.querySelector("[data-login-github-button]"),
+      googleButton: element.querySelector("[data-login-google-button]"),
+      info: element.querySelector("[data-login-info]"),
+      passButton: element.querySelector("[data-login-pass-button]"),
+      signupButton: element.querySelector("[data-login-signup-button]"),
+      resetButton: element.querySelector("[data-login-reset-button]"),
+    },
+  };
+  return domElementsRefs;
+}
 // - - - - - - - - - - - - - - - - - - -
 // - Elementos del DOM
 // - - - - - - - - - - - - - - - - - - -
 
-
-// - Login section
-const btnLoginGH = document.getElementById("btn-login-gh");
-const btnLoginGG = document.getElementById("btn-login-gg");
-const btnLogin = document.getElementById("btn-login");
-const btnSignUp = document.getElementById("btn-signup");
-const btnOpenReset = document.getElementById("btn-reset-open");
+const DE = getDomElementsRefs(document);
 
 // - user-info section
 const btnLogout = document.getElementById("btn-logout");
@@ -32,12 +43,12 @@ const userInfoDisplay = document.getElementById("user-info-display");
 const userInfoId = document.getElementById("user-info-id");
 const userInfoEmail = document.getElementById("user-info-email");
 
-
 // - Signup dialog
 const dialogSignup = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-signup")
 );
-const btnOpenSignup = document.getElementById("btn-signup-open");
+const btnSignUp = document.getElementById("btn-signup");
+
 const btnCloseSignup = document.getElementById("close-signup");
 const signupInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#signup-info")
@@ -68,8 +79,6 @@ const codeInfo = /** @type {HTMLDivElement} */ (
 const changeInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#change-info")
 );
-
-
 
 //- - - - - - - - - - - - - - - - - - -
 //- MAIN
@@ -115,8 +124,6 @@ function renderUI() {
 async function handleLogin(event) {
   event.preventDefault();
 
-  const divLoginInfo = document.getElementById("login-info");
-
   /** @type {HTMLInputElement} */
   let inputEmail = document.querySelector("#email");
 
@@ -136,9 +143,9 @@ async function handleLogin(event) {
     email === "" ||
     password === ""
   ) {
-    divLoginInfo.textContent = `Enter a valid email and password.`;
-    vibrate(divLoginInfo);
-    vibrate(btnLogin);
+    DE.login.info.textContent = `Enter a valid email and password.`;
+    vibrate(DE.login.info);
+    vibrate(DE.login.passButton);
     return;
   }
 
@@ -156,10 +163,10 @@ async function handleLogin(event) {
   });
 
   if (!response.ok) {
-    divLoginInfo.textContent = `Your email or password is incorrect. Please try again.`;
-    divLoginInfo.classList.add("vibrate");
-    vibrate(divLoginInfo);
-    vibrate(btnLogin);
+    DE.login.info.textContent = `Your email or password is incorrect. Please try again.`;
+    DE.login.info.classList.add("vibrate");
+    vibrate(DE.login.info);
+    vibrate(DE.login.passButton);
     return;
   }
 
@@ -526,15 +533,15 @@ async function handleSendCode(e) {
 
 function setEventListeners() {
   btnLogout.addEventListener("click", handleLogOut);
-  btnLoginGH.addEventListener("click", handleLoginGH);
-  btnLoginGG.addEventListener("click", handleLoginGG);
-  btnLogin.addEventListener("click", handleLogin);
+  DE.login.githubButton.addEventListener("click", handleLoginGH);
+  DE.login.googleButton.addEventListener("click", handleLoginGG);
+  DE.login.passButton.addEventListener("click", handleLogin);
   btnSignUp.addEventListener("click", handleSignUp);
   btnDelete.addEventListener("click", handleDeleteUser);
   btnSendCode.addEventListener("click", handleSendCode);
   btnChangePass.addEventListener("click", handleChangePass);
 
-  btnOpenSignup.addEventListener("click", (e) => {
+  DE.login.signupButton.addEventListener("click", (e) => {
     e.preventDefault();
     dialogSignup.showModal();
   });
@@ -566,7 +573,7 @@ function setEventListeners() {
     deleteInfo.textContent = "";
   });
 
-  btnOpenReset.addEventListener("click", async () => {
+  DE.login.resetButton.addEventListener("click", async () => {
     dialogReset.showModal();
   });
 
