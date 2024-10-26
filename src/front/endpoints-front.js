@@ -10,7 +10,8 @@ let ENV;
 if (
   typeof window !== "undefined" &&
   window &&
-  window.location.hostname === "127.0.0.1"
+  (window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost")
 ) {
   ENV = "development";
 } else {

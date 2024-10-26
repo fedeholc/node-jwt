@@ -3,6 +3,7 @@ export { dbURI, apiURL, apiBase, apiEP, ALLOWED_ORIGINS, gitHubEP, googleEP };
 import process from "process";
 
 const ENV = process.env.NODE_ENV;
+console.log("ENV:", process.env.NODE_ENV);
 
 const dbURIs = {
   production: process.env.DB_PROD_URI,
