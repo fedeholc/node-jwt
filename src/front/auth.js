@@ -91,7 +91,7 @@ export async function getUserData(accessToken) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("--response: ", response);
+
     if (!response.ok) {
       console.log(
         `No user authenticated: ${response.status} ${response.statusText}`
