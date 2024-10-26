@@ -41,44 +41,8 @@
    cursor: pointer;
  }
 
- #btn-reset-open {
-   background-color: transparent;
-   color: gray;
-   border-bottom: 1px dashed gray;
-   padding: 0rem;
-   border-radius: 0;
- }
-
- #btn-reset-open:hover {
-   background-color: transparent;
-   color: black;
-   border-bottom: 1px dashed black;
- }
-
-
  button:hover {
    background-color: #0071b3;
- }
-
- #btn-login,
- #btn-login-gh {
-   background-color: #db009a;
- }
-
- #btn-login:hover,
- #btn-login-gh:hover {
-   background-color: #a50073;
- }
-
- #btn-logout,
- #btn-delete-open {
-   color: black;
-   background-color: rgb(255, 196, 0);
- }
-
- #btn-logout:hover,
- #btn-delete-open:hover {
-   background-color: rgb(255, 215, 85);
  }
 
  dialog {
@@ -108,27 +72,6 @@
    background-color: rgb(0 0 0 / 25%);
  }
 
- #reset-container {
-   overflow-y: auto;
-   max-height: 70vh;
- }
-
- .close-btn {
-   position: absolute;
-   top: 0.2rem;
-   right: 0.88rem;
-   font-size: 2rem;
-   color: #aaa;
-   cursor: pointer;
- }
-
- .close-btn:hover {
-   color: black;
- }
-
-
-
-
  form div {
    display: flex;
    flex-direction: column;
@@ -157,13 +100,66 @@
    flex-direction: column;
  }
 
+ span {
+   display: flex;
+   flex-direction: row;
+   place-content: center;
+   align-items: center;
+   gap: 0.5rem;
+ }
 
- /*   #login-form {
-    border: 2px solid gray;
-    padding: 1rem;
-  } */
+ .btn-reset {
+   background-color: transparent;
+   color: gray;
+   border-bottom: 1px dashed gray;
+   padding: 0rem;
+   border-radius: 0;
+ }
 
- #login-signup {
+ .btn-reset:hover {
+   background-color: transparent;
+   color: black;
+   border-bottom: 1px dashed black;
+ }
+
+ .btn-login {
+   background-color: #db009a;
+ }
+
+ .btn-login:hover {
+   background-color: #a50073;
+ }
+
+ .btn-logout,
+ .btn-delete-open {
+   color: black;
+   background-color: rgb(255, 196, 0);
+ }
+
+ .btn-logout:hover,
+ .btn-delete-open:hover {
+   background-color: rgb(255, 215, 85);
+ }
+
+ .close-btn {
+   position: absolute;
+   top: 0.2rem;
+   right: 0.88rem;
+   font-size: 2rem;
+   color: #aaa;
+   cursor: pointer;
+ }
+
+ .close-btn:hover {
+   color: black;
+ }
+
+ .reset-container {
+   overflow-y: auto;
+   max-height: 70vh;
+ }
+
+ .login-signup {
    display: flex;
    flex-direction: row;
    gap: 1rem;
@@ -171,32 +167,12 @@
    justify-content: center;
  }
 
-
-
- .or {
-   color: gray;
-   padding: 0.5rem;
- }
-
- .row {
-   display: flex;
-   flex-direction: row;
-   gap: 1rem;
-   justify-content: space-evenly;
- }
-
- #login-info,
- #code-info,
- #change-info,
- #signup-info,
- #delete-info {
+ .info-slot {
    max-width: 250px;
    color: red;
    font-size: 0.8rem;
    text-align: center;
  }
-
-
 
  .remember-me {
    display: flex;
@@ -222,7 +198,7 @@
    cursor: pointer;
  }
 
- #login-section {
+ .login-section {
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -234,8 +210,7 @@
 
  }
 
- #user-section {
-
+ .user-section {
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -259,12 +234,20 @@
    }
  }
 
- span {
+ .or {
+   color: gray;
+   padding: 0.5rem;
+ }
+
+ .row {
    display: flex;
    flex-direction: row;
-   place-content: center;
-   align-items: center;
-   gap: 0.5rem;
+   gap: 1rem;
+   justify-content: space-evenly;
+ }
+
+ .vibrate {
+   animation: vibrate 0.3s linear;
  }
 
  @keyframes vibrate {
@@ -288,8 +271,4 @@
    100% {
      transform: translateX(0);
    }
- }
-
- .vibrate {
-   animation: vibrate 0.3s linear;
  }

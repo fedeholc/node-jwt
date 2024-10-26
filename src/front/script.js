@@ -18,6 +18,22 @@ let accessToken = null;
 // - Elementos del DOM
 // - - - - - - - - - - - - - - - - - - -
 
+
+// - Login section
+const btnLoginGH = document.getElementById("btn-login-gh");
+const btnLoginGG = document.getElementById("btn-login-gg");
+const btnLogin = document.getElementById("btn-login");
+const btnSignUp = document.getElementById("btn-signup");
+const btnOpenReset = document.getElementById("btn-reset-open");
+
+// - user-info section
+const btnLogout = document.getElementById("btn-logout");
+const userInfoDisplay = document.getElementById("user-info-display");
+const userInfoId = document.getElementById("user-info-id");
+const userInfoEmail = document.getElementById("user-info-email");
+
+
+// - Signup dialog
 const dialogSignup = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-signup")
 );
@@ -26,6 +42,8 @@ const btnCloseSignup = document.getElementById("close-signup");
 const signupInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#signup-info")
 );
+
+// - Delete dialog
 const dialogDelete = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-delete")
 );
@@ -35,10 +53,12 @@ const btnDelete = document.getElementById("btn-delete");
 const deleteInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#delete-info")
 );
+
+// - Reset dialog
 const dialogReset = /** @type {HTMLDialogElement} */ (
   document.getElementById("dialog-reset")
 );
-const btnOpenReset = document.getElementById("btn-reset-open");
+
 const btnCloseReset = document.getElementById("close-reset");
 const btnChangePass = document.getElementById("btn-change-password");
 const btnSendCode = document.getElementById("btn-send-code");
@@ -49,16 +69,7 @@ const changeInfo = /** @type {HTMLDivElement} */ (
   document.querySelector("#change-info")
 );
 
-const btnLogout = document.getElementById("btn-logout");
-const btnLoginGH = document.getElementById("btn-login-gh");
-const btnLoginGG = document.getElementById("btn-login-gg");
 
-const btnLogin = document.getElementById("btn-login");
-const btnSignUp = document.getElementById("btn-signup");
-
-const userInfoDisplay = document.getElementById("user-info-display");
-const userInfoId = document.getElementById("user-info-id");
-const userInfoEmail = document.getElementById("user-info-email");
 
 //- - - - - - - - - - - - - - - - - - -
 //- MAIN

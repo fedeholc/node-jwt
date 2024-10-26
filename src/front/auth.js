@@ -35,10 +35,6 @@ async function getAccessToken() {
   try {
     let accessToken = JSON.parse(localStorage.getItem("accessToken"));
 
-    console.log(
-      "at en authjs:",
-      JSON.parse(localStorage.getItem("accessToken"))
-    );
     if (accessToken && !this.isTokenExpired(accessToken)) {
       return accessToken;
     }

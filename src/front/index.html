@@ -12,7 +12,7 @@
 <body>
   <h1>Welcome</h1>
 
-  <section id="login-section">
+  <section class="login-section" id="login-section">
     <h2>Log in </h2>
     <div class="row">
       <button class="btn-login" id="btn-login-gh">Login with GitHub</button>
@@ -33,8 +33,8 @@
         <input type="checkbox" name="remember-me" id="remember-me">
         <label for="remember-me">Remember me</label>
       </div>
-      <div id="login-info"></div>
-      <div id="login-signup">
+      <div id="login-info" class="info-slot"></div>
+      <div class="login-signup" id="login-signup">
         <button class="btn-login" type="submit" id="btn-login">Login</button>
         <button id="btn-signup-open">Sign Up</button>
       </div>
@@ -44,7 +44,7 @@
     </div>
   </section>
 
-  <section id="user-section">
+  <section class="user-section" id="user-section">
     <div>
       <h2>User data</h2>
       <p id="user-info-display"></p>
@@ -52,8 +52,8 @@
       <p id="user-info-email"></p>
 
     </div>
-    <button id="btn-delete-open">Delete Account</button>
-    <button class="btn-login" id="btn-logout">Logout</button>
+    <button class="btn-delete-open" id="btn-delete-open">Delete Account</button>
+    <button class="btn-logout" id="btn-logout">Logout</button>
   </section>
 
   <dialog id="dialog-signup">
@@ -72,7 +72,7 @@
         <label for="su-confirm-password">Confirm Password</label>
         <input type="password" id="su-confirm-password" name="confirm-password" required>
       </div>
-      <div id="signup-info"></div>
+      <div id="signup-info" class="info-slot"></div>
       <button id="btn-signup" type="submit">Sign Up</button>
     </form>
   </dialog>
@@ -87,7 +87,7 @@
         <input type="password" id="delete-password" name="delete-password" required>
       </div>
 
-      <div id="delete-info"></div>
+      <div id="delete-info" class="info-slot"></div>
       <button id="btn-delete" type="submit">Delete Account</button>
     </form>
   </dialog>
@@ -95,13 +95,13 @@
   <dialog id="dialog-reset">
     <span class="close-btn" id="close-reset">&times;</span>
     <h2 id="reset-title">Reset Password</h2>
-    <div id="reset-container">
+    <div class="reset-container" id="reset-container">
       <form id="code-form">
         <div>
           <label for="reset-email">E-mail</label>
           <input type="email" id="reset-email" name="reset-email" required>
         </div>
-        <div id="code-info"></div>
+        <div id="code-info" class="info-slot"></div>
         <button id="btn-send-code">Send me a code</button>
       </form>
       <form id="reset-form">
@@ -117,7 +117,7 @@
           <label for="reset-confirm-password">Confirm Password</label>
           <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
         </div>
-        <div id="change-info"></div>
+        <div id="change-info" class="info-slot"></div>
         <button id="btn-change-password">Change Password</button>
       </form>
     </div>
