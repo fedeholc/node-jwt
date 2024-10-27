@@ -1,6 +1,7 @@
 import { apiURL } from "./endpoints-front.js";
 import { cleanInputs, vibrate } from "./util.js";
 import { auth, getUserData } from "./auth.js";
+import getDomElementsRefs from "./domElements.js";
 // eslint-disable-next-line no-unused-vars
 import * as types from "./types.js";
 
@@ -14,71 +15,7 @@ let userData = null;
 /** @type {string | null} */
 let accessToken = null;
 
-/**
- * @param {HTMLElement | Document} element
- */
-function getDomElementsRefs(element) {
-  const domElementsRefs = {
-    login: {
-      section: element.querySelector("[data-login-section]"),
-      githubButton: element.querySelector("[data-login-github-button]"),
-      googleButton: element.querySelector("[data-login-google-button]"),
-      info: element.querySelector("[data-login-info]"),
-      passButton: element.querySelector("[data-login-pass-button]"),
-      signupButton: element.querySelector("[data-login-signup-button]"),
-      resetButton: element.querySelector("[data-login-reset-button]"),
-    },
-  };
-  return domElementsRefs;
-}
-// - - - - - - - - - - - - - - - - - - -
-// - Elementos del DOM
-// - - - - - - - - - - - - - - - - - - -
-
 const DE = getDomElementsRefs(document);
-
-// - user-info section
-const btnLogout = document.getElementById("btn-logout");
-const userInfoDisplay = document.getElementById("user-info-display");
-const userInfoId = document.getElementById("user-info-id");
-const userInfoEmail = document.getElementById("user-info-email");
-
-// - Signup dialog
-const dialogSignup = /** @type {HTMLDialogElement} */ (
-  document.getElementById("dialog-signup")
-);
-const btnSignUp = document.getElementById("btn-signup");
-
-const btnCloseSignup = document.getElementById("close-signup");
-const signupInfo = /** @type {HTMLDivElement} */ (
-  document.querySelector("#signup-info")
-);
-
-// - Delete dialog
-const dialogDelete = /** @type {HTMLDialogElement} */ (
-  document.getElementById("dialog-delete")
-);
-const btnOpenDelete = document.getElementById("btn-delete-open");
-const btnCloseDelete = document.getElementById("close-delete");
-const btnDelete = document.getElementById("btn-delete");
-const deleteInfo = /** @type {HTMLDivElement} */ (
-  document.querySelector("#delete-info")
-);
-
-// - Reset dialog
-const dialogReset = /** @type {HTMLDialogElement} */ (
-  document.getElementById("dialog-reset")
-);
-
-const btnCloseReset = document.getElementById("close-reset");
-const btnChangePass = document.getElementById("btn-change-password");
-const btnSendCode = document.getElementById("btn-send-code");
-const codeInfo = /** @type {HTMLDivElement} */ (
-  document.querySelector("#code-info")
-);
-const changeInfo = /** @type {HTMLDivElement} */ (
-  document.querySelector("#change-info")
-);
 
 //- - - - - - - - - - - - - - - - - - -
 //- MAIN
@@ -101,16 +38,16 @@ function renderUI() {
   cleanInputs(document);
   if (userData) {
     //logged in UI
-    userInfoId.textContent = `Id: ${userData.id}`;
-    userInfoEmail.textContent = `Email: ${userData.email}`;
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("user-section").style.display = "flex";
+    DE.user.id.textContent = `Id: ${userData.id}`;
+    DE.user.email.textContent = `Email: ${userData.email}`;
+    DE.login.section.style.display = "none";
+    DE.user.section.style.display = "flex";
   } else {
     //logged out UI
-    userInfoId.textContent = `Id: -`;
-    userInfoEmail.textContent = `Email: -`;
-    document.getElementById("login-section").style.display = "flex";
-    document.getElementById("user-section").style.display = "none";
+    DE.user.id.textContent = `Id: -`;
+    DE.user.email.textContent = `Email: -`;
+    DE.login.section.style.display = "flex";
+    DE.user.section.style.display = "none";
   }
 }
 
@@ -133,15 +70,11 @@ async function handleLogin(event) {
   /** @type {HTMLInputElement} */
   let inputRememberMe = document.querySelector("#remember-me");
 
-  let email = inputEmail.value;
-  let password = inputPassword.value;
-  let rememberMe = inputRememberMe.checked;
-
   if (
     !inputEmail.validity.valid ||
     !inputPassword.validity.valid ||
-    email === "" ||
-    password === ""
+    inputEmail.value === "" ||
+    inputPassword.value === ""
   ) {
     DE.login.info.textContent = `Enter a valid email and password.`;
     vibrate(DE.login.info);
@@ -156,9 +89,9 @@ async function handleLogin(event) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      email: email,
-      pass: password,
-      rememberMe: rememberMe,
+      email: inputEmail.value,
+      pass: inputPassword.value,
+      rememberMe: inputRememberMe.checked,
     }),
   });
 
@@ -258,23 +191,23 @@ async function handleSignUp(event) {
     inPass.value === "" ||
     inConfirmPass.value === ""
   ) {
-    signupInfo.textContent = `Please fill in all fields.`;
-    vibrate(signupInfo);
-    vibrate(btnSignUp);
+    DE.signup.info.textContent = `Please fill in all fields.`;
+    vibrate(DE.signup.info);
+    vibrate(DE.signup.submitButton);
     return;
   }
 
   if (inPass.value !== inConfirmPass.value) {
-    signupInfo.textContent = `Passwords don't match.`;
-    vibrate(signupInfo);
-    vibrate(btnSignUp);
+    DE.signup.info.textContent = `Passwords don't match.`;
+    vibrate(DE.signup.info);
+    vibrate(DE.signup.submitButton);
     return;
   }
 
   if (!inEmail.validity.valid) {
-    signupInfo.textContent = `Enter a valid email.`;
-    vibrate(signupInfo);
-    vibrate(btnSignUp);
+    DE.signup.info.textContent = `Enter a valid email.`;
+    vibrate(DE.signup.info);
+    vibrate(DE.signup.submitButton);
     return;
   }
 
@@ -293,12 +226,12 @@ async function handleSignUp(event) {
 
     if (!response.ok) {
       let data = await response.json();
-      signupInfo.textContent = `Error signing up user: ${data.error}`;
+      DE.signup.info.textContent = `Error signing up user: ${data.error}`;
       console.log(
         `Error signing up. ${response.status} ${response.statusText}`
       );
-      vibrate(signupInfo);
-      vibrate(btnSignUp);
+      vibrate(DE.signup.info);
+      vibrate(DE.signup.submitButton);
       return;
     }
 
@@ -306,19 +239,19 @@ async function handleSignUp(event) {
       let data = await response.json();
 
       if (!data.user) {
-        signupInfo.textContent = `Error signing up user: ${data.error}`;
+        DE.signup.info.textContent = `Error signing up user: ${data.error}`;
         console.log(
           `Error signing up. ${response.status} ${response.statusText}`
         );
-        vibrate(signupInfo);
-        vibrate(btnSignUp);
+        vibrate(DE.signup.info);
+        vibrate(DE.signup.submitButton);
         return;
       }
 
       userData = data.user;
-      userInfoDisplay.textContent = `User successfully registered.`;
-      userInfoId.textContent = `Id: ${userData.id}`;
-      userInfoEmail.textContent = `Email: ${userData.email}`;
+      DE.user.display.textContent = `User successfully registered.`;
+      DE.user.id.textContent = `Id: ${userData.id}`;
+      DE.user.email.textContent = `Email: ${userData.email}`;
 
       accessToken = data.accessToken;
       localStorage.setItem("accessToken", JSON.stringify(data.accessToken));
@@ -328,13 +261,13 @@ async function handleSignUp(event) {
       // Según el tipo de web, aquí puede cambiar la interfaz o puede
       // redirigir a otra página:
       // window.location.href = "/profile";
-      dialogSignup.close();
+      DE.signup.dialog.close();
     }
   } catch (error) {
-    signupInfo.textContent = `Error signing up user: ${error}`;
+    DE.signup.info.textContent = `Error signing up user: ${error}`;
     console.error("Error signing up: ", error);
-    vibrate(signupInfo);
-    vibrate(btnSignUp);
+    vibrate(DE.signup.info);
+    vibrate(DE.signup.submitButton);
   }
 }
 
@@ -347,7 +280,7 @@ async function handleDeleteUser(event) {
 
   let email = userData.email;
 
-  let inPass = /** @type {HTMLInputElement} */ (
+  let inputPassword = /** @type {HTMLInputElement} */ (
     document.getElementById("#delete-password")
   );
 
@@ -357,27 +290,27 @@ async function handleDeleteUser(event) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email: email, pass: inPass.value }),
+    body: JSON.stringify({ email: email, pass: inputPassword.value }),
   });
 
   if (!response.ok) {
     let data = await response.json();
-    deleteInfo.textContent = `Error deleting user: ${data.error}`;
-    vibrate(deleteInfo);
-    vibrate(btnDelete);
+    DE.delete.info.textContent = `Error deleting user: ${data.error}`;
+    vibrate(DE.delete.info);
+    vibrate(DE.delete.submitButton);
     return;
   }
 
   if (response.ok) {
-    deleteInfo.textContent = `User successfully deleted.`;
-    deleteInfo.style.color = "green";
-    deleteInfo.style.fontWeight = "bold";
+    DE.delete.info.textContent = `User successfully deleted.`;
+    DE.delete.info.style.color = "green";
+    DE.delete.info.style.fontWeight = "bold";
 
     userData = null;
     localStorage.removeItem("accessToken");
 
     setTimeout(() => {
-      dialogDelete.close();
+      DE.delete.dialog.close();
       renderUI();
     }, 2000);
     //window.location.reload();
@@ -393,43 +326,43 @@ async function handleDeleteUser(event) {
 async function handleChangePass(event) {
   event.preventDefault();
 
-  let inCode = /** @type {HTMLInputElement} */ (
+  let inputCode = /** @type {HTMLInputElement} */ (
     document.querySelector("#reset-code")
   );
 
-  let inPass = /** @type {HTMLInputElement} */ (
+  let inputPassword = /** @type {HTMLInputElement} */ (
     document.querySelector("#reset-password")
   );
-  let inConfirmPass = /** @type {HTMLInputElement} */ (
+  let inputConfirmPass = /** @type {HTMLInputElement} */ (
     document.querySelector("#reset-confirm-password")
   );
-  let inEmail = /** @type {HTMLInputElement} */ (
+  let inputEmail = /** @type {HTMLInputElement} */ (
     document.querySelector("#reset-email")
   );
 
   try {
-    if (!inCode.validity.valid) {
-      changeInfo.textContent = `Enter a code with six characters.`;
-      vibrate(changeInfo);
-      vibrate(btnChangePass);
+    if (!inputCode.validity.valid) {
+      DE.reset.changeInfo.textContent = `Enter a code with six characters.`;
+      vibrate(DE.reset.changeInfo);
+      vibrate(DE.reset.changeButton);
       return;
     }
 
     if (
-      inPass.value === "" ||
-      inConfirmPass.value === "" ||
-      inEmail.value === ""
+      inputPassword.value === "" ||
+      inputConfirmPass.value === "" ||
+      inputEmail.value === ""
     ) {
-      changeInfo.textContent = `Please fill in all fields.`;
-      vibrate(changeInfo);
-      vibrate(btnChangePass);
+      DE.reset.changeInfo.textContent = `Please fill in all fields.`;
+      vibrate(DE.reset.changeInfo);
+      vibrate(DE.reset.changeButton);
       return;
     }
 
-    if (inPass.value !== inConfirmPass.value) {
-      changeInfo.textContent = `Passwords don't match.`;
-      vibrate(changeInfo);
-      vibrate(btnChangePass);
+    if (inputPassword.value !== inputConfirmPass.value) {
+      DE.reset.changeInfo.textContent = `Passwords don't match.`;
+      vibrate(DE.reset.changeInfo);
+      vibrate(DE.reset.changeButton);
       return;
     }
 
@@ -440,36 +373,36 @@ async function handleChangePass(event) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email: inEmail.value,
-        pass: inPass.value,
-        code: inCode.value,
+        email: inputEmail.value,
+        pass: inputPassword.value,
+        code: inputCode.value,
       }),
     });
 
     if (!response.ok) {
       let data = await response.json();
-      changeInfo.textContent = `Error changing password. ${data.error}`;
-      vibrate(changeInfo);
-      vibrate(btnChangePass);
+      DE.reset.changeInfo.textContent = `Error changing password. ${data.error}`;
+      vibrate(DE.reset.changeInfo);
+      vibrate(DE.reset.changeButton);
       return;
     }
 
     if (response.ok) {
-      changeInfo.style.color = "green";
-      changeInfo.style.fontWeight = "bold";
+      DE.reset.changeInfo.style.color = "green";
+      DE.reset.changeInfo.style.fontWeight = "bold";
 
-      changeInfo.textContent = `Password successfully changed.`;
+      DE.reset.changeInfo.textContent = `Password successfully changed.`;
 
       setTimeout(() => {
-        dialogReset.close();
+        DE.reset.dialog.close();
         return;
       }, 2000);
     }
   } catch (error) {
     console.error("Error changing password: ", error);
-    changeInfo.textContent = `Error changing password. Try again later.`;
-    vibrate(changeInfo);
-    vibrate(btnChangePass);
+    DE.reset.changeInfo.textContent = `Error changing password. Try again later.`;
+    vibrate(DE.reset.changeInfo);
+    vibrate(DE.reset.changeButton);
   }
 }
 
@@ -487,9 +420,9 @@ async function handleSendCode(e) {
     );
 
     if (!inEmail.validity.valid) {
-      codeInfo.textContent = `Enter a valid email.`;
-      vibrate(codeInfo);
-      vibrate(btnSendCode);
+      DE.reset.codeInfo.textContent = `Enter a valid email.`;
+      vibrate(DE.reset.codeInfo);
+      vibrate(DE.reset.sendButton);
       return;
     }
 
@@ -504,26 +437,26 @@ async function handleSendCode(e) {
 
     if (!response.ok) {
       let data = await response.json();
-      codeInfo.textContent = `Error sending code. ${data.error}`;
-      vibrate(codeInfo);
-      vibrate(btnSendCode);
+      DE.reset.codeInfo.textContent = `Error sending code. ${data.error}`;
+      vibrate(DE.reset.codeInfo);
+      vibrate(DE.reset.sendButton);
       return;
     }
 
     if (response.ok) {
-      codeInfo.textContent = `The secuirity code was sent to your email. 
+      DE.reset.codeInfo.textContent = `The secuirity code was sent to your email. 
       Check your inbox.`;
-      codeInfo.style.color = "green";
-      codeInfo.style.fontWeight = "bold";
-      vibrate(codeInfo);
-      vibrate(btnSendCode);
+      DE.reset.codeInfo.style.color = "green";
+      DE.reset.codeInfo.style.fontWeight = "bold";
+      vibrate(DE.reset.codeInfo);
+      vibrate(DE.reset.sendButton);
       return;
     }
   } catch (error) {
     console.error("Error sending code: ", error);
-    codeInfo.textContent = `Error sending code. Try again later.`;
-    vibrate(codeInfo);
-    vibrate(btnSendCode);
+    DE.reset.codeInfo.textContent = `Error sending code. Try again later.`;
+    vibrate(DE.reset.codeInfo);
+    vibrate(DE.reset.sendButton);
   }
 }
 
@@ -532,27 +465,35 @@ async function handleSendCode(e) {
 //- - - - - - - - - - - - - - - - - - - - - - - -
 
 function setEventListeners() {
-  btnLogout.addEventListener("click", handleLogOut);
   DE.login.githubButton.addEventListener("click", handleLoginGH);
   DE.login.googleButton.addEventListener("click", handleLoginGG);
   DE.login.passButton.addEventListener("click", handleLogin);
-  btnSignUp.addEventListener("click", handleSignUp);
-  btnDelete.addEventListener("click", handleDeleteUser);
-  btnSendCode.addEventListener("click", handleSendCode);
-  btnChangePass.addEventListener("click", handleChangePass);
-
   DE.login.signupButton.addEventListener("click", (e) => {
     e.preventDefault();
-    dialogSignup.showModal();
+    DE.signup.dialog.showModal();
+  });
+  DE.login.resetButton.addEventListener("click", async () => {
+    DE.reset.dialog.showModal();
   });
 
-  btnCloseSignup.addEventListener("click", () => {
-    dialogSignup.close();
-    cleanInputs(dialogSignup);
-    signupInfo.textContent = "";
+  DE.reset.sendButton.addEventListener("click", handleSendCode);
+  DE.reset.changeButton.addEventListener("click", handleChangePass);
+  DE.reset.closeButton.addEventListener("click", () => {
+    DE.reset.dialog.close();
+    cleanInputs(DE.reset.dialog);
+    DE.reset.codeInfo.textContent = "";
+    DE.reset.changeInfo.textContent = "";
   });
 
-  btnOpenDelete.addEventListener("click", () => {
+  DE.signup.submitButton.addEventListener("click", handleSignUp);
+  DE.signup.closeButton.addEventListener("click", () => {
+    DE.signup.dialog.close();
+    cleanInputs(DE.signup.dialog);
+    DE.signup.info.textContent = "";
+  });
+
+  DE.user.logoutButton.addEventListener("click", handleLogOut);
+  DE.user.deleteButton.addEventListener("click", () => {
     if (!userData) {
       // Nunca debería entrar acá, no debería mostrarse el botón de delete account si no está logueado el usuario.
       alert("User not logged in.");
@@ -564,42 +505,33 @@ function setEventListeners() {
       "delete-user"
     ).textContent = `User: ${userData.email}`;
 
-    dialogDelete.showModal();
+    DE.delete.dialog.showModal();
   });
 
-  btnCloseDelete.addEventListener("click", () => {
-    dialogDelete.close();
-    cleanInputs(dialogDelete);
-    deleteInfo.textContent = "";
-  });
+  DE.delete.submitButton.addEventListener("click", handleDeleteUser);
 
-  DE.login.resetButton.addEventListener("click", async () => {
-    dialogReset.showModal();
-  });
-
-  btnCloseReset.addEventListener("click", () => {
-    dialogReset.close();
-    cleanInputs(dialogReset);
-    codeInfo.textContent = "";
-    changeInfo.textContent = "";
+  DE.delete.closeButton.addEventListener("click", () => {
+    DE.delete.dialog.close();
+    cleanInputs(DE.delete.dialog);
+    DE.delete.info.textContent = "";
   });
 
   window.addEventListener("click", (event) => {
-    if (event.target === dialogSignup) {
-      dialogSignup.close();
-      cleanInputs(dialogSignup);
-      signupInfo.textContent = "";
+    if (event.target === DE.signup.dialog) {
+      DE.signup.dialog.close();
+      cleanInputs(DE.signup.dialog);
+      DE.signup.info.textContent = "";
     }
-    if (event.target === dialogDelete) {
-      dialogDelete.close();
-      cleanInputs(dialogDelete);
-      deleteInfo.textContent = "";
+    if (event.target === DE.delete.dialog) {
+      DE.delete.dialog.close();
+      cleanInputs(DE.delete.dialog);
+      DE.delete.info.textContent = "";
     }
-    if (event.target === dialogReset) {
-      dialogReset.close();
-      cleanInputs(dialogReset);
-      codeInfo.textContent = "";
-      changeInfo.textContent = "";
+    if (event.target === DE.reset.dialog) {
+      DE.reset.dialog.close();
+      cleanInputs(DE.reset.dialog);
+      DE.reset.codeInfo.textContent = "";
+      DE.reset.changeInfo.textContent = "";
     }
   });
 }

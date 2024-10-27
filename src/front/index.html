@@ -12,7 +12,7 @@
 <body>
   <h1>Welcome</h1>
 
-  <section data-login-section class="login-section" id="login-section">
+  <section data-login-section class="login-section">
     <h2>Log in </h2>
     <div class="row">
       <button data-login-github-button class="btn-login" id="btn-login-gh">Login with GitHub</button>
@@ -45,22 +45,23 @@
     </div>
   </section>
 
-  <section class="user-section" id="user-section">
+  <section data-user-section class="user-section" id="user-section">
     <div>
       <h2>User data</h2>
-      <p id="user-info-display"></p>
-      <p id="user-info-id"></p>
-      <p id="user-info-email"></p>
+      <p data-user-display id="user-info-display"></p>
+      <p data-user-id id="user-info-id"></p>
+      <p data-user-email id="user-info-email"></p>
 
     </div>
-    <button class="btn-delete-open" id="btn-delete-open">Delete Account</button>
-    <button class="btn-logout" id="btn-logout">Logout</button>
+    <button data-user-delete-button class="btn-delete-open" id="btn-delete-open">Delete Account</button>
+    <button data-user-logout-button class="btn-logout" id="btn-logout">Logout</button>
   </section>
 
-  <dialog id="dialog-signup">
-    <span class="close-btn" id="close-signup">&times;</span>
+  <dialog data-signup-dialog id="dialog-signup">
+    <span data-signup-close-button class="close-btn" id="close-signup">&times;</span>
     <h2>Sign Up</h2>
-    <form id="signup-form">
+    <!-- TODO: qué hacer con los input? -->
+    <form>
       <div>
         <label for="su-email">Email</label>
         <input type="email" id="su-email" name="su-email" required>
@@ -73,39 +74,40 @@
         <label for="su-confirm-password">Confirm Password</label>
         <input type="password" id="su-confirm-password" name="confirm-password" required>
       </div>
-      <div id="signup-info" class="info-slot"></div>
-      <button id="btn-signup" type="submit">Sign Up</button>
+      <div data-signup-info id="signup-info" class="info-slot"></div>
+      <button data-signup-submit-button id="btn-signup" type="submit">Sign Up</button>
     </form>
   </dialog>
 
-  <dialog id="dialog-delete">
-    <span class="close-btn" id="close-delete">&times;</span>
-    <form id="delete-form">
-      <h3 id="delete-user"></h3>
+  <dialog data-delete-dialog id="dialog-delete">
+    <span data-delete-close-button class="close-btn" id="close-delete">&times;</span>
+    <form>
+      <h3 data-delete-user id="delete-user"></h3>
 
       <div>
         <label for="delete-password">Password</label>
         <input type="password" id="delete-password" name="delete-password" required>
       </div>
 
-      <div id="delete-info" class="info-slot"></div>
-      <button id="btn-delete" type="submit">Delete Account</button>
+      <div data-delete-info id="delete-info" class="info-slot"></div>
+      <button data-delete-submit-button id="btn-delete" type="submit">Delete Account</button>
     </form>
   </dialog>
 
-  <dialog id="dialog-reset">
-    <span class="close-btn" id="close-reset">&times;</span>
-    <h2 id="reset-title">Reset Password</h2>
+  <dialog data-reset-dialog id="dialog-reset">
+    <span data-reset-close-button class="close-btn" id="close-reset">&times;</span>
+    <h2>Reset Password</h2>
     <div class="reset-container" id="reset-container">
-      <form id="code-form">
+      <!-- TODO: ver que hacer con ids -->
+      <form>
         <div>
           <label for="reset-email">E-mail</label>
           <input type="email" id="reset-email" name="reset-email" required>
         </div>
-        <div id="code-info" class="info-slot"></div>
-        <button id="btn-send-code">Send me a code</button>
+        <div data-reset-code-info id="code-info" class="info-slot"></div>
+        <button data-reset-send-button id="btn-send-code">Send me a code</button>
       </form>
-      <form id="reset-form">
+      <form>
         <div>
           <label for="reset-code"> Code:</label>
           <input type="text" maxlength="6" minlength="6" id="reset-code" name="reset-code" required>
@@ -118,8 +120,8 @@
           <label for="reset-confirm-password">Confirm Password</label>
           <input type="password" id="reset-confirm-password" name="reset-confirm-password" required>
         </div>
-        <div id="change-info" class="info-slot"></div>
-        <button id="btn-change-password">Change Password</button>
+        <div data-reset-change-info id="change-info" class="info-slot"></div>
+        <button data-reset-change-button id="btn-change-password">Change Password</button>
       </form>
     </div>
   </dialog>
